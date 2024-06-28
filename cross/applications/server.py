@@ -1,12 +1,12 @@
+import pages.column_casting
 import pages.load_data
-import pages.page2
 import streamlit as st
 from streamlit_option_menu import option_menu
 
 
 def get_navigation_pages():
-    pages_names = ["Load data", "Page 2"]
-    icons = ["file-spreadsheet", "file"]
+    pages_names = ["Load data", "Column casting"]
+    icons = ["upload", "shuffle"]
 
     return {
         "pages": pages_names,
@@ -49,7 +49,7 @@ def main():
         pages.load_data.show_page()
 
     elif st.session_state["page_index"] == 1:
-        pages.page2.show_page()
+        pages.column_casting.show_page()
 
 
 if __name__ == "__main__":

@@ -2,15 +2,17 @@ import pandas as pd
 import streamlit as st
 from sklearn.datasets import load_breast_cancer, load_iris, load_wine
 
+from cross.applications.components import next_on_click
+
 
 def load_toy_dataset(name):
-    if name == "Iris":
+    if name == "Toy data: Iris":
         data = load_iris()
 
-    elif name == "Wine":
+    elif name == "Toy data: Wine":
         data = load_wine()
 
-    elif name == "Breast Cancer":
+    elif name == "Toy data: Breast Cancer":
         data = load_breast_cancer()
 
     else:
@@ -21,16 +23,9 @@ def load_toy_dataset(name):
     return df
 
 
-def next_on_click():
-    st.session_state["page_index"] = st.session_state["page_index"] + 1
-
-
 def show_page():
     st.title("Load data")
-    st.write("Load your data or select a toy dataset")
-
-    st.session_state["df"] = None
-    enable_button = False
+    st.write("Load your data or select a toy dataset.")
 
     # Selector
     option = st.selectbox(
@@ -42,17 +37,21 @@ def show_page():
         uploaded_file = st.file_uploader("Select a CSV file", type="csv")
 
         if uploaded_file:
-            st.session_state["df"] = pd.read_csv(uploaded_file)
+            st.session_state["data"] = pd.read_csv(uploaded_file)
             st.write(f"### Loaded data from {uploaded_file.name}")
 
     else:
-        st.session_state["df"] = load_toy_dataset(option)
+        st.session_state["data"] = load_toy_dataset(option)
         st.write(f"### {option} Dataset")
 
+    enable_next_button = False
+
     # Display data
-    if st.session_state["df"] is not None:
-        enable_button = True
-        st.write(st.session_state["df"].head())
+    if "data" in st.session_state:
+        enable_next_button = True
+        st.write(st.session_state["data"].head())
 
     # Next button
-    st.button("Next", disabled=not enable_button, on_click=next_on_click)
+    st.button(
+        "Next", disabled=not enable_next_button, on_click=next_on_click, type="primary"
+    )
