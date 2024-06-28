@@ -1,16 +1,34 @@
 import pages.column_casting
 import pages.load_data
+import pages.page3
 import streamlit as st
 from streamlit_option_menu import option_menu
 
 
 def get_navigation_pages():
-    pages_names = ["Load data", "Column casting"]
-    icons = ["upload", "shuffle"]
+    pages_hierarchy = [
+        {
+            "name": "Load data",
+            "pages": ["Load data", "Column casting"],
+            "icons": ["upload", "shuffle"],
+        },
+        {"name": "Others", "pages": ["Page 3"], "icons": ["upload"]},
+    ]
+
+    pages_names = []
+    pages_icons = []
+
+    for i, page_hierarchy in enumerate(pages_hierarchy):
+        if i > 0:
+            pages_names.append("---")
+            pages_icons.append(None)
+
+        pages_names.extend(page_hierarchy["pages"])
+        pages_icons.extend(page_hierarchy["icons"])
 
     return {
         "pages": pages_names,
-        "icons": icons,
+        "icons": pages_icons,
         "page_to_index": {k: i for i, k in enumerate(pages_names)},
         "index_to_page": {i: k for i, k in enumerate(pages_names)},
     }
@@ -26,16 +44,19 @@ def navigation_on_change(key):
 def main():
     st.set_page_config(page_title="Cross", layout="wide")
 
+    # Navigation
     if "page_index" not in st.session_state:
         st.session_state["page_index"] = 0
 
     manual_select = st.session_state["page_index"]
     navigation_pages = get_navigation_pages()
 
-    # Navigation
+    if navigation_pages["index_to_page"][manual_select] == "---":
+        manual_select += 1
+
     with st.sidebar:
         option_menu(
-            menu_title="",
+            menu_title=None,
             options=navigation_pages["pages"],
             icons=navigation_pages["icons"],
             menu_icon="cast",
@@ -50,6 +71,9 @@ def main():
 
     elif st.session_state["page_index"] == 1:
         pages.column_casting.show_page()
+
+    elif st.session_state["page_index"] == 3:
+        pages.page3.show_page()
 
 
 if __name__ == "__main__":
