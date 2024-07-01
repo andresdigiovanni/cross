@@ -1,5 +1,6 @@
 import pages.p01_column_casting
 import pages.p01_load_data
+import pages.p02_column_selection
 import pages.p02_data_missing
 import streamlit as st
 from streamlit_option_menu import option_menu
@@ -12,7 +13,11 @@ def get_navigation_pages():
             "pages": ["Load data", "Column casting"],
             "icons": ["upload", "shuffle"],
         },
-        {"name": "Clean data", "pages": ["Missing Values"], "icons": ["crop"]},
+        {
+            "name": "Clean data",
+            "pages": ["Column selection", "Missing values"],
+            "icons": ["list-check", "question-octagon"],
+        },
     ]
 
     pages_names = []
@@ -73,6 +78,9 @@ def main():
         pages.p01_column_casting.show_page()
 
     elif st.session_state["page_index"] == 3:
+        pages.p02_column_selection.show_page()
+
+    elif st.session_state["page_index"] == 4:
         pages.p02_data_missing.show_page()
 
 
