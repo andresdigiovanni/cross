@@ -1,4 +1,4 @@
-from .conversions import convert_columns
+from .conversions import cast_columns
 from .functions import (
     bool_columns,
     categorical_columns,

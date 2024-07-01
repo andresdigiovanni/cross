@@ -2,7 +2,7 @@ import pandas as pd
 import streamlit as st
 from sklearn.datasets import load_breast_cancer, load_iris, load_wine
 
-from cross.applications.components import next_on_click
+from cross.applications.components import next_button
 
 
 def load_toy_dataset(name):
@@ -52,6 +52,4 @@ def show_page():
         st.write(st.session_state["data"].head())
 
     # Next button
-    st.button(
-        "Next", disabled=not enable_next_button, on_click=next_on_click, type="primary"
-    )
+    next_button(disabled=not enable_next_button)

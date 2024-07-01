@@ -1,10 +1,10 @@
 import streamlit as st
 
-from cross.applications.components import next_on_click
+from cross.applications.components import next_button
 from cross.dtypes import (
     bool_columns,
+    cast_columns,
     categorical_columns,
-    convert_columns,
     datetime_columns,
     numerical_columns,
     timedelta_columns,
@@ -58,6 +58,7 @@ def show_page():
 
     # Display data
     st.write(df.head())
+    st.markdown("""---""")
 
     # Split window in 3 columns
     col1, col2, col3 = st.columns((1, 1, 1))
@@ -106,9 +107,10 @@ def show_page():
                 cast_options[column] = add_selectbox(column, dtype)
 
     # Convert button
+    st.markdown("""---""")
     if st.button("Cast columns"):
         try:
-            df = convert_columns(df, cast_options)
+            df = cast_columns(df, cast_options)
             st.session_state["data"] = df
 
             config = st.session_state.get("config", {})
@@ -121,4 +123,4 @@ def show_page():
             st.error("Error converting columns: {}".format(e))
 
     # Next button
-    st.button("Next", on_click=next_on_click, type="primary")
+    next_button()
