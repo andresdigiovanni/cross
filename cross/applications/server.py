@@ -2,6 +2,7 @@ import pages.p01_column_casting
 import pages.p01_load_data
 import pages.p02_column_selection
 import pages.p02_data_missing
+import pages.p03_normalization
 import streamlit as st
 from streamlit_option_menu import option_menu
 
@@ -17,6 +18,11 @@ def get_navigation_pages():
             "name": "Clean data",
             "pages": ["Column selection", "Missing values"],
             "icons": ["list-check", "question-octagon"],
+        },
+        {
+            "name": "Normalization",
+            "pages": ["Normalization"],
+            "icons": ["plus-slash-minus"],
         },
     ]
 
@@ -82,6 +88,9 @@ def main():
 
     elif st.session_state["page_index"] == 4:
         pages.p02_data_missing.show_page()
+
+    elif st.session_state["page_index"] == 6:
+        pages.p03_normalization.show_page()
 
 
 if __name__ == "__main__":

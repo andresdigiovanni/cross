@@ -22,7 +22,7 @@ def show_page():
 
     # Actions for each column
     actions = {
-        "Do nothing": "do_nothing",
+        "Do nothing": "none",
         "Drop": "drop",
         "Fill with mean": "fill_mean",
         "Fill with median": "fill_median",
