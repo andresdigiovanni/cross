@@ -5,7 +5,7 @@ import seaborn as sns
 import streamlit as st
 
 from cross.applications.components import next_button
-from cross.non_linear_transformation import NonLinearTransformation
+from cross.preprocessing.non_linear_transformation import NonLinearTransformation
 
 
 def show_page():

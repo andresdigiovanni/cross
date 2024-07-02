@@ -3,7 +3,7 @@ import seaborn as sns
 import streamlit as st
 
 from cross.applications.components import next_button
-from cross.missing_values import MissingValuesHandler
+from cross.preprocessing.missing_values import MissingValuesHandler
 
 
 def show_page():

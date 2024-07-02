@@ -1,7 +1,7 @@
 import streamlit as st
 
 from cross.applications.components import next_button
-from cross.dtypes import (
+from cross.preprocessing.dtypes import (
     bool_columns,
     cast_columns,
     categorical_columns,

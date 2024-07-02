@@ -5,7 +5,7 @@ import seaborn as sns
 import streamlit as st
 
 from cross.applications.components import next_button
-from cross.normalize_transformation import NormalizeTransformation
+from cross.preprocessing.normalize_transformation import NormalizeTransformation
 
 
 def show_page():

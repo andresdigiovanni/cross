@@ -1,7 +1,7 @@
 import streamlit as st
 
 from cross.applications.components import next_button
-from cross.column_selection import column_selection
+from cross.preprocessing.column_selection import column_selection
 
 
 def show_page():

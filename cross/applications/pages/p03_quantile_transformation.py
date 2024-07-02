@@ -5,7 +5,7 @@ import seaborn as sns
 import streamlit as st
 
 from cross.applications.components import next_button
-from cross.quantile_transformation import QuantileTransformation
+from cross.preprocessing.quantile_transformation import QuantileTransformation
 
 
 def show_page():
