@@ -1,7 +1,7 @@
 import pages.p01_column_casting
 import pages.p01_load_data
 import pages.p02_column_selection
-import pages.p02_data_missing
+import pages.p02_missing_values
 import pages.p03_normalization
 import streamlit as st
 from streamlit_option_menu import option_menu
@@ -87,7 +87,7 @@ def main():
         pages.p02_column_selection.show_page()
 
     elif st.session_state["page_index"] == 4:
-        pages.p02_data_missing.show_page()
+        pages.p02_missing_values.show_page()
 
     elif st.session_state["page_index"] == 6:
         pages.p03_normalization.show_page()

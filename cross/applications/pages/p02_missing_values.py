@@ -3,7 +3,7 @@ import seaborn as sns
 import streamlit as st
 
 from cross.applications.components import next_button
-from cross.missing_values import handle_missing_values
+from cross.missing_values import MissingValuesHandler
 
 
 def show_page():
@@ -58,11 +58,15 @@ def show_page():
             handling_options_mapped = {
                 col: actions[action] for col, action in handling_options.items()
             }
-            df = handle_missing_values(df, handling_options_mapped)
+            missing_values_handler = MissingValuesHandler(handling_options_mapped)
+            df = missing_values_handler.fit_transform(df)
             st.session_state["data"] = df
 
             config = st.session_state.get("config", {})
-            config["missing_values"] = handling_options_mapped
+            config["missing_values"] = {
+                "handling_options": missing_values_handler.handling_options.copy(),
+                "statistics": missing_values_handler.statistics_.copy(),
+            }
             st.session_state["config"] = config
 
             st.success("Missing values handled successfully!")
