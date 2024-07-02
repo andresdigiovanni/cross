@@ -5,12 +5,14 @@ import seaborn as sns
 import streamlit as st
 
 from cross.applications.components import next_button
-from cross.normalize_transformation import NormalizeTransformation
+from cross.quantile_transformation import QuantileTransformation
 
 
 def show_page():
-    st.title("Data Normalization")
-    st.write("Choose a normalization technique for each column in your DataFrame.")
+    st.title("Quantile Transformations")
+    st.write(
+        "Select and apply quantile transformations (Uniform or Normal) to each column of your dataset."
+    )
 
     if "data" not in st.session_state:
         st.warning("No data loaded. Please load a DataFrame.")
@@ -22,8 +24,8 @@ def show_page():
     # Actions for each column
     transformations = {
         "Do nothing": "none",
-        "Normalize (L1)": "l1",
-        "Normalize (L2)": "l2",
+        "Quantile Transformation (Uniform)": "uniform",
+        "Quantile Transformation (Normal)": "normal",
     }
 
     transformation_options = {}
@@ -48,10 +50,10 @@ def show_page():
             st.pyplot(fig)
 
         with col3:
-            normalize_transformation = NormalizeTransformation(
+            quantile_transformation = QuantileTransformation(
                 {column: transformations[transformation_options[column]]}
             )
-            transformed_df = normalize_transformation.fit_transform(original_df)
+            transformed_df = quantile_transformation.fit_transform(original_df)
 
             fig, ax = plt.subplots(figsize=(4, 2))
             sns.histplot(transformed_df[column], kde=True, ax=ax)
@@ -68,14 +70,14 @@ def show_page():
                 for col, transformation in transformation_options.items()
             }
 
-            normalize_transformation = NormalizeTransformation(transformations_mapped)
-            transformed_df = normalize_transformation.fit_transform(original_df)
+            quantile_transformation = QuantileTransformation(transformations_mapped)
+            transformed_df = quantile_transformation.fit_transform(original_df)
             st.session_state["data"] = transformed_df
 
             config = st.session_state.get("config", {})
-            config["normalize_transformation"] = {
-                "transformation_options": normalize_transformation.transformation_options.copy(),
-                "transformers": deepcopy(normalize_transformation.transformers),
+            config["quantile_transformation"] = {
+                "transformation_options": quantile_transformation.transformation_options.copy(),
+                "transformers": deepcopy(quantile_transformation.transformers),
             }
             st.session_state["config"] = config
 

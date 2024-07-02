@@ -5,6 +5,7 @@ class MissingValuesHandler:
 
     def fit(self, df):
         self.statistics_ = {}
+
         for column, action in self.handling_options.items():
             if action == "fill_mean":
                 self.statistics_[column] = df[column].mean()

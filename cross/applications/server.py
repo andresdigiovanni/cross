@@ -2,7 +2,10 @@ import pages.p01_column_casting
 import pages.p01_load_data
 import pages.p02_column_selection
 import pages.p02_missing_values
+import pages.p03_non_linear_transformation
 import pages.p03_normalization
+import pages.p03_quantile_transformation
+import pages.p03_scale_transformation
 import streamlit as st
 from streamlit_option_menu import option_menu
 
@@ -20,9 +23,19 @@ def get_navigation_pages():
             "icons": ["list-check", "question-octagon"],
         },
         {
-            "name": "Normalization",
-            "pages": ["Normalization"],
-            "icons": ["plus-slash-minus"],
+            "name": "Preprocessing",
+            "pages": [
+                "Non-linear transforms",
+                "Quantile transforms",
+                "Scale",
+                "Normalize",
+            ],
+            "icons": [
+                "bar-chart-steps",
+                "bezier2",
+                "arrows-angle-expand",
+                "bounding-box",
+            ],
         },
     ]
 
@@ -90,6 +103,15 @@ def main():
         pages.p02_missing_values.show_page()
 
     elif st.session_state["page_index"] == 6:
+        pages.p03_non_linear_transformation.show_page()
+
+    elif st.session_state["page_index"] == 7:
+        pages.p03_quantile_transformation.show_page()
+
+    elif st.session_state["page_index"] == 8:
+        pages.p03_scale_transformation.show_page()
+
+    elif st.session_state["page_index"] == 9:
         pages.p03_normalization.show_page()
 
 

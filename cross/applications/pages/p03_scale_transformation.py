@@ -5,12 +5,12 @@ import seaborn as sns
 import streamlit as st
 
 from cross.applications.components import next_button
-from cross.normalize_transformation import NormalizeTransformation
+from cross.scale_transformation import ScaleTransformation
 
 
 def show_page():
-    st.title("Data Normalization")
-    st.write("Choose a normalization technique for each column in your DataFrame.")
+    st.title("Scale Transformations")
+    st.write("Apply various scaling transformations to your DataFrame columns.")
 
     if "data" not in st.session_state:
         st.warning("No data loaded. Please load a DataFrame.")
@@ -22,8 +22,10 @@ def show_page():
     # Actions for each column
     transformations = {
         "Do nothing": "none",
-        "Normalize (L1)": "l1",
-        "Normalize (L2)": "l2",
+        "Min-Max Scaling": "min_max",
+        "Standardization": "standard",
+        "Robust Scaling": "robust",
+        "MaxAbs Scaling": "max_abs",
     }
 
     transformation_options = {}
@@ -48,10 +50,10 @@ def show_page():
             st.pyplot(fig)
 
         with col3:
-            normalize_transformation = NormalizeTransformation(
+            scale_transformation = ScaleTransformation(
                 {column: transformations[transformation_options[column]]}
             )
-            transformed_df = normalize_transformation.fit_transform(original_df)
+            transformed_df = scale_transformation.fit_transform(original_df)
 
             fig, ax = plt.subplots(figsize=(4, 2))
             sns.histplot(transformed_df[column], kde=True, ax=ax)
@@ -68,14 +70,14 @@ def show_page():
                 for col, transformation in transformation_options.items()
             }
 
-            normalize_transformation = NormalizeTransformation(transformations_mapped)
-            transformed_df = normalize_transformation.fit_transform(original_df)
+            scale_transformation = ScaleTransformation(transformations_mapped)
+            transformed_df = scale_transformation.fit_transform(original_df)
             st.session_state["data"] = transformed_df
 
             config = st.session_state.get("config", {})
-            config["normalize_transformation"] = {
-                "transformation_options": normalize_transformation.transformation_options.copy(),
-                "transformers": deepcopy(normalize_transformation.transformers),
+            config["scale_transformation"] = {
+                "transformation_options": scale_transformation.transformation_options.copy(),
+                "transformers": deepcopy(scale_transformation.transformers),
             }
             st.session_state["config"] = config
 
