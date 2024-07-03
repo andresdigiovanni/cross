@@ -6,4 +6,6 @@ def _next_on_click():
 
 
 def next_button(disabled=False):
-    return st.button("Next", disabled=disabled, on_click=_next_on_click, type="primary")
+    return st.button(
+        "Next step", disabled=disabled, on_click=_next_on_click, type="primary"
+    )

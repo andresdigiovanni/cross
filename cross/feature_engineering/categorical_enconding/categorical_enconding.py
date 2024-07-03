@@ -54,25 +54,29 @@ class CategoricalEncoding:
         df_transformed = df.copy()
 
         for column, transformation in self.encodings_options.items():
-            if transformation in ["label", "ordinal", "target"]:
-                transformer = self.encoders[column]
-                df_transformed[column] = transformer.transform(df_transformed[[column]])
+            if column in self.encoders:
+                if transformation in ["label", "ordinal", "target"]:
+                    transformer = self.encoders[column]
+                    df_transformed[column] = transformer.transform(
+                        df_transformed[[column]]
+                    )
 
-            elif transformation in ["onehot", "dummy", "binary"]:
-                transformer = self.encoders[column]
-                encoded_array = transformer.transform(df_transformed[[column]])
-                encoded_df = pd.DataFrame(
-                    encoded_array, columns=transformer.get_feature_names_out([column])
-                )
+                elif transformation in ["onehot", "dummy", "binary"]:
+                    transformer = self.encoders[column]
+                    encoded_array = transformer.transform(df_transformed[[column]])
+                    encoded_df = pd.DataFrame(
+                        encoded_array,
+                        columns=transformer.get_feature_names_out([column]),
+                    )
 
-                df_transformed = pd.concat([df_transformed, encoded_df], axis=1).drop(
-                    columns=[column]
-                )
+                    df_transformed = pd.concat(
+                        [df_transformed, encoded_df], axis=1
+                    ).drop(columns=[column])
 
-            elif transformation == "count":
-                df_transformed[column] = df_transformed[column].map(
-                    self.encoders[column]
-                )
+                elif transformation == "count":
+                    df_transformed[column] = df_transformed[column].map(
+                        self.encoders[column]
+                    )
 
         return df_transformed
 

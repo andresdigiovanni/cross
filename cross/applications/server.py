@@ -1,32 +1,42 @@
-import pages.p01_column_casting
-import pages.p01_load_data
-import pages.p02_column_selection
-import pages.p02_missing_values
-import pages.p02_select_target
-import pages.p03_non_linear_transformation
-import pages.p03_normalization
-import pages.p03_quantile_transformation
-import pages.p03_scale_transformation
-import pages.p04_categorical_encoding
 import streamlit as st
 from streamlit_option_menu import option_menu
+
+from cross.applications.pages.clean_data import (
+    ColumnSelectionPage,
+    MissingValuesPage,
+    TargetSelectionPage,
+)
+from cross.applications.pages.feature_engineering import CategoricalEncodingPage
+from cross.applications.pages.load_data import ColumnCastingPage, LoadDataPage
+from cross.applications.pages.preprocessing import (
+    NonLinearTransformationPage,
+    NormalizationPage,
+    QuantileTransformationsPage,
+    ScaleTransformationsPage,
+)
 
 
 def get_navigation_pages():
     pages_hierarchy = [
         {
             "name": "Load data",
-            "pages": ["Load data", "Column casting"],
+            "pages_names": ["Load data", "Column casting"],
             "icons": ["upload", "shuffle"],
+            "pages": [LoadDataPage(), ColumnCastingPage()],
         },
         {
             "name": "Clean data",
-            "pages": ["Column selection", "Target selection", "Missing values"],
+            "pages_names": ["Column selection", "Target selection", "Missing values"],
             "icons": ["list-check", "bullseye", "question-octagon"],
+            "pages": [
+                ColumnSelectionPage(),
+                TargetSelectionPage(),
+                MissingValuesPage(),
+            ],
         },
         {
             "name": "Preprocessing",
-            "pages": [
+            "pages_names": [
                 "Non-linear transforms",
                 "Quantile transforms",
                 "Scale",
@@ -38,32 +48,43 @@ def get_navigation_pages():
                 "arrows-angle-expand",
                 "bounding-box",
             ],
+            "pages": [
+                NonLinearTransformationPage(),
+                QuantileTransformationsPage(),
+                ScaleTransformationsPage(),
+                NormalizationPage(),
+            ],
         },
         {
             "name": "Feature engineering",
-            "pages": [
+            "pages_names": [
                 "Categorical encoding",
             ],
             "icons": [
                 "bar-chart-steps",
             ],
+            "pages": [CategoricalEncodingPage()],
         },
     ]
 
+    pages = []
     pages_names = []
     pages_icons = []
 
     for i, page_hierarchy in enumerate(pages_hierarchy):
         if i > 0:
+            pages.append(None)
             pages_names.append("---")
             pages_icons.append(None)
 
-        pages_names.extend(page_hierarchy["pages"])
+        pages.extend(page_hierarchy["pages"])
+        pages_names.extend(page_hierarchy["pages_names"])
         pages_icons.extend(page_hierarchy["icons"])
 
     return {
-        "pages": pages_names,
+        "pages_names": pages_names,
         "icons": pages_icons,
+        "pages": {i: k for i, k in enumerate(pages)},
         "page_to_index": {k: i for i, k in enumerate(pages_names)},
         "index_to_page": {i: k for i, k in enumerate(pages_names)},
     }
@@ -92,7 +113,7 @@ def main():
     with st.sidebar:
         option_menu(
             menu_title=None,
-            options=navigation_pages["pages"],
+            options=navigation_pages["pages_names"],
             icons=navigation_pages["icons"],
             menu_icon="cast",
             on_change=navigation_on_change,
@@ -101,35 +122,8 @@ def main():
         )
 
     # Show page
-    if st.session_state["page_index"] == 0:
-        pages.p01_load_data.show_page()
-
-    elif st.session_state["page_index"] == 1:
-        pages.p01_column_casting.show_page()
-
-    elif st.session_state["page_index"] == 3:
-        pages.p02_column_selection.show_page()
-
-    elif st.session_state["page_index"] == 4:
-        pages.p02_select_target.show_page()
-
-    elif st.session_state["page_index"] == 5:
-        pages.p02_missing_values.show_page()
-
-    elif st.session_state["page_index"] == 7:
-        pages.p03_non_linear_transformation.show_page()
-
-    elif st.session_state["page_index"] == 8:
-        pages.p03_quantile_transformation.show_page()
-
-    elif st.session_state["page_index"] == 9:
-        pages.p03_scale_transformation.show_page()
-
-    elif st.session_state["page_index"] == 10:
-        pages.p03_normalization.show_page()
-
-    elif st.session_state["page_index"] == 12:
-        pages.p04_categorical_encoding.show_page()
+    if st.session_state["page_index"] in navigation_pages["pages"]:
+        navigation_pages["pages"][st.session_state["page_index"]].show_page()
 
 
 if __name__ == "__main__":
