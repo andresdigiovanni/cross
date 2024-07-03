@@ -1,6 +1,7 @@
 from copy import deepcopy
 
 import streamlit as st
+from streamlit_sortables import sort_items
 
 from cross.applications.components import next_button
 from cross.feature_engineering.categorical_enconding import CategoricalEncoding
@@ -37,6 +38,7 @@ class CategoricalEncodingPage:
         target_column = config.get("target_column", None)
 
         encodings_options = {}
+        ordinal_orders = {}
 
         for column in cat_columns:
             st.markdown("""---""")
@@ -44,8 +46,10 @@ class CategoricalEncodingPage:
 
             with col1:
                 st.subheader(column)
+
                 num_categories = original_df[column].nunique()
                 st.write(f"Number of categories: {num_categories}")
+
                 selected_encoding = st.selectbox(
                     f"Select encoding for {column}",
                     encodings.keys(),
@@ -53,17 +57,26 @@ class CategoricalEncodingPage:
                 )
                 encodings_options[column] = selected_encoding
 
+                if encodings[selected_encoding] == "ordinal":
+                    categories = original_df[column].fillna("Unknown").unique().tolist()
+                    st.write("Order the categories")
+
+                    ordered_categories = sort_items(categories, key=f"{column}_order")
+                    ordinal_orders[column] = ordered_categories
+
             with col2:
                 st.write("Original Data")
                 st.dataframe(original_df[[column]].drop_duplicates().head())
 
             with col3:
-                if (encodings_options[column] != "Do nothing") and not (
-                    encodings_options[column] == "Target Encoder"
+                if (encodings[encodings_options[column]] != "none") and not (
+                    encodings[encodings_options[column]] == "target"
                     and (target_column is None or target_column == "")
                 ):
                     categorical_encoding = CategoricalEncoding(
-                        {column: encodings[encodings_options[column]]}, target_column
+                        {column: encodings[encodings_options[column]]},
+                        target_column=target_column,
+                        ordinal_orders=ordinal_orders,
                     )
                     transformed_df = categorical_encoding.fit_transform(original_df)
 
@@ -95,7 +108,9 @@ class CategoricalEncodingPage:
                 }
 
                 categorical_encoding = CategoricalEncoding(
-                    encodings_mapped, target_column
+                    encodings_mapped,
+                    target_column=target_column,
+                    ordinal_orders=ordinal_orders,
                 )
                 transformed_df = categorical_encoding.fit_transform(original_df)
                 st.session_state["data"] = transformed_df

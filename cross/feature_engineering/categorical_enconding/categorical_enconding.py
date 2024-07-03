@@ -4,38 +4,42 @@ from sklearn.preprocessing import LabelEncoder, OneHotEncoder, OrdinalEncoder
 
 
 class CategoricalEncoding:
-    def __init__(self, encodings_options, target_column=None):
+    def __init__(self, encodings_options, target_column=None, ordinal_orders=None):
         self.encodings_options = encodings_options
         self.encoders = {}
         self.target_column = target_column
+        self.ordinal_orders = ordinal_orders
 
     def fit(self, df):
         self.encoders = {}
 
+        df_filled = df.copy()
+        df_filled = df_filled.fillna("Unknown")
+
         for column, transformation in self.encodings_options.items():
             if transformation == "label":
                 transformer = LabelEncoder()
-                transformer.fit(df[column])
+                transformer.fit(df_filled[column])
                 self.encoders[column] = transformer
 
             elif transformation == "ordinal":
-                transformer = OrdinalEncoder(categories="auto")
-                transformer.fit(df[[column]])
+                transformer = OrdinalEncoder(categories=[self.ordinal_orders[column]])
+                transformer.fit(df_filled[[column]])
                 self.encoders[column] = transformer
 
             elif transformation == "onehot":
                 transformer = OneHotEncoder(sparse_output=False)
-                transformer.fit(df[[column]])
+                transformer.fit(df_filled[[column]])
                 self.encoders[column] = transformer
 
             elif transformation == "dummy":
                 transformer = OneHotEncoder(sparse_output=False, drop="first")
-                transformer.fit(df[[column]])
+                transformer.fit(df_filled[[column]])
                 self.encoders[column] = transformer
 
             elif transformation == "binary":
                 transformer = BinaryEncoder()
-                transformer.fit(df[[column]])
+                transformer.fit(df_filled[[column]])
                 self.encoders[column] = transformer
 
             elif (
@@ -44,14 +48,15 @@ class CategoricalEncoding:
                 and self.target_column != ""
             ):
                 transformer = TargetEncoder()
-                transformer.fit(df[[column]], df[self.target_column])
+                transformer.fit(df_filled[[column]], df_filled[self.target_column])
                 self.encoders[column] = transformer
 
             elif transformation == "count":
-                self.encoders[column] = df[column].value_counts().to_dict()
+                self.encoders[column] = df_filled[column].value_counts().to_dict()
 
     def transform(self, df):
         df_transformed = df.copy()
+        df_transformed = df_transformed.fillna("Unknown")
 
         for column, transformation in self.encodings_options.items():
             if column in self.encoders:

@@ -1715,6 +1715,20 @@ files = [
 streamlit = ">=0.63"
 
 [[package]]
+name = "streamlit-sortables"
+version = "0.2.0"
+description = "A Streamlit component to provide sortable list."
+optional = false
+python-versions = ">=3.8,<4.0"
+files = [
+    {file = "streamlit_sortables-0.2.0-py3-none-any.whl", hash = "sha256:62dcac58eb25ff12a7cce748d2b56d20fdb917d93bffd6d008f96bc96b920018"},
+    {file = "streamlit_sortables-0.2.0.tar.gz", hash = "sha256:b82b3e27255a7f02b25c97a5d212edc067aff5613ce568e4fecb17bb98daffd0"},
+]
+
+[package.dependencies]
+streamlit = ">=1.0.0"
+
+[[package]]
 name = "tenacity"
 version = "8.4.2"
 description = "Retry code until it succeeds"
@@ -1899,4 +1913,4 @@ watchmedo = ["PyYAML (>=3.10)"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<3.13"
-content-hash = "ca20b9f7cf00b009ee65f6d2c697db3cbaf7274f1140ca9fb41093b4437a3dce"
+content-hash = "fa0eaf1ca35f56571f5e96ba947d493d44445040ad7b8c436e44e447ab546259"
