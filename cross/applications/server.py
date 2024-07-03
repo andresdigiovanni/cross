@@ -2,10 +2,12 @@ import pages.p01_column_casting
 import pages.p01_load_data
 import pages.p02_column_selection
 import pages.p02_missing_values
+import pages.p02_select_target
 import pages.p03_non_linear_transformation
 import pages.p03_normalization
 import pages.p03_quantile_transformation
 import pages.p03_scale_transformation
+import pages.p04_categorical_encoding
 import streamlit as st
 from streamlit_option_menu import option_menu
 
@@ -19,8 +21,8 @@ def get_navigation_pages():
         },
         {
             "name": "Clean data",
-            "pages": ["Column selection", "Missing values"],
-            "icons": ["list-check", "question-octagon"],
+            "pages": ["Column selection", "Target selection", "Missing values"],
+            "icons": ["list-check", "bullseye", "question-octagon"],
         },
         {
             "name": "Preprocessing",
@@ -35,6 +37,15 @@ def get_navigation_pages():
                 "bezier2",
                 "arrows-angle-expand",
                 "bounding-box",
+            ],
+        },
+        {
+            "name": "Feature engineering",
+            "pages": [
+                "Categorical encoding",
+            ],
+            "icons": [
+                "bar-chart-steps",
             ],
         },
     ]
@@ -100,19 +111,25 @@ def main():
         pages.p02_column_selection.show_page()
 
     elif st.session_state["page_index"] == 4:
+        pages.p02_select_target.show_page()
+
+    elif st.session_state["page_index"] == 5:
         pages.p02_missing_values.show_page()
 
-    elif st.session_state["page_index"] == 6:
+    elif st.session_state["page_index"] == 7:
         pages.p03_non_linear_transformation.show_page()
 
-    elif st.session_state["page_index"] == 7:
+    elif st.session_state["page_index"] == 8:
         pages.p03_quantile_transformation.show_page()
 
-    elif st.session_state["page_index"] == 8:
+    elif st.session_state["page_index"] == 9:
         pages.p03_scale_transformation.show_page()
 
-    elif st.session_state["page_index"] == 9:
+    elif st.session_state["page_index"] == 10:
         pages.p03_normalization.show_page()
+
+    elif st.session_state["page_index"] == 12:
+        pages.p04_categorical_encoding.show_page()
 
 
 if __name__ == "__main__":
