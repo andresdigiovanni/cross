@@ -61,7 +61,7 @@ def get_navigation_pages():
                 "Categorical encoding",
             ],
             "icons": [
-                "bar-chart-steps",
+                "alphabet",
             ],
             "pages": [CategoricalEncodingPage()],
         },
@@ -98,7 +98,7 @@ def navigation_on_change(key):
 
 
 def main():
-    st.set_page_config(page_title="Cross", layout="wide")
+    st.set_page_config(page_title="Cross", page_icon="assets/icon.png", layout="wide")
 
     # Navigation
     if "page_index" not in st.session_state:
