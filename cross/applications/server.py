@@ -6,7 +6,10 @@ from cross.applications.pages.clean_data import (
     MissingValuesPage,
     TargetSelectionPage,
 )
-from cross.applications.pages.feature_engineering import CategoricalEncodingPage
+from cross.applications.pages.feature_engineering import (
+    CategoricalEncodingPage,
+    NumericalBinningPage,
+)
 from cross.applications.pages.load_data import ColumnCastingPage, LoadDataPage
 from cross.applications.pages.preprocessing import (
     NonLinearTransformationPage,
@@ -59,11 +62,13 @@ def get_navigation_pages():
             "name": "Feature engineering",
             "pages_names": [
                 "Categorical encoding",
+                "Numerical binning",
             ],
             "icons": [
                 "alphabet",
+                "bucket",
             ],
-            "pages": [CategoricalEncodingPage()],
+            "pages": [CategoricalEncodingPage(), NumericalBinningPage()],
         },
     ]
 
