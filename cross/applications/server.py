@@ -103,7 +103,7 @@ def navigation_on_change(key):
 
 
 def main():
-    st.set_page_config(page_title="Cross", page_icon="assets/icon.png", layout="wide")
+    st.set_page_config(page_title="CROSS", page_icon="assets/icon.png", layout="wide")
 
     # Navigation
     if "page_index" not in st.session_state:
@@ -116,6 +116,10 @@ def main():
         manual_select += 1
 
     with st.sidebar:
+        _, col2, _ = st.columns([0.3, 1, 0.3])
+        with col2:
+            st.image("assets/logo.png")
+
         option_menu(
             menu_title=None,
             options=navigation_pages["pages_names"],
