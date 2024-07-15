@@ -8,6 +8,7 @@ from cross.applications.pages.clean_data import (
 )
 from cross.applications.pages.feature_engineering import (
     CategoricalEncodingPage,
+    MathematicalOperationsPage,
     NumericalBinningPage,
 )
 from cross.applications.pages.load_data import ColumnCastingPage, LoadDataPage
@@ -63,12 +64,18 @@ def get_navigation_pages():
             "pages_names": [
                 "Categorical encoding",
                 "Numerical binning",
+                "Mathematical operations",
             ],
             "icons": [
                 "alphabet",
                 "bucket",
+                "plus-slash-minus",
             ],
-            "pages": [CategoricalEncodingPage(), NumericalBinningPage()],
+            "pages": [
+                CategoricalEncodingPage(),
+                NumericalBinningPage(),
+                MathematicalOperationsPage(),
+            ],
         },
     ]
 

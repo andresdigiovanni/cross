@@ -1,2 +1,3 @@
 from .categorical_encoding import CategoricalEncodingPage
+from .mathematical_operations import MathematicalOperationsPage
 from .numerical_binning import NumericalBinningPage
