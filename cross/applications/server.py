@@ -4,6 +4,7 @@ from streamlit_option_menu import option_menu
 from cross.applications.pages.clean_data import (
     ColumnSelectionPage,
     MissingValuesPage,
+    OutliersHandlingPage,
     TargetSelectionPage,
 )
 from cross.applications.pages.feature_engineering import (
@@ -30,11 +31,22 @@ def get_navigation_pages():
         },
         {
             "name": "Clean data",
-            "pages_names": ["Column selection", "Target selection", "Missing values"],
-            "icons": ["list-check", "bullseye", "question-octagon"],
+            "pages_names": [
+                "Column selection",
+                "Target selection",
+                "Handle outliers",
+                "Missing values",
+            ],
+            "icons": [
+                "list-check",
+                "bullseye",
+                "distribute-horizontal",
+                "question-octagon",
+            ],
             "pages": [
                 ColumnSelectionPage(),
                 TargetSelectionPage(),
+                OutliersHandlingPage(),
                 MissingValuesPage(),
             ],
         },
