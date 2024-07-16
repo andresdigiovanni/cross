@@ -5,7 +5,7 @@ import seaborn as sns
 import streamlit as st
 
 from cross.applications.components import next_button
-from cross.preprocessing.dtypes import numerical_columns
+from cross.load_data.dtypes import numerical_columns
 from cross.preprocessing.scale_transformation import ScaleTransformation
 
 

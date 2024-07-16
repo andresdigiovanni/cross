@@ -5,7 +5,7 @@ from streamlit_sortables import sort_items
 
 from cross.applications.components import next_button
 from cross.feature_engineering.categorical_enconding import CategoricalEncoding
-from cross.preprocessing.dtypes import categorical_columns
+from cross.load_data.dtypes import categorical_columns
 
 
 class CategoricalEncodingPage:

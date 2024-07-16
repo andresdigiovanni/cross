@@ -4,7 +4,7 @@ import streamlit as st
 
 from cross.applications.components import next_button
 from cross.feature_engineering.numerical_binning import NumericalBinning
-from cross.preprocessing.dtypes import numerical_columns
+from cross.load_data.dtypes import numerical_columns
 
 
 class NumericalBinningPage:
