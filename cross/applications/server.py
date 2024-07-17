@@ -10,6 +10,7 @@ from cross.applications.pages.clean_data import (
 )
 from cross.applications.pages.feature_engineering import (
     CategoricalEncodingPage,
+    DateTimeTransformationPage,
     MathematicalOperationsPage,
     NumericalBinningPage,
 )
@@ -79,16 +80,19 @@ def get_navigation_pages():
             "name": "Feature engineering",
             "pages_names": [
                 "Categorical encoding",
+                "Datetime transforms",
                 "Numerical binning",
                 "Mathematical operations",
             ],
             "icons": [
                 "alphabet",
+                "calendar-date",
                 "bucket",
                 "plus-slash-minus",
             ],
             "pages": [
                 CategoricalEncodingPage(),
+                DateTimeTransformationPage(),
                 NumericalBinningPage(),
                 MathematicalOperationsPage(),
             ],
