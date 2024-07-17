@@ -5,6 +5,7 @@ from cross.applications.pages.clean_data import (
     ColumnSelectionPage,
     MissingValuesPage,
     OutliersHandlingPage,
+    RemoveDuplicatesPage,
     TargetSelectionPage,
 )
 from cross.applications.pages.feature_engineering import (
@@ -34,18 +35,21 @@ def get_navigation_pages():
             "pages_names": [
                 "Column selection",
                 "Target selection",
+                "Remove duplicates",
                 "Handle outliers",
                 "Missing values",
             ],
             "icons": [
                 "list-check",
                 "bullseye",
+                "copy",
                 "distribute-horizontal",
                 "question-octagon",
             ],
             "pages": [
                 ColumnSelectionPage(),
                 TargetSelectionPage(),
+                RemoveDuplicatesPage(),
                 OutliersHandlingPage(),
                 MissingValuesPage(),
             ],
