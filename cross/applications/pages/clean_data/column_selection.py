@@ -1,7 +1,7 @@
 import streamlit as st
 
 from cross.applications.components import next_button
-from cross.clean_data.column_selection import column_selection
+from cross.core.clean_data.column_selection import column_selection
 
 
 class ColumnSelectionPage:

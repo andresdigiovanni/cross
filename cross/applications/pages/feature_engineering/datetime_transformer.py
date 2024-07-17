@@ -1,8 +1,8 @@
 import streamlit as st
 
 from cross.applications.components import next_button
-from cross.feature_engineering.datetime_transformer import DateTimeTransformer
-from cross.load_data.dtypes import datetime_columns
+from cross.core.dtypes import datetime_columns
+from cross.core.feature_engineering.datetime_transformer import DateTimeTransformer
 
 
 class DateTimeTransformationPage:

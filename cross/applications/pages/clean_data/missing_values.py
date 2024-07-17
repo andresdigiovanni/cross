@@ -3,8 +3,8 @@ import seaborn as sns
 import streamlit as st
 
 from cross.applications.components import next_button
-from cross.clean_data.missing_values import MissingValuesHandler
-from cross.load_data.dtypes import categorical_columns, numerical_columns
+from cross.core.clean_data.missing_values_handler import MissingValuesHandler
+from cross.core.dtypes import categorical_columns, numerical_columns
 
 
 class MissingValuesPage:

@@ -1,7 +1,7 @@
 from sklearn.preprocessing import Normalizer
 
 
-class NormalizeTransformation:
+class Normalization:
     def __init__(self, transformation_options):
         self.transformation_options = transformation_options
         self.transformers = {}

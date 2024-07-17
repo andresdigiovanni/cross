@@ -1,7 +1,9 @@
 import streamlit as st
 
 from cross.applications.components import next_button
-from cross.feature_engineering.cyclical_transformer import CyclicalFeaturesTransformer
+from cross.core.feature_engineering.cyclical_features_transformer import (
+    CyclicalFeaturesTransformer,
+)
 
 
 class CyclicalFeaturesTransformationPage:

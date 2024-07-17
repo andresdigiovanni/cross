@@ -1,3 +1,4 @@
+from .column_casting import ColumnCastingPage
 from .non_linear_transformation import NonLinearTransformationPage
 from .normalization import NormalizationPage
 from .quantile_transformation import QuantileTransformationsPage

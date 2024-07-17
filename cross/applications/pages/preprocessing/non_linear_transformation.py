@@ -5,8 +5,8 @@ import seaborn as sns
 import streamlit as st
 
 from cross.applications.components import next_button
-from cross.load_data.dtypes import numerical_columns
-from cross.preprocessing.non_linear_transformation import NonLinearTransformation
+from cross.core.dtypes import numerical_columns
+from cross.core.preprocessing.non_linear_transformation import NonLinearTransformation
 
 
 class NonLinearTransformationPage:

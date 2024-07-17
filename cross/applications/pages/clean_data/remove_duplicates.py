@@ -1,7 +1,7 @@
 import streamlit as st
 
 from cross.applications.components import next_button
-from cross.clean_data.remove_duplicates import RemoveDuplicatesHandler
+from cross.core.clean_data.remove_duplicates_handler import RemoveDuplicatesHandler
 
 
 class RemoveDuplicatesPage:

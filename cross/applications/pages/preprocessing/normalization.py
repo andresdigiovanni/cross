@@ -5,8 +5,8 @@ import seaborn as sns
 import streamlit as st
 
 from cross.applications.components import next_button
-from cross.load_data.dtypes import numerical_columns
-from cross.preprocessing.normalize_transformation import NormalizeTransformation
+from cross.core.dtypes import numerical_columns
+from cross.core.preprocessing.normalization import Normalization
 
 
 class NormalizationPage:
@@ -52,10 +52,10 @@ class NormalizationPage:
                 st.pyplot(fig)
 
             with col3:
-                normalize_transformation = NormalizeTransformation(
+                normalization = Normalization(
                     {column: transformations[transformation_options[column]]}
                 )
-                transformed_df = normalize_transformation.fit_transform(original_df)
+                transformed_df = normalization.fit_transform(original_df)
 
                 fig, ax = plt.subplots(figsize=(4, 2))
                 sns.histplot(transformed_df[column], kde=True, ax=ax)
@@ -72,16 +72,14 @@ class NormalizationPage:
                     for col, transformation in transformation_options.items()
                 }
 
-                normalize_transformation = NormalizeTransformation(
-                    transformations_mapped
-                )
-                transformed_df = normalize_transformation.fit_transform(original_df)
+                normalization = Normalization(transformations_mapped)
+                transformed_df = normalization.fit_transform(original_df)
                 st.session_state["data"] = transformed_df
 
                 config = st.session_state.get("config", {})
-                config["normalize_transformation"] = {
-                    "transformation_options": normalize_transformation.transformation_options.copy(),
-                    "transformers": deepcopy(normalize_transformation.transformers),
+                config["normalization"] = {
+                    "transformation_options": normalization.transformation_options.copy(),
+                    "transformers": deepcopy(normalization.transformers),
                 }
                 st.session_state["config"] = config
 

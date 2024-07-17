@@ -3,8 +3,10 @@ from copy import deepcopy
 import streamlit as st
 
 from cross.applications.components import next_button
-from cross.feature_engineering.mathematical_operations import MathematicalOperations
-from cross.load_data.dtypes import numerical_columns
+from cross.core.dtypes import numerical_columns
+from cross.core.feature_engineering.mathematical_operations import (
+    MathematicalOperations,
+)
 
 
 class MathematicalOperationsPage:

@@ -15,8 +15,9 @@ from cross.applications.pages.feature_engineering import (
     MathematicalOperationsPage,
     NumericalBinningPage,
 )
-from cross.applications.pages.load_data import ColumnCastingPage, LoadDataPage
+from cross.applications.pages.load_data import LoadDataPage
 from cross.applications.pages.preprocessing import (
+    ColumnCastingPage,
     NonLinearTransformationPage,
     NormalizationPage,
     QuantileTransformationsPage,

@@ -4,8 +4,8 @@ import streamlit as st
 from streamlit_sortables import sort_items
 
 from cross.applications.components import next_button
-from cross.feature_engineering.categorical_enconding import CategoricalEncoding
-from cross.load_data.dtypes import categorical_columns
+from cross.core.dtypes import categorical_columns
+from cross.core.feature_engineering.categorical_enconding import CategoricalEncoding
 
 
 class CategoricalEncodingPage:

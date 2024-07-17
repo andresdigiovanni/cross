@@ -2,7 +2,7 @@ from sklearn.impute import KNNImputer, SimpleImputer
 
 
 class MissingValuesHandler:
-    def __init__(self, handling_options, n_neighbors=None):
+    def __init__(self, handling_options, n_neighbors):
         self.handling_options = handling_options
         self.statistics_ = {}
         self.n_neighbors = n_neighbors
