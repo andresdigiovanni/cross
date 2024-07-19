@@ -2,8 +2,17 @@ import numpy as np
 
 
 class CyclicalFeaturesTransformer:
-    def __init__(self, columns_periods):
-        self.columns_periods = columns_periods
+    def __init__(self, columns_periods=None, config=None):
+        self.columns_periods = columns_periods or {}
+
+        if config:
+            self.columns_periods = config.get("columns_periods", {})
+
+    def get_params(self):
+        params = {
+            "columns_periods": self.columns_periods,
+        }
+        return params
 
     def fit(self, df):
         pass

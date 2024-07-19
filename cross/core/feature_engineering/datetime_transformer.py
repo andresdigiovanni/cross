@@ -1,6 +1,15 @@
 class DateTimeTransformer:
-    def __init__(self, datetime_columns):
-        self.datetime_columns = datetime_columns
+    def __init__(self, datetime_columns=None, config=None):
+        self.datetime_columns = datetime_columns or []
+
+        if config:
+            self.datetime_columns = config.get("datetime_columns", [])
+
+    def get_params(self):
+        params = {
+            "datetime_columns": self.datetime_columns,
+        }
+        return params
 
     def fit(self, df):
         pass

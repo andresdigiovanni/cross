@@ -64,9 +64,7 @@ class CyclicalFeaturesTransformationPage:
                 st.session_state["data"] = df
 
                 config = st.session_state.get("config", {})
-                config["cyclical_features_transformation"] = {
-                    "columns_periods": columns_periods
-                }
+                config["cyclical_transformer"] = cyclical_transformer.get_params()
                 st.session_state["config"] = config
 
                 st.success("Cyclical features transformed successfully!")
@@ -79,13 +77,18 @@ class CyclicalFeaturesTransformationPage:
 
     def get_default_period(self, df, column):
         unique_values = df[column].dropna().unique()
+
         if column.lower().endswith("month"):
             return 12
+
         elif column.lower().endswith("day"):
             return 31
+
         elif column.lower().endswith("hour"):
             return 24
+
         elif column.lower().endswith("minute") or column.lower().endswith("second"):
             return 60
+
         else:
             return len(unique_values)

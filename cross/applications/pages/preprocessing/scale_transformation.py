@@ -1,12 +1,10 @@
-from copy import deepcopy
-
 import matplotlib.pyplot as plt
 import seaborn as sns
 import streamlit as st
 
 from cross.applications.components import next_button
-from cross.core.dtypes import numerical_columns
 from cross.core.preprocessing.scale_transformation import ScaleTransformation
+from cross.core.utils.dtypes import numerical_columns
 
 
 class ScaleTransformationsPage:
@@ -79,10 +77,7 @@ class ScaleTransformationsPage:
                 st.session_state["data"] = transformed_df
 
                 config = st.session_state.get("config", {})
-                config["scale_transformation"] = {
-                    "transformation_options": scale_transformation.transformation_options.copy(),
-                    "transformers": deepcopy(scale_transformation.transformers),
-                }
+                config["scale_transformation"] = scale_transformation.get_params()
                 st.session_state["config"] = config
 
                 st.success("Transformations applied successfully!")

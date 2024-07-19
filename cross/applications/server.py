@@ -1,3 +1,5 @@
+import pickle
+
 import streamlit as st
 from streamlit_option_menu import option_menu
 
@@ -134,6 +136,13 @@ def navigation_on_change(key):
     st.session_state["page_index"] = navigation_pages["page_to_index"][selection]
 
 
+def save_config():
+    config = st.session_state.get("config", {})
+    with open("config.pkl", "wb") as f:
+        pickle.dump(config, f)
+    st.success("Configuration saved to config.pkl")
+
+
 def main():
     st.set_page_config(page_title="CROSS", page_icon="assets/icon.png", layout="wide")
 
@@ -165,6 +174,10 @@ def main():
     # Show page
     if st.session_state["page_index"] in navigation_pages["pages"]:
         navigation_pages["pages"][st.session_state["page_index"]].show_page()
+
+    # Add button to save configuration
+    if st.button("Save Configuration"):
+        save_config()
 
 
 if __name__ == "__main__":

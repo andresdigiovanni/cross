@@ -1,11 +1,9 @@
-from copy import deepcopy
-
 import streamlit as st
 from streamlit_sortables import sort_items
 
 from cross.applications.components import next_button
-from cross.core.dtypes import categorical_columns
 from cross.core.feature_engineering.categorical_enconding import CategoricalEncoding
+from cross.core.utils.dtypes import categorical_columns
 
 
 class CategoricalEncodingPage:
@@ -116,10 +114,7 @@ class CategoricalEncodingPage:
                 st.session_state["data"] = transformed_df
 
                 config = st.session_state.get("config", {})
-                config["categorical_encoding"] = {
-                    "encodings_options": categorical_encoding.encodings_options.copy(),
-                    "encoders": deepcopy(categorical_encoding.encoders),
-                }
+                config["categorical_encoding"] = categorical_encoding.get_params()
                 st.session_state["config"] = config
 
                 st.success("Encoding applied successfully!")

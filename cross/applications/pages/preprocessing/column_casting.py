@@ -1,9 +1,9 @@
 import streamlit as st
 
 from cross.applications.components import next_button
-from cross.core.dtypes import (
+from cross.core.preprocessing import CastColumns
+from cross.core.utils.dtypes import (
     bool_columns,
-    cast_columns,
     categorical_columns,
     datetime_columns,
     numerical_columns,
@@ -82,11 +82,12 @@ class ColumnCastingPage:
         st.markdown("""---""")
         if st.button("Cast columns"):
             try:
-                df = cast_columns(df, cast_options)
-                st.session_state["data"] = df
+                cast_columns = CastColumns(cast_options)
+                transformed_df = cast_columns.fit_transform(df)
+                st.session_state["data"] = transformed_df
 
                 config = st.session_state.get("config", {})
-                config["column_casting"] = cast_options.copy()
+                config["column_casting"] = cast_columns.get_params()
                 st.session_state["config"] = config
 
                 st.success("Columns successfully converted.")

@@ -1,12 +1,10 @@
-from copy import deepcopy
-
 import matplotlib.pyplot as plt
 import seaborn as sns
 import streamlit as st
 
 from cross.applications.components import next_button
-from cross.core.dtypes import numerical_columns
 from cross.core.preprocessing.non_linear_transformation import NonLinearTransformation
+from cross.core.utils.dtypes import numerical_columns
 
 
 class NonLinearTransformationPage:
@@ -80,10 +78,9 @@ class NonLinearTransformationPage:
                 st.session_state["data"] = transformed_df
 
                 config = st.session_state.get("config", {})
-                config["non_linear_transformations"] = {
-                    "transformation_options": non_linear_transformation.transformation_options.copy(),
-                    "transformers": deepcopy(non_linear_transformation.transformers),
-                }
+                config["non_linear_transformations"] = (
+                    non_linear_transformation.get_params()
+                )
                 st.session_state["config"] = config
 
                 st.success("Transformations applied successfully!")

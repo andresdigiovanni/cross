@@ -2,25 +2,40 @@ from sklearn.impute import KNNImputer, SimpleImputer
 
 
 class MissingValuesHandler:
-    def __init__(self, handling_options, n_neighbors):
-        self.handling_options = handling_options
-        self.statistics_ = {}
-        self.n_neighbors = n_neighbors
+    def __init__(self, handling_options=None, n_neighbors=None, config=None):
+        self.handling_options = handling_options or {}
+        self.n_neighbors = n_neighbors or {}
+        self.statistics = {}
         self.imputers = {}
 
+        if config:
+            self.handling_options = config.get("handling_options", {})
+            self.n_neighbors = config.get("n_neighbors", {})
+            self.statistics = config.get("statistics", {})
+            self.imputers = config.get("imputers", {})
+
+    def get_params(self):
+        params = {
+            "handling_options": self.handling_options,
+            "n_neighbors": self.n_neighbors,
+            "statistics": self.statistics,
+            "imputers": self.imputers,
+        }
+        return params
+
     def fit(self, df):
-        self.statistics_ = {}
+        self.statistics = {}
         self.imputers = {}
 
         for column, action in self.handling_options.items():
             if action == "fill_mean":
-                self.statistics_[column] = df[column].mean()
+                self.statistics[column] = df[column].mean()
 
             elif action == "fill_median":
-                self.statistics_[column] = df[column].median()
+                self.statistics[column] = df[column].median()
 
             elif action == "fill_mode":
-                self.statistics_[column] = df[column].mode()[0]
+                self.statistics[column] = df[column].mode()[0]
 
             elif action == "fill_knn":
                 imputer = KNNImputer(n_neighbors=self.n_neighbors[column])
@@ -41,7 +56,7 @@ class MissingValuesHandler:
 
             elif action in ["fill_mean", "fill_median", "fill_mode"]:
                 df_transformed[column] = df_transformed[column].fillna(
-                    self.statistics_[column]
+                    self.statistics[column]
                 )
 
             elif action == "fill_0":

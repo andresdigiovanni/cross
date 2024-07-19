@@ -4,7 +4,7 @@ import streamlit as st
 
 from cross.applications.components import next_button
 from cross.core.clean_data.outliers_handler import OutliersHandler
-from cross.core.dtypes import numerical_columns
+from cross.core.utils.dtypes import numerical_columns
 
 
 class OutliersHandlingPage:
@@ -112,11 +112,7 @@ class OutliersHandlingPage:
                 st.session_state["data"] = df
 
                 config = st.session_state.get("config", {})
-                config["outliers_handling"] = {
-                    "handling_options": outliers_handler.handling_options.copy(),
-                    "statistics": outliers_handler.statistics_.copy(),
-                    "bounds": outliers_handler.bounds.copy(),
-                }
+                config["outliers_handler"] = outliers_handler.get_params()
                 st.session_state["config"] = config
 
                 st.success("Outliers handled successfully!")

@@ -1,8 +1,8 @@
 import streamlit as st
 
 from cross.applications.components import next_button
-from cross.core.dtypes import datetime_columns
 from cross.core.feature_engineering.datetime_transformer import DateTimeTransformer
+from cross.core.utils.dtypes import datetime_columns
 
 
 class DateTimeTransformationPage:
@@ -61,9 +61,7 @@ class DateTimeTransformationPage:
                 st.session_state["data"] = df
 
                 config = st.session_state.get("config", {})
-                config["datetime_transformation"] = {
-                    "datetime_columns": datetime_columns_selected
-                }
+                config["datetime_transformer"] = datetime_transformer.get_params()
                 st.session_state["config"] = config
 
                 st.success("Datetime columns transformed successfully!")

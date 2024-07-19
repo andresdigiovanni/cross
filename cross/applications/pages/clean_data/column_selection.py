@@ -1,7 +1,7 @@
 import streamlit as st
 
 from cross.applications.components import next_button
-from cross.core.clean_data.column_selection import column_selection
+from cross.core.clean_data.column_selection import ColumnSelection
 
 
 class ColumnSelectionPage:
@@ -25,11 +25,12 @@ class ColumnSelectionPage:
         )
 
         if st.button("Apply Selection"):
-            df = column_selection(df, selected_columns)
-            st.session_state["data"] = df
+            column_selector = ColumnSelection(selected_columns)
+            transformed_df = column_selector.fit_transform(df)
+            st.session_state["data"] = transformed_df
 
             config = st.session_state.get("config", {})
-            config["selected_columns"] = selected_columns
+            config["column_selector"] = column_selector.get_params()
             st.session_state["config"] = config
 
             st.success("Columns selected successfully!")

@@ -51,7 +51,7 @@ class RemoveDuplicatesPage:
                 st.session_state["data"] = df
 
                 config = st.session_state.get("config", {})
-                config["remove_duplicates"] = {"subset": subset, "keep": keep}
+                config["remove_duplicates"] = remove_duplicates_handler.get_params()
                 st.session_state["config"] = config
 
                 st.success("Duplicates removed successfully!")

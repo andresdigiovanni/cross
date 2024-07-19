@@ -2,14 +2,29 @@ import numpy as np
 
 
 class OutliersHandler:
-    def __init__(self, handling_options, thresholds):
-        self.handling_options = handling_options
-        self.thresholds = thresholds
-        self.statistics_ = {}
+    def __init__(self, handling_options=None, thresholds=None, config=None):
+        self.handling_options = handling_options or {}
+        self.thresholds = thresholds or {}
+        self.statistics = {}
         self.bounds = {}
 
+        if config:
+            self.handling_options = config.get("handling_options", {})
+            self.thresholds = config.get("thresholds", {})
+            self.statistics = config.get("statistics", {})
+            self.bounds = config.get("bounds", {})
+
+    def get_params(self):
+        params = {
+            "handling_options": self.handling_options,
+            "thresholds": self.thresholds,
+            "statistics": self.statistics,
+            "bounds": self.bounds,
+        }
+        return params
+
     def fit(self, df):
-        self.statistics_ = {}
+        self.statistics = {}
         self.bounds = {}
 
         for column, (action, method) in self.handling_options.items():
@@ -20,7 +35,7 @@ class OutliersHandler:
             }
 
             if action == "median":
-                self.statistics_[column] = df[column].median()
+                self.statistics[column] = df[column].median()
 
     def _calculate_bounds(self, df, column, method):
         if method == "iqr":
@@ -65,7 +80,7 @@ class OutliersHandler:
                 df_transformed[column] = np.where(
                     (df_transformed[column] < lower_bound)
                     | (df_transformed[column] > upper_bound),
-                    self.statistics_[column],
+                    self.statistics[column],
                     df_transformed[column],
                 )
 

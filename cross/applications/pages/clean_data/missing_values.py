@@ -4,7 +4,7 @@ import streamlit as st
 
 from cross.applications.components import next_button
 from cross.core.clean_data.missing_values_handler import MissingValuesHandler
-from cross.core.dtypes import categorical_columns, numerical_columns
+from cross.core.utils.dtypes import categorical_columns, numerical_columns
 
 
 class MissingValuesPage:
@@ -105,10 +105,7 @@ class MissingValuesPage:
                 st.session_state["data"] = df
 
                 config = st.session_state.get("config", {})
-                config["missing_values"] = {
-                    "handling_options": missing_values_handler.handling_options.copy(),
-                    "statistics": missing_values_handler.statistics_.copy(),
-                }
+                config["missing_values"] = missing_values_handler.get_params()
                 st.session_state["config"] = config
 
                 st.success("Missing values handled successfully!")

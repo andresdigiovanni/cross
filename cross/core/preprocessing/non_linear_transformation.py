@@ -3,9 +3,20 @@ from sklearn.preprocessing import PowerTransformer
 
 
 class NonLinearTransformation:
-    def __init__(self, transformation_options):
-        self.transformation_options = transformation_options
+    def __init__(self, transformation_options=None, config=None):
+        self.transformation_options = transformation_options or {}
         self.transformers = {}
+
+        if config:
+            self.transformation_options = config.get("transformation_options", {})
+            self.transformers = config.get("transformers", {})
+
+    def get_params(self):
+        params = {
+            "transformation_options": self.transformation_options,
+            "transformers": self.transformers,
+        }
+        return params
 
     def fit(self, df):
         self.transformers = {}

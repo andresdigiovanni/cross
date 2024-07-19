@@ -1,10 +1,8 @@
-from copy import deepcopy
-
 import streamlit as st
 
 from cross.applications.components import next_button
-from cross.core.dtypes import numerical_columns
 from cross.core.feature_engineering.numerical_binning import NumericalBinning
+from cross.core.utils.dtypes import numerical_columns
 
 
 class NumericalBinningPage:
@@ -85,10 +83,7 @@ class NumericalBinningPage:
                 st.session_state["data"] = transformed_df
 
                 config = st.session_state.get("config", {})
-                config["numerical_binning"] = {
-                    "binning_options": deepcopy(numerical_binning.binning_options),
-                    "num_bins": deepcopy(numerical_binning.num_bins),
-                }
+                config["numerical_binning"] = numerical_binning.get_params()
                 st.session_state["config"] = config
 
                 st.success("Binning applied successfully!")

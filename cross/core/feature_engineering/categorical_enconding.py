@@ -4,11 +4,32 @@ from sklearn.preprocessing import LabelEncoder, OneHotEncoder, OrdinalEncoder
 
 
 class CategoricalEncoding:
-    def __init__(self, encodings_options, target_column=None, ordinal_orders=None):
-        self.encodings_options = encodings_options
+    def __init__(
+        self,
+        encodings_options=None,
+        target_column=None,
+        ordinal_orders=None,
+        config=None,
+    ):
+        self.encodings_options = encodings_options or {}
+        self.target_column = target_column or ""
+        self.ordinal_orders = ordinal_orders or []
         self.encoders = {}
-        self.target_column = target_column
-        self.ordinal_orders = ordinal_orders
+
+        if config:
+            self.encodings_options = config.get("encodings_options", {})
+            self.target_column = config.get("target_column", "")
+            self.ordinal_orders = config.get("ordinal_orders", [])
+            self.encoders = config.get("encoders", {})
+
+    def get_params(self):
+        params = {
+            "encodings_options": self.encodings_options,
+            "target_column": self.target_column,
+            "ordinal_orders": self.ordinal_orders,
+            "encoders": self.encoders,
+        }
+        return params
 
     def fit(self, df):
         self.encoders = {}

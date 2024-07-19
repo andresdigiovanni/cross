@@ -2,8 +2,17 @@ import numpy as np
 
 
 class MathematicalOperations:
-    def __init__(self, operations_options):
-        self.operations_options = operations_options
+    def __init__(self, operations_options=None, config=None):
+        self.operations_options = operations_options or {}
+
+        if config:
+            self.operations_options = config.get("operations_options", {})
+
+    def get_params(self):
+        params = {
+            "operations_options": self.operations_options,
+        }
+        return params
 
     def fit(self, df):
         pass

@@ -1,12 +1,10 @@
-from copy import deepcopy
-
 import streamlit as st
 
 from cross.applications.components import next_button
-from cross.core.dtypes import numerical_columns
 from cross.core.feature_engineering.mathematical_operations import (
     MathematicalOperations,
 )
+from cross.core.utils.dtypes import numerical_columns
 
 
 class MathematicalOperationsPage:
@@ -111,9 +109,7 @@ class MathematicalOperationsPage:
                 st.session_state["data"] = transformed_df
 
                 config = st.session_state.get("config", {})
-                config["mathematical_operations"] = {
-                    "operations_options": deepcopy(math_operations.operations_options),
-                }
+                config["mathematical_operations"] = math_operations.get_params()
                 st.session_state["config"] = config
 
                 st.success("Mathematical operations applied successfully!")

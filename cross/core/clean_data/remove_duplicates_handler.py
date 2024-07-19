@@ -1,7 +1,18 @@
 class RemoveDuplicatesHandler:
-    def __init__(self, subset, keep):
-        self.subset = subset
-        self.keep = keep
+    def __init__(self, subset=None, keep=None, config=None):
+        self.subset = subset or []
+        self.keep = keep or []
+
+        if config:
+            self.subset = config.get("subset", [])
+            self.keep = config.get("keep", [])
+
+    def get_params(self):
+        params = {
+            "subset": self.subset,
+            "keep": self.keep,
+        }
+        return params
 
     def fit(self, df):
         pass
