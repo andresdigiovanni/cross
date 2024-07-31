@@ -2,11 +2,9 @@ import pandas as pd
 import streamlit as st
 from sklearn.datasets import load_breast_cancer, load_iris, load_wine
 
-from cross.applications.components import next_button
-
 
 class LoadDataPage:
-    def show_page(self):
+    def show_page(self, name):
         st.title("Load data")
         st.write("Load your data or select a toy dataset.")
 
@@ -27,15 +25,9 @@ class LoadDataPage:
             st.session_state["data"] = self._load_toy_dataset(option)
             st.write(f"### {option} Dataset")
 
-        enable_next_button = False
-
         # Display data
         if "data" in st.session_state:
-            enable_next_button = True
             st.write(st.session_state["data"].head())
-
-        # Next button
-        next_button(disabled=not enable_next_button)
 
     def _load_toy_dataset(self, name):
         if name == "Toy data: Iris":

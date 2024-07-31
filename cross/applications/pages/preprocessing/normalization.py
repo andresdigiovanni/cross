@@ -2,18 +2,17 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import streamlit as st
 
-from cross.applications.components import next_button
+from cross.applications.components.check_is_data_loaded import is_data_loaded
 from cross.core.preprocessing.normalization import Normalization
 from cross.core.utils.dtypes import numerical_columns
 
 
 class NormalizationPage:
-    def show_page(self):
+    def show_page(self, name):
         st.title("Data Normalization")
         st.write("Choose a normalization technique for each column in your DataFrame.")
 
-        if "data" not in st.session_state:
-            st.warning("No data loaded. Please load a DataFrame.")
+        if not is_data_loaded():
             return
 
         df = st.session_state["data"]
@@ -63,7 +62,7 @@ class NormalizationPage:
         st.markdown("""---""")
 
         # Apply button
-        if st.button("Apply Transformations"):
+        if st.button("Add step"):
             try:
                 transformations_mapped = {
                     col: transformations[transformation]
@@ -71,17 +70,15 @@ class NormalizationPage:
                 }
 
                 normalization = Normalization(transformations_mapped)
-                transformed_df = normalization.fit_transform(original_df)
+                transformed_df = normalization.fit_transform(df)
                 st.session_state["data"] = transformed_df
 
-                config = st.session_state.get("config", {})
-                config["normalization"] = normalization.get_params()
-                st.session_state["config"] = config
+                params = normalization.get_params()
+                steps = st.session_state.get("steps", [])
+                steps.append({"name": name, "params": params})
+                st.session_state["steps"] = steps
 
                 st.success("Transformations applied successfully!")
 
             except Exception as e:
                 st.error("Error applying transformations: {}".format(e))
-
-        # Next button
-        next_button()

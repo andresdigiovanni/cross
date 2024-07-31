@@ -1,17 +1,16 @@
 import streamlit as st
 
-from cross.applications.components import next_button
+from cross.applications.components.check_is_data_loaded import is_data_loaded
 from cross.core.feature_engineering.numerical_binning import NumericalBinning
 from cross.core.utils.dtypes import numerical_columns
 
 
 class NumericalBinningPage:
-    def show_page(self):
+    def show_page(self, name):
         st.title("Numerical Binning")
         st.write("Select the binning technique for each column.")
 
-        if "data" not in st.session_state:
-            st.warning("No data loaded. Please load a DataFrame.")
+        if not is_data_loaded():
             return
 
         df = st.session_state["data"]
@@ -72,24 +71,22 @@ class NumericalBinningPage:
         st.markdown("""---""")
 
         # Apply button
-        if st.button("Apply binning"):
+        if st.button("Add step"):
             try:
                 binnings_mapped = {
                     col: binnings[binning] for col, binning in binning_options.items()
                 }
 
                 numerical_binning = NumericalBinning(binnings_mapped, num_bins)
-                transformed_df = numerical_binning.fit_transform(original_df)
+                transformed_df = numerical_binning.fit_transform(df)
                 st.session_state["data"] = transformed_df
 
-                config = st.session_state.get("config", {})
-                config["numerical_binning"] = numerical_binning.get_params()
-                st.session_state["config"] = config
+                params = numerical_binning.get_params()
+                steps = st.session_state.get("steps", [])
+                steps.append({"name": name, "params": params})
+                st.session_state["steps"] = steps
 
                 st.success("Binning applied successfully!")
 
             except Exception as e:
                 st.error("Error applying binning: {}".format(e))
-
-        # Next button
-        next_button()

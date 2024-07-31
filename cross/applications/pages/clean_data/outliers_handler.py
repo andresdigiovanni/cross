@@ -2,13 +2,13 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import streamlit as st
 
-from cross.applications.components import next_button
+from cross.applications.components.check_is_data_loaded import is_data_loaded
 from cross.core.clean_data.outliers_handler import OutliersHandler
 from cross.core.utils.dtypes import numerical_columns
 
 
 class OutliersHandlingPage:
-    def show_page(self):
+    def show_page(self, name):
         st.title("Outliers Handling")
         st.write(
             "Handle outliers in your DataFrame. "
@@ -16,8 +16,7 @@ class OutliersHandlingPage:
             "capping outliers to a threshold, and replacing outliers with the median."
         )
 
-        if "data" not in st.session_state:
-            st.warning("No data loaded. Please load a DataFrame.")
+        if not is_data_loaded():
             return
 
         df = st.session_state["data"]
@@ -105,20 +104,18 @@ class OutliersHandlingPage:
         st.markdown("""---""")
 
         # Apply button
-        if st.button("Apply Actions"):
+        if st.button("Add step"):
             try:
                 outliers_handler = OutliersHandler(handling_options, thresholds)
-                df = outliers_handler.fit_transform(df)
-                st.session_state["data"] = df
+                transformed_df = outliers_handler.fit_transform(df)
+                st.session_state["data"] = transformed_df
 
-                config = st.session_state.get("config", {})
-                config["outliers_handler"] = outliers_handler.get_params()
-                st.session_state["config"] = config
+                params = outliers_handler.get_params()
+                steps = st.session_state.get("steps", [])
+                steps.append({"name": name, "params": params})
+                st.session_state["steps"] = steps
 
                 st.success("Outliers handled successfully!")
 
             except Exception as e:
                 st.error("Error handling outliers: {}".format(e))
-
-        # Next button
-        next_button()

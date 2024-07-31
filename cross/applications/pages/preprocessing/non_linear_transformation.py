@@ -2,18 +2,17 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import streamlit as st
 
-from cross.applications.components import next_button
+from cross.applications.components.check_is_data_loaded import is_data_loaded
 from cross.core.preprocessing.non_linear_transformation import NonLinearTransformation
 from cross.core.utils.dtypes import numerical_columns
 
 
 class NonLinearTransformationPage:
-    def show_page(self):
+    def show_page(self, name):
         st.title("Non-linear Transformations")
         st.write("Apply various non-linear transformations to your DataFrame columns.")
 
-        if "data" not in st.session_state:
-            st.warning("No data loaded. Please load a DataFrame.")
+        if not is_data_loaded():
             return
 
         df = st.session_state["data"]
@@ -64,7 +63,7 @@ class NonLinearTransformationPage:
         st.markdown("""---""")
 
         # Apply button
-        if st.button("Apply Transformations"):
+        if st.button("Add step"):
             try:
                 transformations_mapped = {
                     col: transformations[transformation]
@@ -74,19 +73,15 @@ class NonLinearTransformationPage:
                 non_linear_transformation = NonLinearTransformation(
                     transformations_mapped
                 )
-                transformed_df = non_linear_transformation.fit_transform(original_df)
+                transformed_df = non_linear_transformation.fit_transform(df)
                 st.session_state["data"] = transformed_df
 
-                config = st.session_state.get("config", {})
-                config["non_linear_transformations"] = (
-                    non_linear_transformation.get_params()
-                )
-                st.session_state["config"] = config
+                params = non_linear_transformation.get_params()
+                steps = st.session_state.get("steps", [])
+                steps.append({"name": name, "params": params})
+                st.session_state["steps"] = steps
 
                 st.success("Transformations applied successfully!")
 
             except Exception as e:
                 st.error("Error applying transformations: {}".format(e))
-
-        # Next button
-        next_button()

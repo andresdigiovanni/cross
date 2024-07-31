@@ -1,20 +1,19 @@
 import streamlit as st
 
-from cross.applications.components import next_button
+from cross.applications.components.check_is_data_loaded import is_data_loaded
 from cross.core.feature_engineering.datetime_transformer import DateTimeTransformer
 from cross.core.utils.dtypes import datetime_columns
 
 
 class DateTimeTransformationPage:
-    def show_page(self):
+    def show_page(self, name):
         st.title("Datetime Transformation")
         st.write(
             "Transform datetime columns in your DataFrame. "
             "This will extract the year, month, day, hour, minute, and second components from the selected columns."
         )
 
-        if "data" not in st.session_state:
-            st.warning("No data loaded. Please load a DataFrame.")
+        if not is_data_loaded():
             return
 
         df = st.session_state["data"]
@@ -54,20 +53,18 @@ class DateTimeTransformationPage:
         st.markdown("""---""")
 
         # Apply button
-        if st.button("Apply"):
+        if st.button("Add step"):
             try:
                 datetime_transformer = DateTimeTransformer(datetime_columns_selected)
-                df = datetime_transformer.fit_transform(df)
-                st.session_state["data"] = df
+                transformed_df = datetime_transformer.fit_transform(df)
+                st.session_state["data"] = transformed_df
 
-                config = st.session_state.get("config", {})
-                config["datetime_transformer"] = datetime_transformer.get_params()
-                st.session_state["config"] = config
+                params = datetime_transformer.get_params()
+                steps = st.session_state.get("steps", [])
+                steps.append({"name": name, "params": params})
+                st.session_state["steps"] = steps
 
                 st.success("Datetime columns transformed successfully!")
 
             except Exception as e:
                 st.error(f"Error transforming datetime columns: {e}")
-
-        # Next button
-        next_button()

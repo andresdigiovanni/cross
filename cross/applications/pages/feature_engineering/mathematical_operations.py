@@ -1,6 +1,6 @@
 import streamlit as st
 
-from cross.applications.components import next_button
+from cross.applications.components.check_is_data_loaded import is_data_loaded
 from cross.core.feature_engineering.mathematical_operations import (
     MathematicalOperations,
 )
@@ -8,12 +8,11 @@ from cross.core.utils.dtypes import numerical_columns
 
 
 class MathematicalOperationsPage:
-    def show_page(self):
+    def show_page(self, name):
         st.title("Mathematical Operations")
         st.write("Select the mathematical operation for each pair of columns.")
 
-        if "data" not in st.session_state:
-            st.warning("No data loaded. Please load a DataFrame.")
+        if not is_data_loaded():
             return
 
         df = st.session_state["data"]
@@ -100,22 +99,20 @@ class MathematicalOperationsPage:
         st.markdown("""---""")
 
         # Apply button
-        if st.button("Apply operations"):
+        if st.button("Add step"):
             try:
                 math_operations = MathematicalOperations(
                     st.session_state.operations_options
                 )
-                transformed_df = math_operations.fit_transform(original_df)
+                transformed_df = math_operations.fit_transform(df)
                 st.session_state["data"] = transformed_df
 
-                config = st.session_state.get("config", {})
-                config["mathematical_operations"] = math_operations.get_params()
-                st.session_state["config"] = config
+                params = math_operations.get_params()
+                steps = st.session_state.get("steps", [])
+                steps.append({"name": name, "params": params})
+                st.session_state["steps"] = steps
 
                 st.success("Mathematical operations applied successfully!")
 
             except Exception as e:
                 st.error("Error applying operations: {}".format(e))
-
-        # Next button
-        next_button()

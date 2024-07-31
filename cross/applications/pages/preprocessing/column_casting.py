@@ -1,6 +1,6 @@
 import streamlit as st
 
-from cross.applications.components import next_button
+from cross.applications.components.check_is_data_loaded import is_data_loaded
 from cross.core.preprocessing import CastColumns
 from cross.core.utils.dtypes import (
     bool_columns,
@@ -12,12 +12,11 @@ from cross.core.utils.dtypes import (
 
 
 class ColumnCastingPage:
-    def show_page(self):
+    def show_page(self, name):
         st.title("Column Casting")
         st.write("Modify column data types.")
 
-        if "data" not in st.session_state:
-            st.warning("No data loaded. Please load a DataFrame.")
+        if not is_data_loaded():
             return
 
         df = st.session_state["data"]
@@ -78,25 +77,24 @@ class ColumnCastingPage:
                     )
                     cast_options[column] = self._add_selectbox(column, dtype)
 
-        # Convert button
         st.markdown("""---""")
-        if st.button("Cast columns"):
+
+        # Convert button
+        if st.button("Add step"):
             try:
                 cast_columns = CastColumns(cast_options)
                 transformed_df = cast_columns.fit_transform(df)
                 st.session_state["data"] = transformed_df
 
-                config = st.session_state.get("config", {})
-                config["column_casting"] = cast_columns.get_params()
-                st.session_state["config"] = config
+                params = cast_columns.get_params()
+                steps = st.session_state.get("steps", [])
+                steps.append({"name": name, "params": params})
+                st.session_state["steps"] = steps
 
                 st.success("Columns successfully converted.")
 
             except Exception as e:
                 st.error("Error converting columns: {}".format(e))
-
-        # Next button
-        next_button()
 
     def _add_selectbox(self, column, dtype):
         options = ["category", "number", "bool", "datetime", "timedelta"]

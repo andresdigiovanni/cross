@@ -1,21 +1,20 @@
 import streamlit as st
 
-from cross.applications.components import next_button
+from cross.applications.components.check_is_data_loaded import is_data_loaded
 from cross.core.feature_engineering.cyclical_features_transformer import (
     CyclicalFeaturesTransformer,
 )
 
 
 class CyclicalFeaturesTransformationPage:
-    def show_page(self):
+    def show_page(self, name):
         st.title("Cyclical Features Transformation")
         st.write(
             "Transform cyclical features in your DataFrame. "
             "This will extract the sine and cosine components for the selected columns."
         )
 
-        if "data" not in st.session_state:
-            st.warning("No data loaded. Please load a DataFrame.")
+        if not is_data_loaded():
             return
 
         df = st.session_state["data"]
@@ -57,23 +56,21 @@ class CyclicalFeaturesTransformationPage:
         st.markdown("""---""")
 
         # Apply button
-        if st.button("Apply"):
+        if st.button("Add step"):
             try:
                 cyclical_transformer = CyclicalFeaturesTransformer(columns_periods)
-                df = cyclical_transformer.fit_transform(df)
-                st.session_state["data"] = df
+                transformed_df = cyclical_transformer.fit_transform(df)
+                st.session_state["data"] = transformed_df
 
-                config = st.session_state.get("config", {})
-                config["cyclical_transformer"] = cyclical_transformer.get_params()
-                st.session_state["config"] = config
+                params = cyclical_transformer.get_params()
+                steps = st.session_state.get("steps", [])
+                steps.append({"name": name, "params": params})
+                st.session_state["steps"] = steps
 
                 st.success("Cyclical features transformed successfully!")
 
             except Exception as e:
                 st.error(f"Error transforming cyclical features: {e}")
-
-        # Next button
-        next_button()
 
     def get_default_period(self, df, column):
         unique_values = df[column].dropna().unique()

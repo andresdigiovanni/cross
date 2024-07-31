@@ -2,13 +2,13 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import streamlit as st
 
-from cross.applications.components import next_button
+from cross.applications.components.check_is_data_loaded import is_data_loaded
 from cross.core.clean_data.missing_values_handler import MissingValuesHandler
 from cross.core.utils.dtypes import categorical_columns, numerical_columns
 
 
 class MissingValuesPage:
-    def show_page(self):
+    def show_page(self, name):
         st.title("Missing Values Handling")
         st.write(
             "Handle missing values in your DataFrame. "
@@ -16,8 +16,7 @@ class MissingValuesPage:
             "filling missing values with the mean, median, mode, zero, interpolate, etc."
         )
 
-        if "data" not in st.session_state:
-            st.warning("No data loaded. Please load a DataFrame.")
+        if not is_data_loaded():
             return
 
         df = st.session_state["data"]
@@ -91,7 +90,7 @@ class MissingValuesPage:
         st.markdown("""---""")
 
         # Convert button
-        if st.button("Apply Actions"):
+        if st.button("Add step"):
             try:
                 actions = actions_all | actions_cat | actions_num
 
@@ -101,17 +100,15 @@ class MissingValuesPage:
                 missing_values_handler = MissingValuesHandler(
                     handling_options_mapped, n_neighbors
                 )
-                df = missing_values_handler.fit_transform(df)
-                st.session_state["data"] = df
+                transformed_df = missing_values_handler.fit_transform(df)
+                st.session_state["data"] = transformed_df
 
-                config = st.session_state.get("config", {})
-                config["missing_values"] = missing_values_handler.get_params()
-                st.session_state["config"] = config
+                params = missing_values_handler.get_params()
+                steps = st.session_state.get("steps", [])
+                steps.append({"name": name, "params": params})
+                st.session_state["steps"] = steps
 
                 st.success("Missing values handled successfully!")
 
             except Exception as e:
                 st.error("Error handling missing values: {}".format(e))
-
-        # Next button
-        next_button()

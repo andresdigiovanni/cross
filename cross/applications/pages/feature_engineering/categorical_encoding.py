@@ -1,18 +1,17 @@
 import streamlit as st
 from streamlit_sortables import sort_items
 
-from cross.applications.components import next_button
+from cross.applications.components.check_is_data_loaded import is_data_loaded
 from cross.core.feature_engineering.categorical_enconding import CategoricalEncoding
 from cross.core.utils.dtypes import categorical_columns
 
 
 class CategoricalEncodingPage:
-    def show_page(self):
+    def show_page(self, name):
         st.title("Categorical Encoding")
         st.write("Select the encoding technique for each column.")
 
-        if "data" not in st.session_state:
-            st.warning("No data loaded. Please load a DataFrame.")
+        if not is_data_loaded():
             return
 
         df = st.session_state["data"]
@@ -98,7 +97,7 @@ class CategoricalEncodingPage:
         st.markdown("""---""")
 
         # Apply button
-        if st.button("Apply encoding"):
+        if st.button("Add step"):
             try:
                 encodings_mapped = {
                     col: encodings[transformation]
@@ -110,17 +109,15 @@ class CategoricalEncodingPage:
                     target_column=target_column,
                     ordinal_orders=ordinal_orders,
                 )
-                transformed_df = categorical_encoding.fit_transform(original_df)
+                transformed_df = categorical_encoding.fit_transform(df)
                 st.session_state["data"] = transformed_df
 
-                config = st.session_state.get("config", {})
-                config["categorical_encoding"] = categorical_encoding.get_params()
-                st.session_state["config"] = config
+                params = categorical_encoding.get_params()
+                steps = st.session_state.get("steps", [])
+                steps.append({"name": name, "params": params})
+                st.session_state["steps"] = steps
 
                 st.success("Encoding applied successfully!")
 
             except Exception as e:
                 st.error("Error applying encoding: {}".format(e))
-
-        # Next button
-        next_button()

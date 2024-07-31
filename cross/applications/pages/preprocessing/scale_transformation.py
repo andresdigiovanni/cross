@@ -2,13 +2,12 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import streamlit as st
 
-from cross.applications.components import next_button
 from cross.core.preprocessing.scale_transformation import ScaleTransformation
 from cross.core.utils.dtypes import numerical_columns
 
 
 class ScaleTransformationsPage:
-    def show_page(self):
+    def show_page(self, name):
         st.title("Scale Transformations")
         st.write("Apply various scaling transformations to your DataFrame columns.")
 
@@ -65,7 +64,7 @@ class ScaleTransformationsPage:
         st.markdown("""---""")
 
         # Apply button
-        if st.button("Apply Transformations"):
+        if st.button("Add step"):
             try:
                 transformations_mapped = {
                     col: transformations[transformation]
@@ -73,17 +72,15 @@ class ScaleTransformationsPage:
                 }
 
                 scale_transformation = ScaleTransformation(transformations_mapped)
-                transformed_df = scale_transformation.fit_transform(original_df)
+                transformed_df = scale_transformation.fit_transform(df)
                 st.session_state["data"] = transformed_df
 
-                config = st.session_state.get("config", {})
-                config["scale_transformation"] = scale_transformation.get_params()
-                st.session_state["config"] = config
+                params = scale_transformation.get_params()
+                steps = st.session_state.get("steps", [])
+                steps.append({"name": name, "params": params})
+                st.session_state["steps"] = steps
 
                 st.success("Transformations applied successfully!")
 
             except Exception as e:
                 st.error("Error applying transformations: {}".format(e))
-
-        # Next button
-        next_button()

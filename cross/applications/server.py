@@ -122,10 +122,11 @@ def get_navigation_pages():
 
     return {
         "pages_names": pages_names,
-        "icons": pages_icons,
         "pages": {i: k for i, k in enumerate(pages)},
         "page_to_index": {k: i for i, k in enumerate(pages_names)},
         "index_to_page": {i: k for i, k in enumerate(pages_names)},
+        "icons": pages_icons,
+        "index_to_icon": {i: k for i, k in enumerate(pages_icons)},
     }
 
 
@@ -156,6 +157,7 @@ def main():
     if navigation_pages["index_to_page"][manual_select] == "---":
         manual_select += 1
 
+    # Sidebar
     with st.sidebar:
         _, col2, _ = st.columns([0.3, 1, 0.3])
         with col2:
@@ -165,19 +167,49 @@ def main():
             menu_title=None,
             options=navigation_pages["pages_names"],
             icons=navigation_pages["icons"],
-            menu_icon="cast",
             on_change=navigation_on_change,
             key="sidebar_menu",
             manual_select=manual_select,
         )
 
-    # Show page
-    if st.session_state["page_index"] in navigation_pages["pages"]:
-        navigation_pages["pages"][st.session_state["page_index"]].show_page()
+    col1, col2 = st.columns([3, 1], gap="medium")
 
-    # Add button to save configuration
-    if st.button("Save Configuration"):
-        save_config()
+    # New/Modify operation
+    with col1:
+        page_index = st.session_state["page_index"]
+
+        if page_index is not None:
+            page_name = navigation_pages["pages_names"][page_index]
+            navigation_pages["pages"][page_index].show_page(page_name)
+
+        else:
+            pass
+
+    # Selected operations
+    with col2:
+        st.subheader("Steps")
+        steps = st.session_state.get("steps", [])
+
+        if len(steps) == 0:
+            st.write("No selected operations")
+
+        else:
+            for i, step in enumerate(steps):
+                name = step["name"]
+                st.write(f"{i + 1}. {name}")
+
+            st.write("---")
+
+            # Add buttons
+            col1_buttons, col2_buttons = st.columns([1, 1])
+
+            with col1_buttons:
+                if st.button("Modify"):
+                    save_config()  # FIXME
+
+            with col2_buttons:
+                if st.button("Save", type="primary"):
+                    save_config()
 
 
 if __name__ == "__main__":
