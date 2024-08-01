@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import streamlit as st
 
-from cross.applications.components.check_is_data_loaded import is_data_loaded
+from cross.applications.components import is_data_loaded, rain_cloud_plot
 from cross.core.clean_data.outliers_handler import OutliersHandler
 from cross.core.utils.dtypes import numerical_columns
 
@@ -76,30 +76,52 @@ class OutliersHandlingPage:
                     threshold = thresholds[column]
 
                     if selected_method == "iqr":
-                        sns.boxplot(x=df[column], ax=ax)
+                        sns.boxplot(x=df[column], ax=ax, color="#FF4C4B")
+
                         q1 = df[column].quantile(0.25)
                         q3 = df[column].quantile(0.75)
                         iqr = q3 - q1
                         lower_bound = q1 - threshold * iqr
                         upper_bound = q3 + threshold * iqr
+
                         ax.axvline(lower_bound, color="r", linestyle="--")
                         ax.axvline(upper_bound, color="r", linestyle="--")
-                        ax.set_title(f"IQR for {column}")
+
+                        ax.set_ylabel("Density")
                         ax.set_xlabel(column)
 
+                        # Remove borders
+                        ax.spines["top"].set_visible(False)
+                        ax.spines["right"].set_visible(False)
+                        ax.spines["left"].set_visible(False)
+                        ax.spines["bottom"].set_visible(False)
+
                     else:
-                        sns.histplot(df[column].dropna(), kde=True, ax=ax)
+                        sns.histplot(
+                            df[column].dropna(), kde=True, ax=ax, color="#FF4C4B"
+                        )
+
                         mean = df[column].mean()
                         std = df[column].std()
                         lower_bound = mean - threshold * std
                         upper_bound = mean + threshold * std
+
                         ax.axvline(lower_bound, color="r", linestyle="--")
                         ax.axvline(upper_bound, color="r", linestyle="--")
-                        ax.set_title(f"Z-score Distribution for {column}")
-                        ax.set_ylabel("Density")
+
                         ax.set_xlabel(column)
 
-                    st.pyplot(fig)
+                        # Remove borders
+                        ax.spines["top"].set_visible(False)
+                        ax.spines["right"].set_visible(False)
+                        ax.spines["left"].set_visible(False)
+                        ax.spines["bottom"].set_visible(False)
+
+                # By default show rain cloud
+                else:
+                    fig = rain_cloud_plot(df, column)
+
+                st.pyplot(fig)
 
         st.markdown("""---""")
 

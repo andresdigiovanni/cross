@@ -1,6 +1,6 @@
 import streamlit as st
 
-from cross.applications.components.check_is_data_loaded import is_data_loaded
+from cross.applications.components import is_data_loaded
 
 
 class TargetSelectionPage:

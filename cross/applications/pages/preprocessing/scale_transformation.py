@@ -46,8 +46,15 @@ class ScaleTransformationsPage:
 
             with col2:
                 fig, ax = plt.subplots(figsize=(4, 2))
-                sns.histplot(original_df[column], kde=True, ax=ax)
+                sns.histplot(original_df[column], kde=True, ax=ax, color="#FF4C4B")
                 ax.set_title("Original Data")
+
+                # Remove borders
+                ax.spines["top"].set_visible(False)
+                ax.spines["right"].set_visible(False)
+                ax.spines["left"].set_visible(False)
+                ax.spines["bottom"].set_visible(False)
+
                 st.pyplot(fig)
 
             with col3:
@@ -57,8 +64,15 @@ class ScaleTransformationsPage:
                 transformed_df = scale_transformation.fit_transform(original_df)
 
                 fig, ax = plt.subplots(figsize=(4, 2))
-                sns.histplot(transformed_df[column], kde=True, ax=ax)
+                sns.histplot(transformed_df[column], kde=True, ax=ax, color="#FF4C4B")
                 ax.set_title("Transformed Data")
+
+                # Remove borders
+                ax.spines["top"].set_visible(False)
+                ax.spines["right"].set_visible(False)
+                ax.spines["left"].set_visible(False)
+                ax.spines["bottom"].set_visible(False)
+
                 st.pyplot(fig)
 
         st.markdown("""---""")

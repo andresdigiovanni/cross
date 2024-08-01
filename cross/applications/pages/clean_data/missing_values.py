@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import streamlit as st
 
-from cross.applications.components.check_is_data_loaded import is_data_loaded
+from cross.applications.components import is_data_loaded
 from cross.core.clean_data.missing_values_handler import MissingValuesHandler
 from cross.core.utils.dtypes import categorical_columns, numerical_columns
 
@@ -80,11 +80,20 @@ class MissingValuesPage:
 
             with col2:
                 fig, ax = plt.subplots(figsize=(4, 2))
+
                 if column in num_columns:
-                    sns.histplot(df[column], kde=True, ax=ax)
+                    sns.histplot(df[column], kde=True, ax=ax, color="#FF4C4B")
+
+                    # Remove borders
+                    ax.spines["top"].set_visible(False)
+                    ax.spines["right"].set_visible(False)
+                    ax.spines["left"].set_visible(False)
+                    ax.spines["bottom"].set_visible(False)
+
                 else:
                     df[column].value_counts().plot.pie(autopct="%1.1f%%", ax=ax)
                     ax.set_ylabel("")
+
                 st.pyplot(fig)
 
         st.markdown("""---""")
