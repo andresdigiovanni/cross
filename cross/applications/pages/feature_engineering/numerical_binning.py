@@ -63,8 +63,11 @@ class NumericalBinningPage:
                     )
                     transformed_df = numerical_binning.fit_transform(original_df)
 
+                    new_column = "{}__{}_{}".format(
+                        column, binnings[binning_options[column]], num_bins[column]
+                    )
                     st.write("Binned Data")
-                    st.dataframe(transformed_df[[column]].head())
+                    st.dataframe(transformed_df[[new_column]].head())
                 else:
                     st.write("No binning applied")
 

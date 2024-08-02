@@ -25,8 +25,8 @@ class QuantileTransformationsPage:
         # Actions for each column
         transformations = {
             "Do nothing": "none",
-            "Quantile Transformation (Uniform)": "uniform",
-            "Quantile Transformation (Normal)": "normal",
+            "Uniform": "uniform",
+            "Normal": "normal",
         }
 
         transformation_options = {}

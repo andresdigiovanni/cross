@@ -66,8 +66,6 @@ class MissingValuesHandler:
                 df_transformed[column] = df_transformed[column].interpolate()
 
             elif action in ["fill_knn", "most_frequent"]:
-                print(f"transform. {action} for {column}")
-
                 imputer = self.imputers[column]
                 df_transformed[column] = imputer.transform(
                     df_transformed[[column]]

@@ -39,7 +39,10 @@ class NumericalBinning:
         df_transformed = df_transformed.fillna(0)
 
         for column, binner in self.binners.items():
-            df_transformed[column] = binner.transform(
+            new_column = "{}__{}_{}".format(
+                column, self.binning_options[column], self.num_bins[column]
+            )
+            df_transformed[new_column] = binner.transform(
                 df_transformed[[column]]
             ).flatten()
 
