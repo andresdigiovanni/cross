@@ -3,27 +3,23 @@ import pickle
 import streamlit as st
 from streamlit_option_menu import option_menu
 
-from cross.applications.pages.clean_data import (
-    ColumnSelectionPage,
-    MissingValuesPage,
-    OutliersHandlingPage,
-    RemoveDuplicatesPage,
-    TargetSelectionPage,
-)
-from cross.applications.pages.feature_engineering import (
+from cross.applications.pages import (
     CategoricalEncodingPage,
+    ColumnCastingPage,
+    ColumnSelectionPage,
     CyclicalFeaturesTransformationPage,
     DateTimeTransformationPage,
+    LoadDataPage,
     MathematicalOperationsPage,
-    NumericalBinningPage,
-)
-from cross.applications.pages.load_data import LoadDataPage
-from cross.applications.pages.preprocessing import (
-    ColumnCastingPage,
+    MissingValuesPage,
     NonLinearTransformationPage,
     NormalizationPage,
+    NumericalBinningPage,
+    OutliersHandlingPage,
     QuantileTransformationsPage,
+    RemoveDuplicatesPage,
     ScaleTransformationsPage,
+    TargetSelectionPage,
 )
 
 
@@ -174,16 +170,11 @@ def main():
 
     col1, col2 = st.columns([3, 1], gap="medium")
 
-    # New/Modify operation
+    # List of operations
     with col1:
         page_index = st.session_state["page_index"]
-
-        if page_index is not None:
-            page_name = navigation_pages["pages_names"][page_index]
-            navigation_pages["pages"][page_index].show_page(page_name)
-
-        else:
-            pass
+        page_name = navigation_pages["pages_names"][page_index]
+        navigation_pages["pages"][page_index].show_page(page_name)
 
     # Selected operations
     with col2:
