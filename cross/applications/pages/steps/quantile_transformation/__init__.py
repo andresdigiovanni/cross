@@ -1,0 +1,2 @@
+from .quantile_transformation_edit import QuantileTransformationsEdit
+from .quantile_transformation_page import QuantileTransformationsPage

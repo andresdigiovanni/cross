@@ -3,7 +3,8 @@ import pickle
 import streamlit as st
 from streamlit_option_menu import option_menu
 
-from cross.applications.pages import (
+from cross.applications.pages.modify_steps import ModifyStepsPage
+from cross.applications.pages.steps import (
     CategoricalEncodingPage,
     ColumnCastingPage,
     ColumnSelectionPage,
@@ -21,6 +22,7 @@ from cross.applications.pages import (
     ScaleTransformationsPage,
     TargetSelectionPage,
 )
+from cross.applications.styles import css
 
 
 def get_navigation_pages():
@@ -131,6 +133,7 @@ def navigation_on_change(key):
 
     navigation_pages = get_navigation_pages()
     st.session_state["page_index"] = navigation_pages["page_to_index"][selection]
+    st.session_state["is_show_modify_page"] = False
 
 
 def save_config():
@@ -140,8 +143,17 @@ def save_config():
     st.success("Configuration saved to config.pkl")
 
 
+def modify_steps():
+    st.session_state["page_index"] = -1
+    st.session_state["is_show_modify_page"] = True
+
+
 def main():
     st.set_page_config(page_title="CROSS", page_icon="assets/icon.png", layout="wide")
+    st.logo("assets/logo.png")
+
+    # Style
+    css()
 
     # Navigation
     if "page_index" not in st.session_state:
@@ -150,15 +162,17 @@ def main():
     manual_select = st.session_state["page_index"]
     navigation_pages = get_navigation_pages()
 
-    if navigation_pages["index_to_page"][manual_select] == "---":
+    if (
+        manual_select in navigation_pages["index_to_page"]
+        and navigation_pages["index_to_page"][manual_select] == "---"
+    ):
         manual_select += 1
+
+    if "is_show_modify_page" not in st.session_state:
+        st.session_state["is_show_modify_page"] = False
 
     # Sidebar
     with st.sidebar:
-        _, col2, _ = st.columns([0.3, 1, 0.3])
-        with col2:
-            st.image("assets/logo.png")
-
         option_menu(
             menu_title=None,
             options=navigation_pages["pages_names"],
@@ -172,9 +186,13 @@ def main():
 
     # List of operations
     with col1:
-        page_index = st.session_state["page_index"]
-        page_name = navigation_pages["pages_names"][page_index]
-        navigation_pages["pages"][page_index].show_page(page_name)
+        if st.session_state["is_show_modify_page"]:
+            ModifyStepsPage().show_page()
+
+        else:
+            page_index = st.session_state["page_index"]
+            page_name = navigation_pages["pages_names"][page_index]
+            navigation_pages["pages"][page_index].show_page(page_name)
 
     # Selected operations
     with col2:
@@ -187,7 +205,7 @@ def main():
         else:
             for i, step in enumerate(steps):
                 name = step["name"]
-                st.write(f"{i + 1}. {name}")
+                st.write(f"{i + 1} - {name}")
 
             st.write("---")
 
@@ -195,8 +213,7 @@ def main():
             col1_buttons, col2_buttons = st.columns([1, 1])
 
             with col1_buttons:
-                if st.button("Modify"):
-                    save_config()  # FIXME
+                st.button("Modify", on_click=modify_steps)
 
             with col2_buttons:
                 if st.button("Save", type="primary"):

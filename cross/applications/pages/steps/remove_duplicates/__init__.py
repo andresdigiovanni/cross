@@ -1,0 +1,2 @@
+from .remove_duplicates_edit import RemoveDuplicatesEdit
+from .remove_duplicates_page import RemoveDuplicatesPage
