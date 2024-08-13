@@ -1,9 +1,7 @@
 import streamlit as st
 
 from cross.applications.components import is_data_loaded
-from cross.core.feature_engineering.mathematical_operations import (
-    MathematicalOperations,
-)
+from cross.core.feature_engineering import MathematicalOperations
 from cross.core.utils.dtypes import numerical_columns
 
 from .mathematical_operations import MathematicalOperationsBase

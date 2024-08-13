@@ -3,7 +3,7 @@ import seaborn as sns
 import streamlit as st
 
 from cross.applications.components import is_data_loaded, rain_cloud_plot
-from cross.core.clean_data.outliers_handler import OutliersHandler
+from cross.core.clean_data import OutliersHandler
 from cross.core.utils.dtypes import numerical_columns
 
 from .outliers_handler import OutliersHandlingBase

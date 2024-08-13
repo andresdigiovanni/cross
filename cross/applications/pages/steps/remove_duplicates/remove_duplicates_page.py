@@ -1,6 +1,6 @@
 import streamlit as st
 
-from cross.core.clean_data.remove_duplicates_handler import RemoveDuplicatesHandler
+from cross.core.clean_data import RemoveDuplicatesHandler
 
 from .remove_duplicates import RemoveDuplicatesBase
 

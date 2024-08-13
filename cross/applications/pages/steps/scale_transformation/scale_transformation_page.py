@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import streamlit as st
 
-from cross.core.preprocessing.scale_transformation import ScaleTransformation
+from cross.core.preprocessing import ScaleTransformation
 from cross.core.utils.dtypes import numerical_columns
 
 from .scale_transformation import ScaleTransformationsBase

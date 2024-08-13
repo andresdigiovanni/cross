@@ -3,7 +3,7 @@ import seaborn as sns
 import streamlit as st
 
 from cross.applications.components import is_data_loaded
-from cross.core.preprocessing.quantile_transformation import QuantileTransformation
+from cross.core.preprocessing import QuantileTransformation
 from cross.core.utils.dtypes import numerical_columns
 
 from .quantile_transformation import QuantileTransformationsBase

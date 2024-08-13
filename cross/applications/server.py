@@ -4,143 +4,24 @@ import streamlit as st
 from streamlit_option_menu import option_menu
 
 from cross.applications.pages.modify_steps import ModifyStepsPage
-from cross.applications.pages.steps import (
-    CategoricalEncodingPage,
-    ColumnCastingPage,
-    ColumnSelectionPage,
-    CyclicalFeaturesTransformationPage,
-    DateTimeTransformationPage,
-    LoadDataPage,
-    MathematicalOperationsPage,
-    MissingValuesPage,
-    NonLinearTransformationPage,
-    NormalizationPage,
-    NumericalBinningPage,
-    OutliersHandlingPage,
-    QuantileTransformationsPage,
-    RemoveDuplicatesPage,
-    ScaleTransformationsPage,
-    TargetSelectionPage,
-)
+from cross.applications.pages.navigation_pages import navigation_pages
 from cross.applications.styles import css
-
-
-def get_navigation_pages():
-    pages_hierarchy = [
-        {
-            "name": "Load data",
-            "pages_names": ["Load data", "Column casting"],
-            "icons": ["upload", "shuffle"],
-            "pages": [LoadDataPage(), ColumnCastingPage()],
-        },
-        {
-            "name": "Clean data",
-            "pages_names": [
-                "Column selection",
-                "Target selection",
-                "Remove duplicates",
-                "Handle outliers",
-                "Missing values",
-            ],
-            "icons": [
-                "list-check",
-                "bullseye",
-                "copy",
-                "distribute-horizontal",
-                "question-octagon",
-            ],
-            "pages": [
-                ColumnSelectionPage(),
-                TargetSelectionPage(),
-                RemoveDuplicatesPage(),
-                OutliersHandlingPage(),
-                MissingValuesPage(),
-            ],
-        },
-        {
-            "name": "Preprocessing",
-            "pages_names": [
-                "Non-linear transforms",
-                "Quantile transforms",
-                "Scale",
-                "Normalize",
-            ],
-            "icons": [
-                "bar-chart-steps",
-                "bezier2",
-                "arrows-angle-expand",
-                "bounding-box",
-            ],
-            "pages": [
-                NonLinearTransformationPage(),
-                QuantileTransformationsPage(),
-                ScaleTransformationsPage(),
-                NormalizationPage(),
-            ],
-        },
-        {
-            "name": "Feature engineering",
-            "pages_names": [
-                "Categorical encoding",
-                "Datetime transforms",
-                "Cyclical transforms",
-                "Numerical binning",
-                "Mathematical operations",
-            ],
-            "icons": [
-                "alphabet",
-                "calendar-date",
-                "arrow-clockwise",
-                "bucket",
-                "plus-slash-minus",
-            ],
-            "pages": [
-                CategoricalEncodingPage(),
-                DateTimeTransformationPage(),
-                CyclicalFeaturesTransformationPage(),
-                NumericalBinningPage(),
-                MathematicalOperationsPage(),
-            ],
-        },
-    ]
-
-    pages = []
-    pages_names = []
-    pages_icons = []
-
-    for i, page_hierarchy in enumerate(pages_hierarchy):
-        if i > 0:
-            pages.append(None)
-            pages_names.append("---")
-            pages_icons.append(None)
-
-        pages.extend(page_hierarchy["pages"])
-        pages_names.extend(page_hierarchy["pages_names"])
-        pages_icons.extend(page_hierarchy["icons"])
-
-    return {
-        "pages_names": pages_names,
-        "pages": {i: k for i, k in enumerate(pages)},
-        "page_to_index": {k: i for i, k in enumerate(pages_names)},
-        "index_to_page": {i: k for i, k in enumerate(pages_names)},
-        "icons": pages_icons,
-        "index_to_icon": {i: k for i, k in enumerate(pages_icons)},
-    }
 
 
 def navigation_on_change(key):
     selection = st.session_state[key]
 
-    navigation_pages = get_navigation_pages()
-    st.session_state["page_index"] = navigation_pages["page_to_index"][selection]
+    pages = navigation_pages()
+    st.session_state["page_index"] = pages["page_to_index"][selection]
     st.session_state["is_show_modify_page"] = False
 
 
 def save_config():
     config = st.session_state.get("config", {})
-    with open("config.pkl", "wb") as f:
+    with open("cross_config.pkl", "wb") as f:
         pickle.dump(config, f)
-    st.success("Configuration saved to config.pkl")
+
+    st.success("Configuration saved to cross_config.pkl")
 
 
 def modify_steps():
@@ -160,12 +41,9 @@ def main():
         st.session_state["page_index"] = 0
 
     manual_select = st.session_state["page_index"]
-    navigation_pages = get_navigation_pages()
+    pages = navigation_pages()
 
-    if (
-        manual_select in navigation_pages["index_to_page"]
-        and navigation_pages["index_to_page"][manual_select] == "---"
-    ):
+    if pages["index_to_page"].get(manual_select, "") == "---":
         manual_select += 1
 
     if "is_show_modify_page" not in st.session_state:
@@ -175,8 +53,8 @@ def main():
     with st.sidebar:
         option_menu(
             menu_title=None,
-            options=navigation_pages["pages_names"],
-            icons=navigation_pages["icons"],
+            options=pages["pages_names"],
+            icons=pages["pages_icons"],
             on_change=navigation_on_change,
             key="sidebar_menu",
             manual_select=manual_select,
@@ -191,8 +69,8 @@ def main():
 
         else:
             page_index = st.session_state["page_index"]
-            page_name = navigation_pages["pages_names"][page_index]
-            navigation_pages["pages"][page_index].show_page(page_name)
+            page_name = pages["pages_names"][page_index]
+            pages["pages_show"][page_index].show_page(page_name)
 
     # Selected operations
     with col2:

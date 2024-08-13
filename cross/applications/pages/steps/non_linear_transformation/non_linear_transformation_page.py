@@ -3,7 +3,7 @@ import seaborn as sns
 import streamlit as st
 
 from cross.applications.components import is_data_loaded
-from cross.core.preprocessing.non_linear_transformation import NonLinearTransformation
+from cross.core.preprocessing import NonLinearTransformation
 from cross.core.utils.dtypes import numerical_columns
 
 from .non_linear_transformation import NonLinearTransformationBase

@@ -1,21 +1,6 @@
 import streamlit as st
 
-from cross.applications.pages.steps import (
-    CategoricalEncodingEdit,
-    ColumnCastingEdit,
-    ColumnSelectionEdit,
-    CyclicalFeaturesTransformationEdit,
-    DateTimeTransformationEdit,
-    MathematicalOperationsEdit,
-    MissingValuesEdit,
-    NonLinearTransformationEdit,
-    NormalizationEdit,
-    NumericalBinningEdit,
-    OutliersHandlingEdit,
-    QuantileTransformationsEdit,
-    RemoveDuplicatesEdit,
-    ScaleTransformationsEdit,
-)
+from cross.applications.pages.navigation_pages import navigation_pages
 
 
 class ModifyStepsPage:
@@ -42,47 +27,12 @@ class ModifyStepsPage:
         st.button("Remove", on_click=self._remove_steps, type="primary")
 
     def _get_edit_page(self, name):
-        if name == "Categorical encoding":
-            return CategoricalEncodingEdit()
+        pages = navigation_pages()
 
-        elif name == "Column casting":
-            return ColumnCastingEdit()
+        page_index = pages["page_to_index"][name]
+        page_edit = pages["index_to_edit"][page_index]
 
-        elif name == "Column selection":
-            return ColumnSelectionEdit()
-
-        elif name == "Cyclical transforms":
-            return CyclicalFeaturesTransformationEdit()
-
-        elif name == "Datetime transforms":
-            return DateTimeTransformationEdit()
-
-        elif name == "Mathematical operations":
-            return MathematicalOperationsEdit()
-
-        elif name == "Missing values":
-            return MissingValuesEdit()
-
-        elif name == "Non-linear transforms":
-            return NonLinearTransformationEdit()
-
-        elif name == "Normalize":
-            return NormalizationEdit()
-
-        elif name == "Numerical binning":
-            return NumericalBinningEdit()
-
-        elif name == "Handle outliers":
-            return OutliersHandlingEdit()
-
-        elif name == "Quantile transforms":
-            return QuantileTransformationsEdit()
-
-        elif name == "Remove duplicates":
-            return RemoveDuplicatesEdit()
-
-        elif name == "Scale":
-            return ScaleTransformationsEdit()
+        return page_edit
 
     def _remove_steps(self):
         steps = st.session_state.get("steps", [])

@@ -1,7 +1,7 @@
 import streamlit as st
 
 from cross.applications.components import is_data_loaded
-from cross.core.feature_engineering.datetime_transformer import DateTimeTransformer
+from cross.core.feature_engineering import DateTimeTransformer
 from cross.core.utils.dtypes import datetime_columns
 
 

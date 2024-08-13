@@ -3,7 +3,7 @@ import seaborn as sns
 import streamlit as st
 
 from cross.applications.components import is_data_loaded
-from cross.core.clean_data.missing_values_handler import MissingValuesHandler
+from cross.core.clean_data import MissingValuesHandler
 from cross.core.utils.dtypes import categorical_columns, numerical_columns
 
 from .missing_values import MissingValuesBase

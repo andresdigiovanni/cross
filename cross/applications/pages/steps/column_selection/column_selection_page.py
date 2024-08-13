@@ -1,7 +1,7 @@
 import streamlit as st
 
 from cross.applications.components import is_data_loaded
-from cross.core.clean_data.column_selection import ColumnSelection
+from cross.core.clean_data import ColumnSelection
 
 
 class ColumnSelectionPage:

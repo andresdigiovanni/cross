@@ -1,9 +1,7 @@
 import streamlit as st
 
 from cross.applications.components import is_data_loaded
-from cross.core.feature_engineering.cyclical_features_transformer import (
-    CyclicalFeaturesTransformer,
-)
+from cross.core.feature_engineering import CyclicalFeaturesTransformer
 
 
 class CyclicalFeaturesTransformationPage:
