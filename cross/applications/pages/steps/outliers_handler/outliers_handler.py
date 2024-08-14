@@ -8,4 +8,6 @@ class OutliersHandlingBase:
     detection_methods = {
         "IQR": "iqr",
         "Z-score": "zscore",
+        "Local Outlier Factor": "lof",
+        "Isolation Forest": "iforest",
     }

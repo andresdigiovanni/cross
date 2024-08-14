@@ -3,6 +3,7 @@ import seaborn as sns
 import streamlit as st
 
 from cross.applications.components import is_data_loaded
+from cross.applications.styles import plot_remove_borders
 from cross.core.clean_data import MissingValuesHandler
 from cross.core.utils.dtypes import categorical_columns, numerical_columns
 
@@ -68,12 +69,7 @@ class MissingValuesPage(MissingValuesBase):
 
                 if column in num_columns:
                     sns.histplot(df[column], kde=True, ax=ax, color="#FF4C4B")
-
-                    # Remove borders
-                    ax.spines["top"].set_visible(False)
-                    ax.spines["right"].set_visible(False)
-                    ax.spines["left"].set_visible(False)
-                    ax.spines["bottom"].set_visible(False)
+                    plot_remove_borders(ax)
 
                 else:
                     df[column].value_counts().plot.pie(autopct="%1.1f%%", ax=ax)

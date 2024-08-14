@@ -1,6 +1,8 @@
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+from cross.applications.styles import plot_remove_borders
+
 
 def rain_cloud_plot(df, column, figsize=(4, 2), color="#FF4C4B"):
     fig, (ax1, ax2) = plt.subplots(
@@ -16,12 +18,8 @@ def rain_cloud_plot(df, column, figsize=(4, 2), color="#FF4C4B"):
     sns.stripplot(x=df[column], ax=ax2, size=2, jitter=1, color=color)
     sns.boxplot(x=df[column], ax=ax2, color=color, **boxplot_props)
 
-    # Remove borders
     for ax in [ax1, ax2]:
-        ax.spines["top"].set_visible(False)
-        ax.spines["right"].set_visible(False)
-        ax.spines["left"].set_visible(False)
-        ax.spines["bottom"].set_visible(False)
+        plot_remove_borders(ax)
 
     ax1.xaxis.label.set_visible(False)
 

@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import streamlit as st
 
+from cross.applications.styles import plot_remove_borders
 from cross.core.preprocessing import ScaleTransformation
 from cross.core.utils.dtypes import numerical_columns
 
@@ -40,13 +41,9 @@ class ScaleTransformationsPage(ScaleTransformationsBase):
             with col2:
                 fig, ax = plt.subplots(figsize=(4, 2))
                 sns.histplot(original_df[column], kde=True, ax=ax, color="#FF4C4B")
-                ax.set_title("Original Data")
 
-                # Remove borders
-                ax.spines["top"].set_visible(False)
-                ax.spines["right"].set_visible(False)
-                ax.spines["left"].set_visible(False)
-                ax.spines["bottom"].set_visible(False)
+                ax.set_title("Original Data")
+                plot_remove_borders(ax)
 
                 st.pyplot(fig)
 
@@ -58,13 +55,9 @@ class ScaleTransformationsPage(ScaleTransformationsBase):
 
                 fig, ax = plt.subplots(figsize=(4, 2))
                 sns.histplot(transformed_df[column], kde=True, ax=ax, color="#FF4C4B")
-                ax.set_title("Transformed Data")
 
-                # Remove borders
-                ax.spines["top"].set_visible(False)
-                ax.spines["right"].set_visible(False)
-                ax.spines["left"].set_visible(False)
-                ax.spines["bottom"].set_visible(False)
+                ax.set_title("Transformed Data")
+                plot_remove_borders(ax)
 
                 st.pyplot(fig)
 
