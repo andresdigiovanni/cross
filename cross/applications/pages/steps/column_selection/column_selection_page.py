@@ -18,7 +18,14 @@ class ColumnSelectionPage:
         st.write(df.head())
         st.markdown("""---""")
 
-        # Selección de columnas
+        # Check for columns with a single unique value
+        single_value_columns = [col for col in df.columns if df[col].nunique() == 1]
+        if single_value_columns:
+            st.warning(
+                f"The following columns have a single unique value and may not provide useful information: {', '.join(single_value_columns)}"
+            )
+
+        # Columns selection
         selected_columns = st.multiselect(
             "Select columns", options=df.columns.tolist(), default=df.columns.tolist()
         )
