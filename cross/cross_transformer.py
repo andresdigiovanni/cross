@@ -26,7 +26,10 @@ class CrossTransformer:
     def __init__(self, transformations=None):
         self.transformations = transformations or []
 
-    def load_transformations(self, transformations):
+    def load_transformations(self, file_path):
+        with open(file_path, "rb") as f:
+            transformations = pickle.load(f)
+
         self.transformations = []
 
         for transformation in transformations:

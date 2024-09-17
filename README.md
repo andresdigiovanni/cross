@@ -78,14 +78,27 @@ To save and reuse the transformations, export them to a file and load them in fu
 cross.save_transformations("cross_transformations.pkl")
 
 # Import transformations from the file
-with open("cross_transformations.pkl", "rb") as f:
-    transformations = pickle.load(f)
-
-cross = CrossTransformer()
-cross.load_transformations(transformations)
+cross.load_transformations("cross_transformations.pkl")
 ```
 
 ## Transformations
+
+- [Clean Data](#clean-data)
+    - [Column Selection](#column-selection)
+    - [Column Casting](#column-casting)
+    - [Remove Duplicates](#remove-duplicates)
+    - [Missing Values](#missing-values)
+    - [Handle Outliers](#handle-outliers)
+- [Preprocessing](#preprocessing)
+    - [Quantile Transformations](#quantile-transformations)
+    - [Scale Transformations](#scale-transformations)
+    - [Normalization](#normalization)
+- [Feature Engineering](#feature-engineering)
+    - [Categorical Encoding](#categorical-encoding)
+    - [Date Time Transforms](#date-time-transforms)
+    - [Cyclical Features Transforms](#cyclical-features-transforms)
+    - [Numerical Binning](#numerical-binning)
+    - [Mathematical Operations](#mathematical-operations)
 
 ### Clean Data
 
@@ -94,7 +107,7 @@ cross.load_transformations(transformations)
 Allows you to select specific columns for further processing.
 
 - Parameters:
-  - `columns`: List of column names to select.
+    - `columns`: List of column names to select.
   
 ```python
 ColumnSelection(
@@ -110,7 +123,7 @@ ColumnSelection(
 Casts columns to specific data types.
 
 - Parameters:
-  - `cast_options`: A dictionary specifying the type for each column. Options include: `category`, `number`, `bool`, `datetime`, `timedelta`.
+    - `cast_options`: A dictionary specifying the type for each column. Options include: `category`, `number`, `bool`, `datetime`, `timedelta`.
   
 ```python
 CastColumns(
@@ -126,8 +139,8 @@ CastColumns(
 Handles duplicate entries in the data.
 
 - Parameters:
-  - `subset`: List of columns to check for duplicates.
-  - `keep`: Specifies which duplicate to keep (`none`, `first`, `last`, or `False` for no duplicates).
+    - `subset`: List of columns to check for duplicates.
+    - `keep`: Specifies which duplicate to keep (`none`, `first`, `last`, or `False` for no duplicates).
   
 ```python
 RemoveDuplicatesHandler(
@@ -144,8 +157,8 @@ RemoveDuplicatesHandler(
 Handles missing values in the dataset.
 
 - Parameters:
-  - `handling_options`: Dictionary that specifies the handling strategy for each column. Options: `drop`, `fill_0`, `most_frequent`, `fill_mean`, `fill_median`, `fill_mode`, `interpolate`, `fill_knn`.
-  - `n_neighbors`: Number of neighbors for K-Nearest Neighbors imputation (used with `fill_knn`).
+    - `handling_options`: Dictionary that specifies the handling strategy for each column. Options: `drop`, `fill_0`, `most_frequent`, `fill_mean`, `fill_median`, `fill_mode`, `interpolate`, `fill_knn`.
+    - `n_neighbors`: Number of neighbors for K-Nearest Neighbors imputation (used with `fill_knn`).
   
 ```python
 MissingValuesHandler(
@@ -167,10 +180,10 @@ MissingValuesHandler(
 Manages outliers in the dataset using different strategies.
 
 - Parameters:
-  - `handling_options`: Dictionary specifying the handling strategy. Options: `none`, `remove`, `cap`, `median`, `lof`, `iforest`.
-  - `thresholds`: Dictionary with thresholds for `iqr` and `zscore` methods.
-  - `lof_params`: Dictionary specifying parameters for the LOF method.
-  - `iforest_params`: Dictionary specifying parameters for Isolation Forest.
+    - `handling_options`: Dictionary specifying the handling strategy. Options: `none`, `remove`, `cap`, `median`, `lof`, `iforest`.
+    - `thresholds`: Dictionary with thresholds for `iqr` and `zscore` methods.
+    - `lof_params`: Dictionary specifying parameters for the LOF method.
+    - `iforest_params`: Dictionary specifying parameters for Isolation Forest.
   
 ```python
 OutliersHandler(
@@ -204,7 +217,7 @@ OutliersHandler(
 Applies quantile transformations for normalizing data.
 
 - Parameters:
-  - `transformation_options`: Dictionary specifying the transformation type. Options: `uniform`, `normal`.
+    - `transformation_options`: Dictionary specifying the transformation type. Options: `uniform`, `normal`.
   
 ```python
 QuantileTransformation(
@@ -220,7 +233,7 @@ QuantileTransformation(
 Scales numerical data using different scaling methods.
 
 - Parameters:
-  - `transformation_options`: Dictionary specifying the scaling method for each column. Options: `min_max`, `standard`, `robust`, `max_abs`.
+    - `transformation_options`: Dictionary specifying the scaling method for each column. Options: `min_max`, `standard`, `robust`, `max_abs`.
   
 ```python
 ScaleTransformation(
@@ -238,7 +251,7 @@ ScaleTransformation(
 Normalizes data using L1 or L2 norms.
 
 - Parameters:
-  - `transformation_options`: Dictionary specifying the normalization type. Options: `l1`, `l2`.
+    - `transformation_options`: Dictionary specifying the normalization type. Options: `l1`, `l2`.
   
 ```python
 Normalization(
@@ -256,8 +269,8 @@ Normalization(
 Encodes categorical variables using various methods.
 
 - Parameters:
-  - `encodings_options`: Dictionary specifying the encoding method for each column. Options: `label`, `ordinal`, `onehot`, `dummy`, `binary`, `count`, `target`.
-  - `ordinal_orders`: Specifies the order for ordinal encoding.
+    - `encodings_options`: Dictionary specifying the encoding method for each column. Options: `label`, `ordinal`, `onehot`, `dummy`, `binary`, `count`, `target`.
+    - `ordinal_orders`: Specifies the order for ordinal encoding.
 
 ```python
 CategoricalEncoding(
@@ -276,7 +289,7 @@ CategoricalEncoding(
 Transforms datetime columns into useful features.
 
 - Parameters:
-  - `datetime_columns`: List of columns to extract date/time features from.
+    - `datetime_columns`: List of columns to extract date/time features from.
   
 ```python
 DateTimeTransformer(
@@ -289,7 +302,7 @@ DateTimeTransformer(
 Transforms cyclical features like time into a continuous representation.
 
 - Parameters:
-  - `columns_periods`: Dictionary specifying the period for each cyclical column.
+    - `columns_periods`: Dictionary specifying the period for each cyclical column.
   
 ```python
 CyclicalFeaturesTransformer(
@@ -305,8 +318,8 @@ CyclicalFeaturesTransformer(
 Bins numerical columns into categories.
 
 - Parameters:
-  - `binning_options`: Dictionary specifying the binning method for each column. Options: `uniform`, `quantile`, `kmeans`.
-  - `num_bins`: Number of bins for each column.
+    - `binning_options`: Dictionary specifying the binning method for each column. Options: `uniform`, `quantile`, `kmeans`.
+    - `num_bins`: Number of bins for each column.
   
 ```python
 NumericalBinning(
@@ -328,17 +341,17 @@ NumericalBinning(
 Performs mathematical operations between columns.
 
 - Parameters:
-  - `operations_options`: List of tuples specifying the columns and the operation.
+    - `operations_options`: List of tuples specifying the columns and the operation.
 
 - **Options**:
-  - `add`: Adds the values of two columns.
-  - `subtract`: Subtracts the values of two columns.
-  - `multiply`: Multiplies the values of two columns.
-  - `divide`: Divides the values of two columns.
-  - `modulus`: Computes the modulus of two columns.
-  - `power`: Raises the values of the first column to the power of the second.
-  - `hypotenuse`: Computes the hypotenuse of two columns.
-  - `mean`: Calculates the mean of two columns.
+    - `add`: Adds the values of two columns.
+    - `subtract`: Subtracts the values of two columns.
+    - `multiply`: Multiplies the values of two columns.
+    - `divide`: Divides the values of two columns.
+    - `modulus`: Computes the modulus of two columns.
+    - `power`: Raises the values of the first column to the power of the second.
+    - `hypotenuse`: Computes the hypotenuse of two columns.
+    - `mean`: Calculates the mean of two columns.
   
 ```python
 MathematicalOperations(
