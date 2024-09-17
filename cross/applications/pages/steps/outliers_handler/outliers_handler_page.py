@@ -13,7 +13,7 @@ from .outliers_handler import OutliersHandlingBase
 
 
 class OutliersHandlingPage(OutliersHandlingBase):
-    def show_page(self, name):
+    def show_page(self):
         st.title("Outliers Handling")
         st.write(
             "Handle outliers in your DataFrame. "
@@ -24,8 +24,12 @@ class OutliersHandlingPage(OutliersHandlingBase):
         if not is_data_loaded():
             return
 
+        config = st.session_state.get("config", {})
+        target_column = config.get("target_column", None)
+
         df = st.session_state["data"]
         num_columns = numerical_columns(df)
+        num_columns = [x for x in num_columns if x != target_column]
 
         handling_options = {}
         thresholds = {}
@@ -191,7 +195,7 @@ class OutliersHandlingPage(OutliersHandlingBase):
 
                 params = outliers_handler.get_params()
                 steps = st.session_state.get("steps", [])
-                steps.append({"name": name, "params": params})
+                steps.append({"name": "OutliersHandler", "params": params})
                 st.session_state["steps"] = steps
 
                 st.success("Outliers handled successfully!")

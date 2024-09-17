@@ -1,23 +1,24 @@
 class ColumnSelection:
-    def __init__(self, columns=None, config=None):
+    def __init__(self, columns=None):
         self.columns = columns or []
 
-        if config:
-            self.columns = config.get("columns", [])
-
     def get_params(self):
-        params = {
-            "columns": self.columns,
-        }
-        return params
+        return {"columns": self.columns}
 
-    def fit(self, df):
-        pass
+    def fit(self, x, y=None):
+        return
 
-    def transform(self, df):
-        df_transformed = df.copy()
-        return df_transformed[self.columns]
+    def transform(self, x, y=None):
+        x_transformed = x.copy()
+        y_transformed = y.copy() if y is not None else None
 
-    def fit_transform(self, df):
-        self.fit(df)
-        return self.transform(df)
+        x_transformed = x_transformed[self.columns]
+
+        if y_transformed is not None:
+            return x_transformed, y_transformed
+        else:
+            return x_transformed
+
+    def fit_transform(self, x, y=None):
+        self.fit(x, y)
+        return self.transform(x, y)

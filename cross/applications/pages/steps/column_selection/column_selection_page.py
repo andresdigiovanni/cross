@@ -5,7 +5,7 @@ from cross.core.clean_data import ColumnSelection
 
 
 class ColumnSelectionPage:
-    def show_page(self, name):
+    def show_page(self):
         st.title("Column Selection")
         st.write("Select the columns you want to include in your analysis.")
 
@@ -26,8 +26,12 @@ class ColumnSelectionPage:
             )
 
         # Columns selection
+        config = st.session_state.get("config", {})
+        target_column = config.get("target_column", None)
+
+        columns = [x for x in df.columns if x != target_column]
         selected_columns = st.multiselect(
-            "Select columns", options=df.columns.tolist(), default=df.columns.tolist()
+            "Select columns", options=columns, default=columns
         )
 
         if st.button("Add step"):
@@ -37,7 +41,7 @@ class ColumnSelectionPage:
 
             params = column_selector.get_params()
             steps = st.session_state.get("steps", [])
-            steps.append({"name": name, "params": params})
+            steps.append({"name": "ColumnSelection", "params": params})
             st.session_state["steps"] = steps
 
             st.success("Columns selected successfully!")

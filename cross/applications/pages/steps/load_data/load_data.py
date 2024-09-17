@@ -4,7 +4,7 @@ from sklearn.datasets import load_breast_cancer, load_iris, load_wine
 
 
 class LoadDataPage:
-    def show_page(self, name):
+    def show_page(self):
         st.title("Load data")
         st.write("Load your data or select a toy dataset.")
 

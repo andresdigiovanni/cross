@@ -12,7 +12,7 @@ from cross.core.utils.dtypes import (
 
 
 class ColumnCastingPage:
-    def show_page(self, name):
+    def show_page(self):
         st.title("Column Casting")
         st.write("Modify column data types.")
 
@@ -35,7 +35,10 @@ class ColumnCastingPage:
         col1, col2, col3 = st.columns((1, 1, 1))
 
         # We create a dictionary to store the type selections for each column
-        cast_options = {}
+        config = st.session_state.get("config", {})
+        target_column = config.get("target_column", None)
+
+        columns = [x for x in df.columns if x != target_column]
         original_types = {
             column: self._get_dtype(
                 column,
@@ -45,12 +48,13 @@ class ColumnCastingPage:
                 num_columns,
                 delta_columns,
             )
-            for column in df.columns
+            for column in columns
         }
+        cast_options = {}
 
         # Display columns selectors
         with col1:
-            for i, column in enumerate(df.columns):
+            for i, column in enumerate(columns):
                 if i % 3 == 0:
                     dtype = self._get_dtype(
                         column,
@@ -63,7 +67,7 @@ class ColumnCastingPage:
                     cast_options[column] = self._add_selectbox(column, dtype)
 
         with col2:
-            for i, column in enumerate(df.columns):
+            for i, column in enumerate(columns):
                 if i % 3 == 1:
                     dtype = self._get_dtype(
                         column,
@@ -76,7 +80,7 @@ class ColumnCastingPage:
                     cast_options[column] = self._add_selectbox(column, dtype)
 
         with col3:
-            for i, column in enumerate(df.columns):
+            for i, column in enumerate(columns):
                 if i % 3 == 2:
                     dtype = self._get_dtype(
                         column,
@@ -104,7 +108,7 @@ class ColumnCastingPage:
 
                 params = cast_columns.get_params()
                 steps = st.session_state.get("steps", [])
-                steps.append({"name": name, "params": params})
+                steps.append({"name": "CastColumns", "params": params})
                 st.session_state["steps"] = steps
 
                 st.success("Columns successfully converted.")

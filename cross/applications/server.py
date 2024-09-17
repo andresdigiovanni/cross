@@ -17,11 +17,11 @@ def navigation_on_change(key):
 
 
 def save_config():
-    config = st.session_state.get("config", {})
-    with open("cross_config.pkl", "wb") as f:
+    config = st.session_state.get("steps", {})
+    with open("cross_transformations.pkl", "wb") as f:
         pickle.dump(config, f)
 
-    st.success("Configuration saved to cross_config.pkl")
+    st.success("Configuration saved to cross_transformations.pkl")
 
 
 def modify_steps():
@@ -69,8 +69,7 @@ def main():
 
         else:
             page_index = st.session_state["page_index"]
-            page_name = pages["pages_names"][page_index]
-            pages["pages_show"][page_index].show_page(page_name)
+            pages["pages_show"][page_index].show_page()
 
     # Selected operations
     with col2:

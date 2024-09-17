@@ -10,29 +10,22 @@ class OutliersHandler:
         thresholds=None,
         lof_params=None,
         iforest_params=None,
-        config=None,
+        statistics=None,
+        bounds=None,
+        lof_results=None,
+        iforest_results=None,
     ):
         self.handling_options = handling_options or {}
         self.thresholds = thresholds or {}
         self.lof_params = lof_params or {}
         self.iforest_params = iforest_params or {}
-        self.statistics = {}
-        self.bounds = {}
-        self.lof_results = {}
-        self.iforest_results = {}
-
-        if config:
-            self.handling_options = config.get("handling_options", {})
-            self.thresholds = config.get("thresholds", {})
-            self.lof_params = config.get("lof_params", {})
-            self.iforest_params = config.get("iforest_params", {})
-            self.statistics = config.get("statistics", {})
-            self.bounds = config.get("bounds", {})
-            self.lof_results = config.get("lof_results", {})
-            self.iforest_results = config.get("iforest_results", {})
+        self.statistics = statistics or {}
+        self.bounds = bounds or {}
+        self.lof_results = lof_results or {}
+        self.iforest_results = iforest_results or {}
 
     def get_params(self):
-        params = {
+        return {
             "handling_options": self.handling_options,
             "thresholds": self.thresholds,
             "lof_params": self.lof_params,
@@ -42,29 +35,31 @@ class OutliersHandler:
             "lof_results": self.lof_results,
             "iforest_results": self.iforest_results,
         }
-        return params
 
-    def fit(self, df):
+    def fit(self, x, y=None):
         self.statistics = {}
         self.bounds = {}
         self.lof_results = {}
         self.iforest_results = {}
 
         for column, (action, method) in self.handling_options.items():
+            # Specific methods fit
             if method == "lof":
-                self._apply_lof(df, column)
+                self._apply_lof(x, column)
 
             elif method == "iforest":
-                self._apply_iforest(df, column)
+                self._apply_iforest(x, column)
 
-            lower_bound, upper_bound = self._calculate_bounds(df, column, method)
+            # Calculate bounds
+            lower_bound, upper_bound = self._calculate_bounds(x, column, method)
             self.bounds[column] = {
                 "lower_bound": lower_bound,
                 "upper_bound": upper_bound,
             }
 
+            # Specific actions fit
             if action == "median":
-                self.statistics[column] = df[column].median()
+                self.statistics[column] = x[column].median()
 
     def _apply_lof(self, df, column):
         lof = LocalOutlierFactor(**self.lof_params.get(column, {}))
@@ -117,34 +112,41 @@ class OutliersHandler:
 
         return lower_bound, upper_bound
 
-    def transform(self, df):
-        df_transformed = df.copy()
+    def transform(self, x, y=None):
+        x_transformed = x.copy()
+        y_transformed = y.copy() if y is not None else None
 
         for column, (action, method) in self.handling_options.items():
             lower_bound = self.bounds[column]["lower_bound"]
             upper_bound = self.bounds[column]["upper_bound"]
 
             if action == "remove":
-                df_transformed = df_transformed[
-                    (df_transformed[column] >= lower_bound)
-                    & (df_transformed[column] <= upper_bound)
-                ]
+                mask = (x_transformed[column] >= lower_bound) & (
+                    x_transformed[column] <= upper_bound
+                )
+                x_transformed = x_transformed[mask]
+
+                if y_transformed is not None:
+                    y_transformed = y_transformed[mask]
 
             elif action == "cap":
-                df_transformed[column] = np.clip(
-                    df_transformed[column], lower_bound, upper_bound
+                x_transformed[column] = np.clip(
+                    x_transformed[column], lower_bound, upper_bound
                 )
 
             elif action == "median":
-                df_transformed[column] = np.where(
-                    (df_transformed[column] < lower_bound)
-                    | (df_transformed[column] > upper_bound),
+                x_transformed[column] = np.where(
+                    (x_transformed[column] < lower_bound)
+                    | (x_transformed[column] > upper_bound),
                     self.statistics[column],
-                    df_transformed[column],
+                    x_transformed[column],
                 )
 
-        return df_transformed
+        if y_transformed is not None:
+            return x_transformed, y_transformed
+        else:
+            return x_transformed
 
-    def fit_transform(self, df):
-        self.fit(df)
-        return self.transform(df)
+    def fit_transform(self, x, y=None):
+        self.fit(x, y)
+        return self.transform(x, y)

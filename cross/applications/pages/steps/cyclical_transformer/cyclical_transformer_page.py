@@ -5,7 +5,7 @@ from cross.core.feature_engineering import CyclicalFeaturesTransformer
 
 
 class CyclicalFeaturesTransformationPage:
-    def show_page(self, name):
+    def show_page(self):
         st.title("Cyclical Features Transformation")
         st.write(
             "Transform cyclical features in your DataFrame. "
@@ -62,7 +62,7 @@ class CyclicalFeaturesTransformationPage:
 
                 params = cyclical_transformer.get_params()
                 steps = st.session_state.get("steps", [])
-                steps.append({"name": name, "params": params})
+                steps.append({"name": "CyclicalFeaturesTransformer", "params": params})
                 st.session_state["steps"] = steps
 
                 st.success("Cyclical features transformed successfully!")

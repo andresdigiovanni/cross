@@ -1,28 +1,40 @@
 class RemoveDuplicatesHandler:
-    def __init__(self, subset=None, keep=None, config=None):
+    def __init__(self, subset=None, keep="first"):
         self.subset = subset or []
-        self.keep = keep or []
-
-        if config:
-            self.subset = config.get("subset", [])
-            self.keep = config.get("keep", [])
+        self.keep = keep
 
     def get_params(self):
-        params = {
-            "subset": self.subset,
-            "keep": self.keep,
-        }
-        return params
+        return {"subset": self.subset, "keep": self.keep}
 
-    def fit(self, df):
-        pass
+    def fit(self, x, y=None):
+        return
 
-    def transform(self, df):
-        if self.keep not in ["first", "last", False]:
-            return df
+    def transform(self, x, y=None):
+        x_transformed = x.copy()
+        y_transformed = y.copy() if y is not None else None
 
-        return df.drop_duplicates(subset=self.subset, keep=self.keep)
+        if self.keep in ["first", "last", False]:
+            if y_transformed is not None:
+                combined = x_transformed.copy()
+                combined["__y"] = y_transformed
 
-    def fit_transform(self, df):
-        self.fit(df)
-        return self.transform(df)
+                combined = combined.drop_duplicates(
+                    subset=self.subset, keep=self.keep
+                ).reset_index(drop=True)
+
+                x_transformed = combined.drop(columns=["__y"])
+                y_transformed = combined["__y"]
+
+            else:
+                x_transformed = x_transformed.drop_duplicates(
+                    subset=self.subset, keep=self.keep
+                ).reset_index(drop=True)
+
+        if y_transformed is not None:
+            return x_transformed, y_transformed
+        else:
+            return x_transformed
+
+    def fit_transform(self, x, y=None):
+        self.fit(x, y)
+        return self.transform(x, y)

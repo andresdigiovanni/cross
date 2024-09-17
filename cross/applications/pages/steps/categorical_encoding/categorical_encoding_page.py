@@ -9,7 +9,7 @@ from .categorical_encoding import CategoricalEncodingBase
 
 
 class CategoricalEncodingPage(CategoricalEncodingBase):
-    def show_page(self, name):
+    def show_page(self):
         st.title("Categorical Encoding")
         st.write("Select the encoding technique for each column.")
 
@@ -104,7 +104,7 @@ class CategoricalEncodingPage(CategoricalEncodingBase):
 
                 params = categorical_encoding.get_params()
                 steps = st.session_state.get("steps", [])
-                steps.append({"name": name, "params": params})
+                steps.append({"name": "CategoricalEncoding", "params": params})
                 st.session_state["steps"] = steps
 
                 st.success("Encoding applied successfully!")

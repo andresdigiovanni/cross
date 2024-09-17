@@ -11,7 +11,7 @@ from .missing_values import MissingValuesBase
 
 
 class MissingValuesPage(MissingValuesBase):
-    def show_page(self, name):
+    def show_page(self):
         st.title("Missing Values Handling")
         st.write(
             "Handle missing values in your DataFrame. "
@@ -31,7 +31,11 @@ class MissingValuesPage(MissingValuesBase):
         n_neighbors = {}
         missing_values = df.isnull().sum()
 
-        valid_columns = [x for x in df.columns if x in cat_columns + num_columns]
+        config = st.session_state.get("config", {})
+        target_column = config.get("target_column", None)
+
+        columns = [x for x in df.columns if x != target_column]
+        valid_columns = [x for x in columns if x in cat_columns + num_columns]
 
         for column in valid_columns:
             st.markdown("""---""")
@@ -94,7 +98,7 @@ class MissingValuesPage(MissingValuesBase):
 
                 params = missing_values_handler.get_params()
                 steps = st.session_state.get("steps", [])
-                steps.append({"name": name, "params": params})
+                steps.append({"name": "MissingValuesHandler", "params": params})
                 st.session_state["steps"] = steps
 
                 st.success("Missing values handled successfully!")

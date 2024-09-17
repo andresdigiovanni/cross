@@ -4,7 +4,7 @@ from cross.applications.components import is_data_loaded
 
 
 class TargetSelectionPage:
-    def show_page(self, name):
+    def show_page(self):
         st.title("Select Target Column")
         st.write(
             "Choose the target column for your analysis. This can be useful for tasks such as classification, "
@@ -23,10 +23,19 @@ class TargetSelectionPage:
         columns = df.columns.tolist()
         columns.insert(0, "None")  # Add the option to select no target column
 
+        config = st.session_state.get("config", {})
+        target_column = config.get("target_column", None)
+
+        default_index = 0
+        for i, column in enumerate(columns):
+            if column == target_column:
+                default_index = i
+                break
+
         st.selectbox(
             "Select the target column:",
             options=columns,
-            index=0,
+            index=default_index,
             key="target_column_selectbox",
             on_change=self._update_target_column,
         )

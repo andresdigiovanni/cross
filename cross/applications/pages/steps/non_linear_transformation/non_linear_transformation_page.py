@@ -11,17 +11,21 @@ from .non_linear_transformation import NonLinearTransformationBase
 
 
 class NonLinearTransformationPage(NonLinearTransformationBase):
-    def show_page(self, name):
+    def show_page(self):
         st.title("Non-linear Transformations")
         st.write("Apply various non-linear transformations to your DataFrame columns.")
 
         if not is_data_loaded():
             return
 
+        config = st.session_state.get("config", {})
+        target_column = config.get("target_column", None)
+
         df = st.session_state["data"]
         original_df = df.copy()
 
         num_columns = numerical_columns(df)
+        num_columns = [x for x in num_columns if x != target_column]
 
         transformation_options = {}
 
@@ -79,7 +83,7 @@ class NonLinearTransformationPage(NonLinearTransformationBase):
 
                 params = non_linear_transformation.get_params()
                 steps = st.session_state.get("steps", [])
-                steps.append({"name": name, "params": params})
+                steps.append({"name": "NonLinearTransformation", "params": params})
                 st.session_state["steps"] = steps
 
                 st.success("Transformations applied successfully!")

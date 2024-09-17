@@ -8,17 +8,21 @@ from .numerical_binning import NumericalBinningBase
 
 
 class NumericalBinningPage(NumericalBinningBase):
-    def show_page(self, name):
+    def show_page(self):
         st.title("Numerical Binning")
         st.write("Select the binning technique for each column.")
 
         if not is_data_loaded():
             return
 
+        config = st.session_state.get("config", {})
+        target_column = config.get("target_column", None)
+
         df = st.session_state["data"]
         original_df = df.copy()
 
         num_columns = numerical_columns(df)
+        num_columns = [x for x in num_columns if x != target_column]
 
         binning_options = {}
         num_bins = {}
@@ -81,7 +85,7 @@ class NumericalBinningPage(NumericalBinningBase):
 
                 params = numerical_binning.get_params()
                 steps = st.session_state.get("steps", [])
-                steps.append({"name": name, "params": params})
+                steps.append({"name": "NumericalBinning", "params": params})
                 st.session_state["steps"] = steps
 
                 st.success("Binning applied successfully!")

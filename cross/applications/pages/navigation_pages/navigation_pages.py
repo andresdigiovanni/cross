@@ -43,16 +43,16 @@ def navigation_pages():
                 "edit": None,
             },
             {
-                "name": "Column selection",
-                "icon": "list-check",
-                "page": ColumnSelectionPage(),
-                "edit": ColumnSelectionEdit(),
-            },
-            {
                 "name": "Target selection",
                 "icon": "bullseye",
                 "page": TargetSelectionPage(),
                 "edit": None,
+            },
+            {
+                "name": "Column selection",
+                "icon": "list-check",
+                "page": ColumnSelectionPage(),
+                "edit": ColumnSelectionEdit(),
             },
             {
                 "name": "Column casting",

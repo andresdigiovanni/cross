@@ -6,7 +6,7 @@ from .remove_duplicates import RemoveDuplicatesBase
 
 
 class RemoveDuplicatesPage(RemoveDuplicatesBase):
-    def show_page(self, name):
+    def show_page(self):
         st.title("Remove Duplicates")
         st.write(
             "Handle duplicate rows in your DataFrame. "
@@ -21,9 +21,12 @@ class RemoveDuplicatesPage(RemoveDuplicatesBase):
 
         # Select columns to consider for identifying duplicates
         st.subheader("Select Columns to Consider for Identifying Duplicates")
-        subset = st.multiselect(
-            "Columns", options=df.columns.tolist(), default=df.columns.tolist()
-        )
+
+        config = st.session_state.get("config", {})
+        target_column = config.get("target_column", None)
+
+        columns = [x for x in df.columns if x != target_column]
+        subset = st.multiselect("Columns", options=columns, default=columns)
 
         # Display initial number of duplicates
         initial_duplicates = df.duplicated().sum()
@@ -47,7 +50,7 @@ class RemoveDuplicatesPage(RemoveDuplicatesBase):
 
                 params = remove_duplicates_handler.get_params()
                 steps = st.session_state.get("steps", [])
-                steps.append({"name": name, "params": params})
+                steps.append({"name": "RemoveDuplicatesHandler", "params": params})
                 st.session_state["steps"] = steps
 
                 st.success("Duplicates removed successfully!")

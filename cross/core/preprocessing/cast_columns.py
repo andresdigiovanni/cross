@@ -2,44 +2,42 @@ import pandas as pd
 
 
 class CastColumns:
-    def __init__(self, cast_options=None, config=None):
+    def __init__(self, cast_options=None):
         self.cast_options = cast_options or {}
 
-        if config:
-            self.cast_options = config.get("cast_options", {})
-
     def get_params(self):
-        params = {
-            "cast_options": self.cast_options,
-        }
-        return params
+        return {"cast_options": self.cast_options}
 
-    def fit(self, df):
-        pass
+    def fit(self, x, y=None):
+        return
 
-    def transform(self, df):
-        df_transformed = df.copy()
+    def transform(self, x, y=None):
+        x_transformed = x.copy()
+        y_transformed = y.copy() if y is not None else None
 
         for column, dtype_to_cast in self.cast_options.items():
             if dtype_to_cast == "bool":
-                df_transformed[column] = df_transformed[column].astype(bool)
+                x_transformed[column] = x_transformed[column].astype(bool)
 
             elif dtype_to_cast == "category":
-                df_transformed[column] = df_transformed[column].astype(str)
+                x_transformed[column] = x_transformed[column].astype(str)
 
             elif dtype_to_cast == "datetime":
-                df_transformed[column] = pd.to_datetime(df_transformed[column])
+                x_transformed[column] = pd.to_datetime(x_transformed[column])
 
             elif dtype_to_cast == "number":
-                df_transformed[column] = pd.to_numeric(
-                    df_transformed[column], errors="coerce"
+                x_transformed[column] = pd.to_numeric(
+                    x_transformed[column], errors="coerce"
                 )
 
             elif dtype_to_cast == "timedelta":
-                df_transformed[column] = pd.to_timedelta(df_transformed[column])
+                x_transformed[column] = pd.to_timedelta(x_transformed[column])
 
-        return df_transformed
+        if y_transformed is not None:
+            return x_transformed, y_transformed
+        else:
+            return x_transformed
 
-    def fit_transform(self, df):
-        self.fit(df)
-        return self.transform(df)
+    def fit_transform(self, x, y=None):
+        self.fit(x, y)
+        return self.transform(x, y)

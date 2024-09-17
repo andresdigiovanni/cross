@@ -6,7 +6,7 @@ from cross.core.utils.dtypes import datetime_columns
 
 
 class DateTimeTransformationPage:
-    def show_page(self, name):
+    def show_page(self):
         st.title("Datetime Transformation")
         st.write(
             "Transform datetime columns in your DataFrame. "
@@ -61,7 +61,7 @@ class DateTimeTransformationPage:
 
                 params = datetime_transformer.get_params()
                 steps = st.session_state.get("steps", [])
-                steps.append({"name": name, "params": params})
+                steps.append({"name": "DateTimeTransformer", "params": params})
                 st.session_state["steps"] = steps
 
                 st.success("Datetime columns transformed successfully!")

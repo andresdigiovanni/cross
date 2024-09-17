@@ -1,34 +1,34 @@
 class DateTimeTransformer:
-    def __init__(self, datetime_columns=None, config=None):
+    def __init__(self, datetime_columns=None):
         self.datetime_columns = datetime_columns or []
 
-        if config:
-            self.datetime_columns = config.get("datetime_columns", [])
-
     def get_params(self):
-        params = {
+        return {
             "datetime_columns": self.datetime_columns,
         }
-        return params
 
-    def fit(self, df):
+    def fit(self, x, y=None):
         pass
 
-    def transform(self, df):
-        df_transformed = df.copy()
+    def transform(self, x, y=None):
+        x_transformed = x.copy()
+        y_transformed = y.copy() if y is not None else None
 
         for column in self.datetime_columns:
-            df_transformed[f"{column}_year"] = df_transformed[column].dt.year
-            df_transformed[f"{column}_month"] = df_transformed[column].dt.month
-            df_transformed[f"{column}_day"] = df_transformed[column].dt.day
-            df_transformed[f"{column}_hour"] = df_transformed[column].dt.hour
-            df_transformed[f"{column}_minute"] = df_transformed[column].dt.minute
-            df_transformed[f"{column}_second"] = df_transformed[column].dt.second
+            x_transformed[f"{column}_year"] = x_transformed[column].dt.year
+            x_transformed[f"{column}_month"] = x_transformed[column].dt.month
+            x_transformed[f"{column}_day"] = x_transformed[column].dt.day
+            x_transformed[f"{column}_hour"] = x_transformed[column].dt.hour
+            x_transformed[f"{column}_minute"] = x_transformed[column].dt.minute
+            x_transformed[f"{column}_second"] = x_transformed[column].dt.second
 
-        df_transformed = df_transformed.drop(columns=self.datetime_columns)
+        x_transformed = x_transformed.drop(columns=self.datetime_columns)
 
-        return df_transformed
+        if y_transformed is not None:
+            return x_transformed, y_transformed
+        else:
+            return x_transformed
 
-    def fit_transform(self, df):
-        self.fit(df)
-        return self.transform(df)
+    def fit_transform(self, x, y=None):
+        self.fit(x, y)
+        return self.transform(x, y)
