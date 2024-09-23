@@ -6,8 +6,8 @@ from sklearn.neighbors import LocalOutlierFactor
 
 from cross.applications.components import is_data_loaded
 from cross.applications.styles import plot_remove_borders
-from cross.core.clean_data import OutliersHandler
-from cross.core.utils.dtypes import numerical_columns
+from cross.transformations.clean_data import OutliersHandler
+from cross.transformations.utils.dtypes import numerical_columns
 
 from .outliers_handler import OutliersHandlingBase
 

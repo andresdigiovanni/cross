@@ -2,8 +2,8 @@ import streamlit as st
 from streamlit_sortables import sort_items
 
 from cross.applications.components import is_data_loaded
-from cross.core.feature_engineering import CategoricalEncoding
-from cross.core.utils.dtypes import categorical_columns
+from cross.transformations.feature_engineering import CategoricalEncoding
+from cross.transformations.utils.dtypes import categorical_columns
 
 from .categorical_encoding import CategoricalEncodingBase
 

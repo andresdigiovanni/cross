@@ -4,8 +4,8 @@ import streamlit as st
 
 from cross.applications.components import is_data_loaded
 from cross.applications.styles import plot_remove_borders
-from cross.core.clean_data import MissingValuesHandler
-from cross.core.utils.dtypes import categorical_columns, numerical_columns
+from cross.transformations.clean_data import MissingValuesHandler
+from cross.transformations.utils.dtypes import categorical_columns, numerical_columns
 
 from .missing_values import MissingValuesBase
 

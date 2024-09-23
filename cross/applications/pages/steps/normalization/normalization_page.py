@@ -4,8 +4,8 @@ import streamlit as st
 
 from cross.applications.components import is_data_loaded
 from cross.applications.styles import plot_remove_borders
-from cross.core.preprocessing import Normalization
-from cross.core.utils.dtypes import numerical_columns
+from cross.transformations.preprocessing import Normalization
+from cross.transformations.utils.dtypes import numerical_columns
 
 from .normalization import NormalizationBase
 

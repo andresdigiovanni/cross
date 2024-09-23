@@ -1,19 +1,19 @@
 import pickle
 
-from cross.core.clean_data import (
+from cross.transformations.clean_data import (
     ColumnSelection,
     MissingValuesHandler,
     OutliersHandler,
     RemoveDuplicatesHandler,
 )
-from cross.core.feature_engineering import (
+from cross.transformations.feature_engineering import (
     CategoricalEncoding,
     CyclicalFeaturesTransformer,
     DateTimeTransformer,
     MathematicalOperations,
     NumericalBinning,
 )
-from cross.core.preprocessing import (
+from cross.transformations.preprocessing import (
     CastColumns,
     NonLinearTransformation,
     Normalization,
