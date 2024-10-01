@@ -1,5 +1,18 @@
 import pickle
+from datetime import datetime
 
+from cross.parameter_calculators.clean_data import (
+    MissingValuesParamCalculator,
+    OutliersParamCalculator,
+    RemoveDuplicatesParamCalculator,
+)
+from cross.parameter_calculators.feature_engineering import (
+    CategoricalEncodingParamCalculator,
+)
+from cross.parameter_calculators.preprocessing import (
+    NonLinearTransformationParamCalculator,
+    ScaleTransformationParamCalculator,
+)
 from cross.transformations.clean_data import (
     ColumnSelection,
     MissingValuesHandler,
@@ -24,19 +37,28 @@ from cross.transformations.preprocessing import (
 
 class CrossTransformer:
     def __init__(self, transformations=None):
-        self.transformations = transformations or []
+        self.transformations = []
+
+        if isinstance(transformations, list):
+            if all(isinstance(t, dict) for t in transformations):
+                self.transformations = self._initialize_transformations(transformations)
+            else:
+                self.transformations = transformations
 
     def load_transformations(self, file_path):
         with open(file_path, "rb") as f:
             transformations = pickle.load(f)
 
-        self.transformations = []
+        self.transformations = self._initialize_transformations(transformations)
 
+    def _initialize_transformations(self, transformations):
+        initialized_transformers = []
         for transformation in transformations:
             transformer = self._get_transformer(
                 transformation["name"], transformation["params"]
             )
-            self.transformations.append(transformer)
+            initialized_transformers.append(transformer)
+        return initialized_transformers
 
     def _get_transformer(self, name, params):
         if name == "CategoricalEncoding":
@@ -132,3 +154,47 @@ class CrossTransformer:
             return x_transformed, y_transformed
         else:
             return x_transformed
+
+    def auto_transform(self, x, y, problem_type, verbose=True):
+        if verbose:
+            print(
+                f"\n[{self._date_time()}] Starting experiment to find the bests transformations"
+            )
+
+        x_transformed = x.copy()
+        y_transformed = y.copy()
+
+        transformations = []
+        calculators = [
+            ("RemoveDuplicatesHandler", RemoveDuplicatesParamCalculator),
+            ("MissingValuesHandler", MissingValuesParamCalculator),
+            ("OutliersHandler", OutliersParamCalculator),
+            ("NonLinearTransformation", NonLinearTransformationParamCalculator),
+            ("ScaleTransformation", ScaleTransformationParamCalculator),
+            ("CategoricalEncoding", CategoricalEncodingParamCalculator),
+        ]
+
+        for name, calculator in calculators:
+            if verbose:
+                print(f"[{self._date_time()}] Trying transformation: {name}")
+
+            calculator = calculator()
+            transformation = calculator.calculate_best_params(
+                x_transformed, y_transformed, problem_type
+            )
+
+            if transformation:
+                transformations.append(transformation)
+
+                transformer = self._get_transformer(
+                    transformation["name"], transformation["params"]
+                )
+                x_transformed, y_transformed = transformer.fit_transform(
+                    x_transformed, y_transformed
+                )
+
+        return transformations
+
+    def _date_time(self):
+        now = datetime.now()
+        return now.strftime("%d/%m/%Y %H:%M:%S")

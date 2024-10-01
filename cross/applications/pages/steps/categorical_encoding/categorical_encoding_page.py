@@ -62,10 +62,13 @@ class CategoricalEncodingPage(CategoricalEncodingBase):
                 ):
                     categorical_encoding = CategoricalEncoding(
                         {column: self.encodings[encodings_options[column]]},
-                        target_column=target_column,
                         ordinal_orders=ordinal_orders,
                     )
-                    transformed_df = categorical_encoding.fit_transform(original_df)
+                    transformed_df, _ = categorical_encoding.fit_transform(
+                        original_df.loc[:, ~original_df.columns.isin([target_column])],
+                        original_df[target_column],
+                    )
+                    transformed_df[target_column] = original_df[target_column]
 
                     # If multiple columns are created
                     if self.encodings[encodings_options[column]] in [

@@ -1,6 +1,6 @@
 class RemoveDuplicatesHandler:
     def __init__(self, subset=None, keep="first"):
-        self.subset = subset or []
+        self.subset = subset
         self.keep = keep
 
     def get_params(self):

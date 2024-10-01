@@ -46,11 +46,11 @@ def evaluate_model(x, y, transformer=None):
 if __name__ == "__main__":
     x, y = load_data()
 
-    # Baseline model
+    # Evalute baseline model
     score = evaluate_model(x, y)
     print(f"Baseline score: {score}")
 
-    # Transformations
+    # Define transformations
     transformer = CrossTransformer(
         [
             ScaleTransformation(
@@ -70,5 +70,6 @@ if __name__ == "__main__":
         ]
     )
 
+    # Evalute model with transformations
     score = evaluate_model(x, y, transformer)
     print(f"Transformations score: {score}")

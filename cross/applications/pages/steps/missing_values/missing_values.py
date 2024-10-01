@@ -4,6 +4,7 @@ class MissingValuesBase:
             "Do nothing": "none",
             "Drop": "drop",
             "Fill with 0": "fill_0",
+            "Fill with mode": "fill_mode",
         }
         self.actions_cat = {
             "Most frequent": "most_frequent",
@@ -11,7 +12,6 @@ class MissingValuesBase:
         self.actions_num = {
             "Fill with mean": "fill_mean",
             "Fill with median": "fill_median",
-            "Fill with mode": "fill_mode",
             "Interpolate": "interpolate",
             "KNN imputation": "fill_knn",
         }

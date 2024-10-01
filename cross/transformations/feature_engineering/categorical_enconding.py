@@ -7,19 +7,16 @@ class CategoricalEncoding:
     def __init__(
         self,
         encodings_options=None,
-        target_column=None,
         ordinal_orders=None,
         encoders=None,
     ):
         self.encodings_options = encodings_options or {}
-        self.target_column = target_column or ""
         self.ordinal_orders = ordinal_orders or {}
         self.encoders = encoders or {}
 
     def get_params(self):
         return {
             "encodings_options": self.encodings_options,
-            "target_column": self.target_column,
             "ordinal_orders": self.ordinal_orders,
             "encoders": self.encoders,
         }
@@ -56,17 +53,21 @@ class CategoricalEncoding:
                 transformer.fit(x_filled[[column]])
                 self.encoders[column] = transformer
 
-            elif (
-                transformation == "target"
-                and self.target_column is not None
-                and self.target_column != ""
-            ):
-                transformer = TargetEncoder()
-                transformer.fit(x_filled[[column]], x_filled[self.target_column])
-                self.encoders[column] = transformer
+            elif transformation == "target":
+                if y is not None:
+                    transformer = TargetEncoder()
+                    transformer.fit(x_filled[[column]], y)
+                    self.encoders[column] = transformer
 
             elif transformation == "count":
                 self.encoders[column] = x_filled[column].value_counts().to_dict()
+
+    def _safe_transform(self, value, transformer, known_classes):
+        if value in known_classes:
+            return transformer.transform([value])[0]
+
+        else:
+            return -1
 
     def transform(self, x, y=None):
         x_transformed = x.copy()
@@ -76,20 +77,29 @@ class CategoricalEncoding:
 
         for column, transformation in self.encodings_options.items():
             if column in self.encoders:
-                if transformation in ["label", "ordinal", "target"]:
-                    transformer = self.encoders[column]
+                transformer = self.encoders[column]
+
+                if transformation == "label":
+                    known_classes = set(transformer.classes_)
+                    x_transformed[column] = x_transformed[column].apply(
+                        lambda val: self._safe_transform(
+                            val, transformer, known_classes
+                        )
+                    )
+
+                elif transformation in ["ordinal", "target"]:
                     x_transformed[column] = transformer.transform(
                         x_transformed[[column]]
                     )
 
                 elif transformation in ["onehot", "dummy", "binary"]:
-                    transformer = self.encoders[column]
                     encoded_array = transformer.transform(x_transformed[[column]])
                     encoded_df = pd.DataFrame(
                         encoded_array,
                         columns=transformer.get_feature_names_out([column]),
                     )
 
+                    encoded_df.index = x_transformed.index
                     x_transformed = pd.concat([x_transformed, encoded_df], axis=1).drop(
                         columns=[column]
                     )
