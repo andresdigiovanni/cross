@@ -1,37 +1,42 @@
+from tqdm import tqdm
+
 from cross.parameter_calculators.shared import evaluate_model
 from cross.transformations.feature_engineering import CategoricalEncoding
 from cross.transformations.utils.dtypes import categorical_columns
 
 
 class CategoricalEncodingParamCalculator:
-    def calculate_best_params(self, x, y=None, problem_type=None):
+    def calculate_best_params(self, x, y, problem_type, verbose):
         columns = categorical_columns(x)
 
         best_encodings_options = {}
         encodings = ["label", "dummy", "binary", "target", "count"]
 
-        for column in columns:
-            num_unique_values = x[column].nunique()
+        with tqdm(total=len(columns) * len(encodings), disable=(not verbose)) as pbar:
+            for column in columns:
+                num_unique_values = x[column].nunique()
 
-            best_score = -float("inf")
-            best_encoding = None
+                best_score = -float("inf")
+                best_encoding = None
 
-            for encoding in encodings:
-                if encoding == "dummy" and num_unique_values > 20:
-                    continue
+                for encoding in encodings:
+                    pbar.update(1)
 
-                encodings_options = {column: encoding}
-                missing_values_handler = CategoricalEncoding(
-                    encodings_options=encodings_options
-                )
+                    if encoding == "dummy" and num_unique_values > 20:
+                        continue
 
-                score = evaluate_model(x, y, problem_type, missing_values_handler)
-                if score > best_score:
-                    best_score = score
-                    best_encoding = encoding
+                    encodings_options = {column: encoding}
+                    missing_values_handler = CategoricalEncoding(
+                        encodings_options=encodings_options
+                    )
 
-            if best_encoding:
-                best_encodings_options[column] = best_encoding
+                    score = evaluate_model(x, y, problem_type, missing_values_handler)
+                    if score > best_score:
+                        best_score = score
+                        best_encoding = encoding
+
+                if best_encoding:
+                    best_encodings_options[column] = best_encoding
 
         if best_encodings_options:
             categorical_encoding = CategoricalEncoding(

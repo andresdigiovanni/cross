@@ -6,7 +6,6 @@ class MathematicalOperationsBase:
         "Multiplication": "multiply",
         "Division": "divide",
         "Modulus": "modulus",
-        "Power": "power",
         "Hypotenuse": "hypotenuse",
         "Mean": "mean",
     }

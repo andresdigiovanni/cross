@@ -2,7 +2,7 @@ from cross.transformations.clean_data import RemoveDuplicatesHandler
 
 
 class RemoveDuplicatesParamCalculator:
-    def calculate_best_params(self, x, y=None, problem_type=None):
+    def calculate_best_params(self, x, y, problem_type, verbose):
         if self._has_duplicates(x):
             return self._get_remove_duplicates_params()
 

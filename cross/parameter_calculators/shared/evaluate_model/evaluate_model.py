@@ -6,14 +6,14 @@ from sklearn.model_selection import KFold, StratifiedKFold
 from cross.transformations.utils.dtypes import numerical_columns
 
 
-def evaluate_model(x, y, problem_type, transformer=None):
-    if problem_type in ["binary_classification", "multiclass_classification"]:
-        model = RandomForestClassifier()
+def evaluate_model(x, y, problem_type, transformer=None, columns_idx=None):
+    if problem_type == "classification":
+        model = RandomForestClassifier(n_jobs=-1, random_state=42)
         kfold = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
         scoring_func = accuracy_score
 
     elif problem_type == "regression":
-        model = RandomForestRegressor()
+        model = RandomForestRegressor(n_jobs=-1, random_state=42)
         kfold = KFold(n_splits=5, shuffle=True, random_state=42)
         scoring_func = mean_squared_error
 
@@ -29,6 +29,10 @@ def evaluate_model(x, y, problem_type, transformer=None):
         if transformer:
             x_train, y_train = transformer.fit_transform(x_train, y_train)
             x_test, y_test = transformer.transform(x_test, y_test)
+
+        if columns_idx:
+            x_train = x_train.iloc[:, columns_idx]
+            x_test = x_test.iloc[:, columns_idx]
 
         num_columns = numerical_columns(x_train)
         x_train = x_train[num_columns]

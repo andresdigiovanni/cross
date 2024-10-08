@@ -1,13 +1,19 @@
 import pickle
+import warnings
 from datetime import datetime
 
 from cross.parameter_calculators.clean_data import (
+    ColumnSelectionParamCalculator,
     MissingValuesParamCalculator,
     OutliersParamCalculator,
     RemoveDuplicatesParamCalculator,
 )
 from cross.parameter_calculators.feature_engineering import (
     CategoricalEncodingParamCalculator,
+    CyclicalFeaturesTransformerParamCalculator,
+    DateTimeTransformerParamCalculator,
+    MathematicalOperationsParamCalculator,
+    NumericalBinningParamCalculator,
 )
 from cross.parameter_calculators.preprocessing import (
     NonLinearTransformationParamCalculator,
@@ -157,9 +163,11 @@ class CrossTransformer:
 
     def auto_transform(self, x, y, problem_type, verbose=True):
         if verbose:
+            date_time = self._date_time()
             print(
-                f"\n[{self._date_time()}] Starting experiment to find the bests transformations"
+                f"\n[{date_time}] Starting experiment to find the bests transformations"
             )
+            print(f"[{date_time}] Shape: {x.shape}. Problem type: {problem_type}\n")
 
         x_transformed = x.copy()
         y_transformed = y.copy()
@@ -172,26 +180,34 @@ class CrossTransformer:
             ("NonLinearTransformation", NonLinearTransformationParamCalculator),
             ("ScaleTransformation", ScaleTransformationParamCalculator),
             ("CategoricalEncoding", CategoricalEncodingParamCalculator),
+            ("DateTimeTransformer", DateTimeTransformerParamCalculator),
+            ("CyclicalFeaturesTransformer", CyclicalFeaturesTransformerParamCalculator),
+            ("NumericalBinning", NumericalBinningParamCalculator),
+            ("MathematicalOperations", MathematicalOperationsParamCalculator),
+            ("ColumnSelection", ColumnSelectionParamCalculator),
         ]
 
-        for name, calculator in calculators:
-            if verbose:
-                print(f"[{self._date_time()}] Trying transformation: {name}")
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore")
 
-            calculator = calculator()
-            transformation = calculator.calculate_best_params(
-                x_transformed, y_transformed, problem_type
-            )
+            for name, calculator in calculators:
+                if verbose:
+                    print(f"[{self._date_time()}] Fitting transformation: {name}")
 
-            if transformation:
-                transformations.append(transformation)
-
-                transformer = self._get_transformer(
-                    transformation["name"], transformation["params"]
+                calculator = calculator()
+                transformation = calculator.calculate_best_params(
+                    x_transformed, y_transformed, problem_type, verbose
                 )
-                x_transformed, y_transformed = transformer.fit_transform(
-                    x_transformed, y_transformed
-                )
+
+                if transformation:
+                    transformations.append(transformation)
+
+                    transformer = self._get_transformer(
+                        transformation["name"], transformation["params"]
+                    )
+                    x_transformed, y_transformed = transformer.fit_transform(
+                        x_transformed, y_transformed
+                    )
 
         return transformations
 

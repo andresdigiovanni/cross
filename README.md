@@ -349,7 +349,6 @@ Performs mathematical operations between columns.
     - `multiply`: Multiplies the values of two columns.
     - `divide`: Divides the values of two columns.
     - `modulus`: Computes the modulus of two columns.
-    - `power`: Raises the values of the first column to the power of the second.
     - `hypotenuse`: Computes the hypotenuse of two columns.
     - `mean`: Calculates the mean of two columns.
   
@@ -361,7 +360,6 @@ MathematicalOperations(
         ('sepal length (cm)', 'petal length (cm)', 'multiply'),
         ('sepal width (cm)', 'petal width (cm)', 'divide'),
         ('sepal length (cm)', 'petal width (cm)', 'modulus'),
-        ('sepal width (cm)', 'petal length (cm)', 'power'),
         ('sepal length (cm)', 'sepal width (cm)', 'hypotenuse'),
         ('petal length (cm)', 'petal width (cm)', 'mean'),
     ]

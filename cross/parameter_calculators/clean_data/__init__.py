@@ -1,3 +1,4 @@
+from .column_selection import ColumnSelectionParamCalculator
 from .missing_values_handler import MissingValuesParamCalculator
 from .outliers_handler import OutliersParamCalculator
 from .remove_duplicates_handler import RemoveDuplicatesParamCalculator

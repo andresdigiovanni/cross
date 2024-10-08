@@ -31,12 +31,13 @@ class MathematicalOperations:
 
             elif operation == "divide":
                 x_transformed[new_column] = x_transformed[col1] / x_transformed[col2]
+                x_transformed[new_column] = x_transformed[new_column].replace(
+                    [np.inf, -np.inf], np.nan
+                )
+                x_transformed[new_column] = x_transformed[new_column].fillna(0)
 
             elif operation == "modulus":
                 x_transformed[new_column] = x_transformed[col1] % x_transformed[col2]
-
-            elif operation == "power":
-                x_transformed[new_column] = x_transformed[col1] ** x_transformed[col2]
 
             elif operation == "hypotenuse":
                 x_transformed[new_column] = np.hypot(
@@ -47,6 +48,8 @@ class MathematicalOperations:
                 x_transformed[new_column] = (
                     x_transformed[col1] + x_transformed[col2]
                 ) / 2
+
+            x_transformed = x_transformed.copy()  # desfragment
 
         if y_transformed is not None:
             return x_transformed, y_transformed

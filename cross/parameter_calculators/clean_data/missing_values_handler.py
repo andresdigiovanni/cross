@@ -1,22 +1,31 @@
+from tqdm import tqdm
+
 from cross.parameter_calculators.shared import evaluate_model
 from cross.transformations.clean_data import MissingValuesHandler
-from cross.transformations.utils.dtypes import numerical_columns
+from cross.transformations.utils.dtypes import categorical_columns, numerical_columns
 
 
 class MissingValuesParamCalculator:
     def __init__(self):
         self.imputation_strategies = {
-            "fill_0": {},
-            "fill_mean": {},
-            "fill_median": {},
-            "fill_mode": {},
-            "fill_knn": {"n_neighbors": [3, 5, 7]},
-            "most_frequent": {},
+            "all": {
+                "fill_0": {},
+                "fill_mode": {},
+            },
+            "num": {
+                "fill_mean": {},
+                "fill_median": {},
+                "fill_knn": {"n_neighbors": [3, 5, 7]},
+            },
+            "cat": {
+                "most_frequent": {},
+            },
         }
 
-    def calculate_best_params(self, x, y, problem_type):
+    def calculate_best_params(self, x, y, problem_type, verbose):
+        cat_columns = categorical_columns(x)
         num_columns = numerical_columns(x)
-        x = x[num_columns]
+        x = x[cat_columns + num_columns]
 
         columns_with_nulls = self._get_columns_with_nulls(x)
 
@@ -26,9 +35,9 @@ class MissingValuesParamCalculator:
         best_handling_options = {}
         best_n_neighbors = {}
 
-        for column in columns_with_nulls:
+        for column in tqdm(columns_with_nulls, disable=(not verbose)):
             best_strategy, best_params = self._find_best_strategy_for_column(
-                x, y, problem_type, column
+                x, y, problem_type, column, is_num_column=(column in num_columns)
             )
             best_handling_options[column] = best_strategy
 
@@ -40,12 +49,22 @@ class MissingValuesParamCalculator:
     def _get_columns_with_nulls(self, x):
         return x.columns[x.isnull().any()].tolist()
 
-    def _find_best_strategy_for_column(self, x, y, problem_type, column):
+    def _find_best_strategy_for_column(self, x, y, problem_type, column, is_num_column):
         best_score = -float("inf")
         best_strategy = None
         best_params = {}
 
-        for strategy, params in self.imputation_strategies.items():
+        if is_num_column:
+            imputation_strategies = (
+                self.imputation_strategies["all"] | self.imputation_strategies["num"]
+            )
+
+        else:
+            imputation_strategies = (
+                self.imputation_strategies["all"] | self.imputation_strategies["cat"]
+            )
+
+        for strategy, params in imputation_strategies.items():
             if strategy == "fill_knn":
                 for n_neighbors in params["n_neighbors"]:
                     score = self._evaluate_strategy(

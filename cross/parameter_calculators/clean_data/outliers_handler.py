@@ -1,25 +1,30 @@
 from itertools import product
 
+import numpy as np
+from sklearn.ensemble import IsolationForest
+from sklearn.neighbors import LocalOutlierFactor
+from tqdm import tqdm
+
 from cross.parameter_calculators.shared import evaluate_model
 from cross.transformations.clean_data import OutliersHandler
 from cross.transformations.utils.dtypes import numerical_columns
 
 
 class OutliersParamCalculator:
-    def calculate_best_params(self, x, y, problem_type):
+    def calculate_best_params(self, x, y, problem_type, verbose):
         if y is None:
             return None
 
         columns = numerical_columns(x)
         outlier_methods = self._get_outlier_methods()
-        outlier_actions = ["remove", "cap", "median"]
+        outlier_actions = ["cap", "median"]
 
         best_handling_options = {}
         best_thresholds = {}
         best_lof_params = {}
         best_iforest_params = {}
 
-        for column in columns:
+        for column in tqdm(columns, disable=(not verbose)):
             best_params = self._find_best_params_for_column(
                 x, y, problem_type, column, outlier_actions, outlier_methods
             )
@@ -40,10 +45,10 @@ class OutliersParamCalculator:
 
     def _get_outlier_methods(self):
         return {
-            "iqr": {"thresholds": [1.5, 2.0, 2.5]},
-            "zscore": {"thresholds": [2.0, 2.5, 3.0]},
-            "lof": {"n_neighbors": [10, 15, 20]},
-            "iforest": {"contamination": [0.05, 0.1, 0.2, 0.3]},
+            "iqr": {"thresholds": [1.5]},
+            "zscore": {"thresholds": [3.0]},
+            "lof": {"n_neighbors": [20]},
+            "iforest": {"contamination": [0.1]},
         }
 
     def _find_best_params_for_column(
@@ -55,6 +60,47 @@ class OutliersParamCalculator:
         combinations = self._generate_combinations(outlier_actions, outlier_methods)
 
         for action, method, param in combinations:
+            rows_affected = float("inf")
+
+            if method == "iqr":
+                q1, q3 = np.percentile(x[column], [25, 75])
+                iqr = q3 - q1
+
+                lower_bound = q1 - param * iqr
+                upper_bound = q3 + param * iqr
+
+                rows_affected = x[
+                    (x[column] < lower_bound) | (x[column] > upper_bound)
+                ].shape[0]
+
+            elif method == "zscore":
+                mean = x[column].mean()
+                std = x[column].std()
+
+                lower_bound = mean - param * std
+                upper_bound = mean + param * std
+
+                rows_affected = x[
+                    (x[column] < lower_bound) | (x[column] > upper_bound)
+                ].shape[0]
+
+            elif method == "lof":
+                lof = LocalOutlierFactor(n_neighbors=param)
+                y_pred = lof.fit_predict(x[[column]].dropna())
+                is_outlier = y_pred == -1
+
+                rows_affected = is_outlier.sum()
+
+            elif method == "iforest":
+                iforest = IsolationForest(contamination=param)
+                y_pred = iforest.fit_predict(x[[column]].dropna())
+                is_outlier = y_pred == -1
+
+                rows_affected = is_outlier.sum()
+
+            if not rows_affected:
+                continue
+
             kwargs = self._build_kwargs(column, action, method, param)
             score = evaluate_model(x, y, problem_type, OutliersHandler(**kwargs))
 

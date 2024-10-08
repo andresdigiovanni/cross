@@ -1,5 +1,7 @@
 from sklearn.impute import KNNImputer, SimpleImputer
 
+from cross.transformations.utils.dtypes import categorical_columns
+
 
 class MissingValuesHandler:
     def __init__(
@@ -46,6 +48,8 @@ class MissingValuesHandler:
         x_transformed = x.copy()
         y_transformed = y.copy() if y is not None else None
 
+        cat_columns = categorical_columns(x)
+
         for column, action in self.handling_options.items():
             if action == "drop":
                 if y_transformed is not None:
@@ -66,7 +70,8 @@ class MissingValuesHandler:
                 )
 
             elif action == "fill_0":
-                x_transformed[column] = x_transformed[column].fillna(0)
+                fill_with = "Unknown" if column in cat_columns else 0
+                x_transformed[column] = x_transformed[column].fillna(fill_with)
 
             elif action == "interpolate":
                 x_transformed[column] = x_transformed[column].interpolate()

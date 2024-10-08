@@ -5,7 +5,7 @@ from cross.transformations.utils.dtypes import numerical_columns
 
 
 class ScaleTransformationParamCalculator:
-    def calculate_best_params(self, x, y=None, problem_type=None):
+    def calculate_best_params(self, x, y, problem_type, verbose):
         columns = numerical_columns(x)
         transformation_options = {}
 

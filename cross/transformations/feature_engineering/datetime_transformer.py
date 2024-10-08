@@ -18,6 +18,7 @@ class DateTimeTransformer:
             x_transformed[f"{column}_year"] = x_transformed[column].dt.year
             x_transformed[f"{column}_month"] = x_transformed[column].dt.month
             x_transformed[f"{column}_day"] = x_transformed[column].dt.day
+            x_transformed[f"{column}_weekday"] = x_transformed[column].dt.weekday
             x_transformed[f"{column}_hour"] = x_transformed[column].dt.hour
             x_transformed[f"{column}_minute"] = x_transformed[column].dt.minute
             x_transformed[f"{column}_second"] = x_transformed[column].dt.second
