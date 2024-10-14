@@ -24,8 +24,6 @@ from cross.applications.pages.steps import (
     OutliersHandlingPage,
     QuantileTransformationsEdit,
     QuantileTransformationsPage,
-    RemoveDuplicatesEdit,
-    RemoveDuplicatesPage,
     ScaleTransformationsEdit,
     ScaleTransformationsPage,
     TargetSelectionPage,
@@ -63,12 +61,6 @@ def navigation_pages():
         ],
         # Data Cleaning
         [
-            {
-                "name": "Remove duplicates",
-                "icon": "copy",
-                "page": RemoveDuplicatesPage(),
-                "edit": RemoveDuplicatesEdit(),
-            },
             {
                 "name": "Missing values",
                 "icon": "question-octagon",

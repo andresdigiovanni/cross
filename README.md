@@ -134,24 +134,6 @@ CastColumns(
 )
 ```
 
-#### **Remove Duplicates**
-
-Handles duplicate entries in the data.
-
-- Parameters:
-    - `subset`: List of columns to check for duplicates.
-    - `keep`: Specifies which duplicate to keep (`none`, `first`, `last`, or `False` for no duplicates).
-  
-```python
-RemoveDuplicatesHandler(
-    subset=[
-        "sepal length (cm)",
-        "sepal width (cm)",
-    ],
-    keep="first"
-)
-```
-
 #### **Missing Values**
 
 Handles missing values in the dataset.

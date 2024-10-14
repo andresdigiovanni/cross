@@ -23,6 +23,5 @@ from .quantile_transformation import (
     QuantileTransformationsEdit,
     QuantileTransformationsPage,
 )
-from .remove_duplicates import RemoveDuplicatesEdit, RemoveDuplicatesPage
 from .scale_transformation import ScaleTransformationsEdit, ScaleTransformationsPage
 from .target_selection import TargetSelectionPage

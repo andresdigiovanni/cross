@@ -6,7 +6,6 @@ from cross.parameter_calculators.clean_data import (
     ColumnSelectionParamCalculator,
     MissingValuesParamCalculator,
     OutliersParamCalculator,
-    RemoveDuplicatesParamCalculator,
 )
 from cross.parameter_calculators.feature_engineering import (
     CategoricalEncodingParamCalculator,
@@ -23,7 +22,6 @@ from cross.transformations.clean_data import (
     ColumnSelection,
     MissingValuesHandler,
     OutliersHandler,
-    RemoveDuplicatesHandler,
 )
 from cross.transformations.feature_engineering import (
     CategoricalEncoding,
@@ -174,7 +172,6 @@ class CrossTransformer:
 
         transformations = []
         calculators = [
-            ("RemoveDuplicatesHandler", RemoveDuplicatesParamCalculator),
             ("MissingValuesHandler", MissingValuesParamCalculator),
             ("OutliersHandler", OutliersParamCalculator),
             ("NonLinearTransformation", NonLinearTransformationParamCalculator),

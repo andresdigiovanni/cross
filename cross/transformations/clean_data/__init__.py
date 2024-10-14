@@ -1,4 +1,3 @@
 from .column_selection import ColumnSelection
 from .missing_values_handler import MissingValuesHandler
 from .outliers_handler import OutliersHandler
-from .remove_duplicates_handler import RemoveDuplicatesHandler
