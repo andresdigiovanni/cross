@@ -1,7 +1,6 @@
 class OutliersHandlingBase:
     actions = {
         "Do nothing": "none",
-        "Remove": "remove",
         "Cap to threshold": "cap",
         "Replace with median": "median",
     }

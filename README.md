@@ -34,7 +34,7 @@ Access the application by navigating to `http://localhost:8501` in your browser.
 transformations = [
     OutliersHandler(
         handling_options={
-            "sepal length (cm)": ("remove", "iqr"),
+            "sepal length (cm)": ("median", "iqr"),
             "sepal width (cm)": ("cap", "zscore"),
         },
         thresholds={
@@ -157,13 +157,12 @@ RemoveDuplicatesHandler(
 Handles missing values in the dataset.
 
 - Parameters:
-    - `handling_options`: Dictionary that specifies the handling strategy for each column. Options: `drop`, `fill_0`, `most_frequent`, `fill_mean`, `fill_median`, `fill_mode`, `interpolate`, `fill_knn`.
+    - `handling_options`: Dictionary that specifies the handling strategy for each column. Options: `fill_0`, `most_frequent`, `fill_mean`, `fill_median`, `fill_mode`, `interpolate`, `fill_knn`.
     - `n_neighbors`: Number of neighbors for K-Nearest Neighbors imputation (used with `fill_knn`).
   
 ```python
 MissingValuesHandler(
     handling_options={
-        'sepal length (cm)': 'drop',
         'sepal width (cm)': 'fill_knn',
         'petal length (cm)': 'fill_mode',
         'petal width (cm)': 'interpolate',
@@ -180,7 +179,7 @@ MissingValuesHandler(
 Manages outliers in the dataset using different strategies.
 
 - Parameters:
-    - `handling_options`: Dictionary specifying the handling strategy. Options: `none`, `remove`, `cap`, `median`, `lof`, `iforest`.
+    - `handling_options`: Dictionary specifying the handling strategy. Options: `none`, `cap`, `median`, `lof`, `iforest`.
     - `thresholds`: Dictionary with thresholds for `iqr` and `zscore` methods.
     - `lof_params`: Dictionary specifying parameters for the LOF method.
     - `iforest_params`: Dictionary specifying parameters for Isolation Forest.
@@ -188,10 +187,10 @@ Manages outliers in the dataset using different strategies.
 ```python
 OutliersHandler(
     handling_options={
-        'sepal length (cm)': ('remove', 'iqr'),
+        'sepal length (cm)': ('median', 'iqr'),
         'sepal width (cm)': ('cap', 'zscore'),
         'petal length (cm)': ('median', 'lof'),
-        'petal width (cm)': ('remove', 'iforest'),
+        'petal width (cm)': ('cap', 'iforest'),
     },
     thresholds={
         'sepal length (cm)': 1.5,

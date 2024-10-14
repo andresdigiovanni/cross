@@ -17,7 +17,6 @@ class MissingValuesEdit(MissingValuesBase):
 
         for i, (column, action) in enumerate(handling_options.items()):
             if action in [
-                "drop",
                 "fill_mean",
                 "fill_median",
                 "fill_mode",

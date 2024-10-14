@@ -30,7 +30,7 @@ def evaluate_model(x, y, problem_type, transformer=None, columns_idx=None):
             x_train, y_train = transformer.fit_transform(x_train, y_train)
             x_test, y_test = transformer.transform(x_test, y_test)
 
-        if columns_idx:
+        if columns_idx is not None:
             x_train = x_train.iloc[:, columns_idx]
             x_test = x_test.iloc[:, columns_idx]
 

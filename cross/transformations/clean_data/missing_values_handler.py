@@ -51,20 +51,7 @@ class MissingValuesHandler:
         cat_columns = categorical_columns(x)
 
         for column, action in self.handling_options.items():
-            if action == "drop":
-                if y_transformed is not None:
-                    combined = x_transformed.copy()
-                    combined["__y"] = y_transformed
-
-                    combined = combined.dropna(subset=[column])
-
-                    x_transformed = combined.drop(columns=["__y"])
-                    y_transformed = combined["__y"]
-
-                else:
-                    x_transformed = x_transformed.dropna(subset=[column])
-
-            elif action in ["fill_mean", "fill_median", "fill_mode"]:
+            if action in ["fill_mean", "fill_median", "fill_mode"]:
                 x_transformed[column] = x_transformed[column].fillna(
                     self.statistics[column]
                 )

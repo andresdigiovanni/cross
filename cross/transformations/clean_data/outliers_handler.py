@@ -120,16 +120,7 @@ class OutliersHandler:
             lower_bound = self.bounds[column]["lower_bound"]
             upper_bound = self.bounds[column]["upper_bound"]
 
-            if action == "remove":
-                mask = (x_transformed[column] >= lower_bound) & (
-                    x_transformed[column] <= upper_bound
-                )
-                x_transformed = x_transformed[mask]
-
-                if y_transformed is not None:
-                    y_transformed = y_transformed[mask]
-
-            elif action == "cap":
+            if action == "cap":
                 x_transformed[column] = np.clip(
                     x_transformed[column], lower_bound, upper_bound
                 )

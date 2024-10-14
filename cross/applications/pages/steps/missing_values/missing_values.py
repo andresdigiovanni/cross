@@ -2,7 +2,6 @@ class MissingValuesBase:
     def __init__(self):
         self.actions_all = {
             "Do nothing": "none",
-            "Drop": "drop",
             "Fill with 0": "fill_0",
             "Fill with mode": "fill_mode",
         }
