@@ -1,79 +1,79 @@
+from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.impute import KNNImputer, SimpleImputer
 
 from cross.transformations.utils.dtypes import categorical_columns
 
 
-class MissingValuesHandler:
-    def __init__(
-        self, handling_options=None, n_neighbors=None, statistics=None, imputers=None
-    ):
-        self.handling_options = handling_options or {}
-        self.n_neighbors = n_neighbors or {}
-        self.statistics = statistics or {}
-        self.imputers = imputers or {}
+class MissingValuesHandler(BaseEstimator, TransformerMixin):
+    def __init__(self, handling_options=None, n_neighbors=None):
+        self.handling_options = handling_options
+        self.n_neighbors = n_neighbors
 
-    def get_params(self):
+        self._statistics = {}
+        self._imputers = {}
+
+    def get_params(self, deep=True):
         return {
             "handling_options": self.handling_options,
             "n_neighbors": self.n_neighbors,
-            "statistics": self.statistics,
-            "imputers": self.imputers,
         }
 
-    def fit(self, x, y=None):
-        self.statistics = {}
-        self.imputers = {}
+    def set_params(self, **params):
+        for key, value in params.items():
+            setattr(self, key, value)
+
+        return self
+
+    def fit(self, X, y=None):
+        self._statistics = {}
+        self._imputers = {}
 
         for column, action in self.handling_options.items():
             if action == "fill_mean":
-                self.statistics[column] = x[column].mean()
+                self._statistics[column] = X[column].mean()
 
             elif action == "fill_median":
-                self.statistics[column] = x[column].median()
+                self._statistics[column] = X[column].median()
 
             elif action == "fill_mode":
-                self.statistics[column] = x[column].mode()[0]
+                self._statistics[column] = X[column].mode()[0]
 
             elif action == "fill_knn":
-                imputer = KNNImputer(n_neighbors=self.n_neighbors[column])
-                imputer.fit(x[[column]])
-                self.imputers[column] = imputer
+                imputer = KNNImputer(n_neighbors=self.n_neighbors.get(column, 5))
+                imputer.fit(X[[column]])
+                self._imputers[column] = imputer
 
             elif action == "most_frequent":
                 imputer = SimpleImputer(strategy="most_frequent")
-                imputer.fit(x[[column]])
-                self.imputers[column] = imputer
+                imputer.fit(X[[column]])
+                self._imputers[column] = imputer
 
-    def transform(self, x, y=None):
-        x_transformed = x.copy()
-        y_transformed = y.copy() if y is not None else None
+        return self
 
-        cat_columns = categorical_columns(x)
+    def transform(self, X, y=None):
+        X_transformed = X.copy()
+        cat_columns = categorical_columns(X)
 
         for column, action in self.handling_options.items():
             if action in ["fill_mean", "fill_median", "fill_mode"]:
-                x_transformed[column] = x_transformed[column].fillna(
-                    self.statistics[column]
+                X_transformed[column] = X_transformed[column].fillna(
+                    self._statistics[column]
                 )
 
             elif action == "fill_0":
                 fill_with = "Unknown" if column in cat_columns else 0
-                x_transformed[column] = x_transformed[column].fillna(fill_with)
+                X_transformed[column] = X_transformed[column].fillna(fill_with)
 
             elif action == "interpolate":
-                x_transformed[column] = x_transformed[column].interpolate()
+                X_transformed[column] = X_transformed[column].interpolate()
 
             elif action in ["fill_knn", "most_frequent"]:
-                imputer = self.imputers[column]
-                x_transformed[column] = imputer.transform(
-                    x_transformed[[column]]
+                imputer = self._imputers[column]
+                X_transformed[column] = imputer.transform(
+                    X_transformed[[column]]
                 ).flatten()
 
-        if y_transformed is not None:
-            return x_transformed, y_transformed
-        else:
-            return x_transformed
+        return X_transformed
 
-    def fit_transform(self, x, y=None):
-        self.fit(x, y)
-        return self.transform(x, y)
+    def fit_transform(self, X, y=None):
+        return self.fit(X, y).transform(X, y)

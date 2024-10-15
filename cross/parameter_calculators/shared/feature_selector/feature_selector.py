@@ -25,8 +25,8 @@ class FeatureSelector:
         )
 
         if transformer:
-            x_train, y_train = transformer.fit_transform(x_train, y_train)
-            x_test, y_test = transformer.transform(x_test, y_test)
+            x_train = transformer.fit_transform(x_train, y_train)
+            x_test = transformer.transform(x_test, y_test)
 
         model = self._get_model(problem_type)
         model.fit(x_train, y_train)

@@ -2,6 +2,8 @@ import pickle
 import warnings
 from datetime import datetime
 
+from sklearn.base import BaseEstimator, TransformerMixin
+
 from cross.parameter_calculators.clean_data import (
     ColumnSelectionParamCalculator,
     MissingValuesParamCalculator,
@@ -39,7 +41,7 @@ from cross.transformations.preprocessing import (
 )
 
 
-class CrossTransformer:
+class CrossTransformer(BaseEstimator, TransformerMixin):
     def __init__(self, transformations=None):
         self.transformations = []
 
@@ -48,6 +50,8 @@ class CrossTransformer:
                 self.transformations = self._initialize_transformations(transformations)
             else:
                 self.transformations = transformations
+
+        # self.transformations = transformations or []
 
     def load_transformations(self, file_path):
         with open(file_path, "rb") as f:
@@ -65,47 +69,26 @@ class CrossTransformer:
         return initialized_transformers
 
     def _get_transformer(self, name, params):
-        if name == "CategoricalEncoding":
-            return CategoricalEncoding(**params)
+        transformer_mapping = {
+            "CategoricalEncoding": CategoricalEncoding,
+            "CastColumns": CastColumns,
+            "ColumnSelection": ColumnSelection,
+            "CyclicalFeaturesTransformer": CyclicalFeaturesTransformer,
+            "DateTimeTransformer": DateTimeTransformer,
+            "OutliersHandler": OutliersHandler,
+            "MathematicalOperations": MathematicalOperations,
+            "MissingValuesHandler": MissingValuesHandler,
+            "NonLinearTransformation": NonLinearTransformation,
+            "Normalization": Normalization,
+            "NumericalBinning": NumericalBinning,
+            "QuantileTransformation": QuantileTransformation,
+            "ScaleTransformation": ScaleTransformation,
+        }
 
-        if name == "CastColumns":
-            return CastColumns(**params)
+        if name in transformer_mapping:
+            return transformer_mapping[name](**params)
 
-        if name == "ColumnSelection":
-            return ColumnSelection(**params)
-
-        if name == "CyclicalFeaturesTransformer":
-            return CyclicalFeaturesTransformer(**params)
-
-        if name == "DateTimeTransformer":
-            return DateTimeTransformer(**params)
-
-        if name == "OutliersHandler":
-            return OutliersHandler(**params)
-
-        if name == "MathematicalOperations":
-            return MathematicalOperations(**params)
-
-        if name == "MissingValuesHandler":
-            return MissingValuesHandler(**params)
-
-        if name == "NonLinearTransformation":
-            return NonLinearTransformation(**params)
-
-        if name == "Normalization":
-            return Normalization(**params)
-
-        if name == "NumericalBinning":
-            return NumericalBinning(**params)
-
-        if name == "QuantileTransformation":
-            return QuantileTransformation(**params)
-
-        if name == "RemoveDuplicatesHandler":
-            return RemoveDuplicatesHandler(**params)
-
-        if name == "ScaleTransformation":
-            return ScaleTransformation(**params)
+        raise ValueError(f"Unknown transformer: {name}")
 
     def save_transformations(self, file_path):
         transformations_data = [
@@ -116,58 +99,38 @@ class CrossTransformer:
         with open(file_path, "wb") as f:
             pickle.dump(transformations_data, f)
 
-    def fit(self, x, y=None):
-        x_transformed = x.copy()
-
+    def fit(self, X, y=None):
+        X_transformed = X.copy()
         for transformer in self.transformations:
-            transformer.fit(x_transformed, y)
-            x_transformed = transformer.transform(x_transformed)
+            transformer.fit(X_transformed, y)
+            X_transformed = transformer.transform(X_transformed)
 
-    def transform(self, x, y=None):
-        x_transformed = x.copy()
-        y_transformed = y.copy() if y is not None else None
+        return self
 
+    def transform(self, X, y=None):
+        X_transformed = X.copy()
         for transformer in self.transformations:
-            if y_transformed is not None:
-                x_transformed, y_transformed = transformer.transform(
-                    x_transformed, y_transformed
-                )
+            X_transformed = transformer.transform(X_transformed)
 
-            else:
-                x_transformed = transformer.transform(x_transformed)
+        return X_transformed
 
-        if y_transformed is not None:
-            return x_transformed, y_transformed
-        else:
-            return x_transformed
-
-    def fit_transform(self, x, y=None):
-        x_transformed = x.copy()
-        y_transformed = y.copy() if y is not None else None
-
+    def fit_transform(self, X, y=None):
+        X_transformed = X.copy()
         for transformer in self.transformations:
-            if y_transformed is not None:
-                x_transformed, y_transformed = transformer.fit_transform(
-                    x_transformed, y_transformed
-                )
+            X_transformed = transformer.fit_transform(X_transformed, y)
 
-            else:
-                x_transformed = transformer.fit_transform(x_transformed)
+        return X_transformed
 
-        if y_transformed is not None:
-            return x_transformed, y_transformed
-        else:
-            return x_transformed
-
-    def auto_transform(self, x, y, problem_type, verbose=True):
+    def auto_transform(self, X, y, problem_type, verbose=True):
         if verbose:
-            date_time = self._date_time()
             print(
-                f"\n[{date_time}] Starting experiment to find the bests transformations"
+                f"\n[{self._date_time()}] Starting experiment to find the best transformations"
             )
-            print(f"[{date_time}] Shape: {x.shape}. Problem type: {problem_type}\n")
+            print(
+                f"[{self._date_time()}] Shape: {X.shape}. Problem type: {problem_type}\n"
+            )
 
-        x_transformed = x.copy()
+        X_transformed = X.copy()
         y_transformed = y.copy()
 
         transformations = []
@@ -193,18 +156,14 @@ class CrossTransformer:
 
                 calculator = calculator()
                 transformation = calculator.calculate_best_params(
-                    x_transformed, y_transformed, problem_type, verbose
+                    X_transformed, y_transformed, problem_type, verbose
                 )
-
                 if transformation:
                     transformations.append(transformation)
-
                     transformer = self._get_transformer(
                         transformation["name"], transformation["params"]
                     )
-                    x_transformed, y_transformed = transformer.fit_transform(
-                        x_transformed, y_transformed
-                    )
+                    X_transformed = transformer.fit_transform(X_transformed)
 
         return transformations
 

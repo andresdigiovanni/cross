@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.metrics import accuracy_score, mean_squared_error
 from sklearn.model_selection import KFold, StratifiedKFold
@@ -23,12 +24,14 @@ def evaluate_model(x, y, problem_type, transformer=None, columns_idx=None):
     scores = []
 
     for train_idx, test_idx in kfold.split(x, y):
-        x_train, y_train = x.iloc[train_idx], y.iloc[train_idx]
-        x_test, y_test = x.iloc[test_idx], y.iloc[test_idx]
+        x_train = _select_data(x, train_idx)
+        y_train = _select_data(y, train_idx)
+        x_test = _select_data(x, test_idx)
+        y_test = _select_data(y, test_idx)
 
         if transformer:
-            x_train, y_train = transformer.fit_transform(x_train, y_train)
-            x_test, y_test = transformer.transform(x_test, y_test)
+            x_train = transformer.fit_transform(x_train, y_train)
+            x_test = transformer.transform(x_test, y_test)
 
         if columns_idx is not None:
             x_train = x_train.iloc[:, columns_idx]
@@ -52,3 +55,14 @@ def evaluate_model(x, y, problem_type, transformer=None, columns_idx=None):
         scores.append(score)
 
     return np.mean(scores) if len(scores) else float("-inf")
+
+
+def _select_data(x, idx):
+    if isinstance(x, np.ndarray):
+        return x[idx]
+
+    elif isinstance(x, pd.DataFrame) or isinstance(x, pd.Series):
+        return x.iloc[idx]
+
+    else:
+        raise TypeError("The data type {} is not compatible.".format(type(x)))

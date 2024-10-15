@@ -12,9 +12,6 @@ from cross.transformations.utils.dtypes import numerical_columns
 
 class OutliersParamCalculator:
     def calculate_best_params(self, x, y, problem_type, verbose):
-        if y is None:
-            return None
-
         columns = numerical_columns(x)
         outlier_methods = self._get_outlier_methods()
         outlier_actions = ["cap", "median"]
@@ -60,7 +57,7 @@ class OutliersParamCalculator:
         combinations = self._generate_combinations(outlier_actions, outlier_methods)
 
         for action, method, param in combinations:
-            rows_affected = float("inf")
+            rows_affected = None
 
             if method == "iqr":
                 q1, q3 = np.percentile(x[column], [25, 75])
@@ -115,6 +112,9 @@ class OutliersParamCalculator:
 
         for action in outlier_actions:
             for method, params in outlier_methods.items():
+                if action == "cap" and method not in ["iqr", "zscore"]:
+                    continue
+
                 if method == "lof":
                     combinations.extend(
                         product([action], [method], params["n_neighbors"])

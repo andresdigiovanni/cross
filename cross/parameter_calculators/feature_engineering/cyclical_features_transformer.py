@@ -34,19 +34,19 @@ class CyclicalFeaturesTransformerParamCalculator:
         return None
 
     def _get_period(self, df, column):
-        if column.lower().endswith("month"):
+        if column.lower().endswith("_month"):
             return 12
 
-        elif column.lower().endswith("day"):
+        elif column.lower().endswith("_day"):
             return 31
 
-        elif column.lower().endswith("weekday"):
+        elif column.lower().endswith("_weekday"):
             return 7
 
-        elif column.lower().endswith("hour"):
+        elif column.lower().endswith("_hour"):
             return 24
 
-        elif column.lower().endswith("minute") or column.lower().endswith("second"):
+        elif column.lower().endswith("_minute") or column.lower().endswith("_second"):
             return 60
 
         unique_values = df[column].dropna().unique()

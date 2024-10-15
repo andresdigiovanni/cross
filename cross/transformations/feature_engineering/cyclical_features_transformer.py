@@ -1,37 +1,39 @@
 import numpy as np
+from sklearn.base import BaseEstimator, TransformerMixin
 
 
-class CyclicalFeaturesTransformer:
+class CyclicalFeaturesTransformer(BaseEstimator, TransformerMixin):
     def __init__(self, columns_periods=None):
         self.columns_periods = columns_periods or {}
 
-    def get_params(self):
+    def get_params(self, deep=True):
         return {
             "columns_periods": self.columns_periods,
         }
 
-    def fit(self, x, y=None):
-        pass
+    def set_params(self, **params):
+        for key, value in params.items():
+            setattr(self, key, value)
 
-    def transform(self, x, y=None):
-        x_transformed = x.copy()
-        y_transformed = y.copy() if y is not None else None
+        return self
+
+    def fit(self, X, y=None):
+        return self  # No fitting necessary, but required for compatibility
+
+    def transform(self, X, y=None):
+        X_transformed = X.copy()
 
         for column, period in self.columns_periods.items():
-            x_transformed[f"{column}_sin"] = np.sin(
-                2 * np.pi * x_transformed[column] / period
+            X_transformed[f"{column}_sin"] = np.sin(
+                2 * np.pi * X_transformed[column] / period
             )
-            x_transformed[f"{column}_cos"] = np.cos(
-                2 * np.pi * x_transformed[column] / period
+            X_transformed[f"{column}_cos"] = np.cos(
+                2 * np.pi * X_transformed[column] / period
             )
 
-        x_transformed = x_transformed.drop(columns=self.columns_periods.keys())
+        X_transformed = X_transformed.drop(columns=self.columns_periods.keys())
 
-        if y_transformed is not None:
-            return x_transformed, y_transformed
-        else:
-            return x_transformed
+        return X_transformed
 
-    def fit_transform(self, x, y=None):
-        self.fit(x, y)
-        return self.transform(x, y)
+    def fit_transform(self, X, y=None):
+        return self.fit(X, y).transform(X, y)

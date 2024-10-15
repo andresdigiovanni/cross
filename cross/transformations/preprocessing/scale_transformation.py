@@ -1,3 +1,4 @@
+from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.preprocessing import (
     MaxAbsScaler,
     MinMaxScaler,
@@ -6,19 +7,25 @@ from sklearn.preprocessing import (
 )
 
 
-class ScaleTransformation:
-    def __init__(self, transformation_options=None, transformers=None):
+class ScaleTransformation(BaseEstimator, TransformerMixin):
+    def __init__(self, transformation_options=None):
         self.transformation_options = transformation_options or {}
-        self.transformers = transformers or {}
 
-    def get_params(self):
+        self._transformers = {}
+
+    def get_params(self, deep=True):
         return {
             "transformation_options": self.transformation_options,
-            "transformers": self.transformers,
         }
 
-    def fit(self, x, y=None):
-        self.transformers = {}
+    def set_params(self, **params):
+        for key, value in params.items():
+            setattr(self, key, value)
+
+        return self
+
+    def fit(self, X, y=None):
+        self._transformers = {}
 
         for column, transformation in self.transformation_options.items():
             if transformation == "min_max":
@@ -36,21 +43,17 @@ class ScaleTransformation:
             else:
                 continue
 
-            transformer.fit(x[[column]])
-            self.transformers[column] = transformer
+            self._transformers[column] = transformer.fit(X[[column]])
 
-    def transform(self, x, y=None):
-        x_transformed = x.copy()
-        y_transformed = y.copy() if y is not None else None
+        return self
 
-        for column, transformer in self.transformers.items():
-            x_transformed[column] = transformer.transform(x[[column]])
+    def transform(self, X, y=None):
+        X_transformed = X.copy()
 
-        if y_transformed is not None:
-            return x_transformed, y_transformed
-        else:
-            return x_transformed
+        for column, scaler in self._transformers.items():
+            X_transformed[[column]] = scaler.transform(X[[column]])
 
-    def fit_transform(self, x, y=None):
-        self.fit(x, y)
-        return self.transform(x, y)
+        return X_transformed
+
+    def fit_transform(self, X, y=None):
+        return self.fit(X, y).transform(X, y)

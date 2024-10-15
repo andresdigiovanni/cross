@@ -1,24 +1,30 @@
-class ColumnSelection:
+from sklearn.base import BaseEstimator, TransformerMixin
+
+
+class ColumnSelection(BaseEstimator, TransformerMixin):
     def __init__(self, columns=None):
         self.columns = columns or []
 
-    def get_params(self):
+    def get_params(self, deep=True):
         return {"columns": self.columns}
 
-    def fit(self, x, y=None):
-        return
+    def set_params(self, **params):
+        for key, value in params.items():
+            setattr(self, key, value)
 
-    def transform(self, x, y=None):
-        x_transformed = x.copy()
-        y_transformed = y.copy() if y is not None else None
+        return self
 
-        x_transformed = x_transformed[self.columns]
+    def fit(self, X, y=None):
+        # No fitting required, maintaining compatibility with scikit-learn API
+        return self
 
-        if y_transformed is not None:
-            return x_transformed, y_transformed
-        else:
-            return x_transformed
+    def transform(self, X, y=None):
+        X_transformed = X.copy()
 
-    def fit_transform(self, x, y=None):
-        self.fit(x, y)
-        return self.transform(x, y)
+        # Select only the specified columns from X
+        X_transformed = X_transformed[self.columns]
+
+        return X_transformed
+
+    def fit_transform(self, X, y=None):
+        return self.fit(X, y).transform(X, y)

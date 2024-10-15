@@ -1,35 +1,39 @@
-class DateTimeTransformer:
+from sklearn.base import BaseEstimator, TransformerMixin
+
+
+class DateTimeTransformer(BaseEstimator, TransformerMixin):
     def __init__(self, datetime_columns=None):
         self.datetime_columns = datetime_columns or []
 
-    def get_params(self):
+    def get_params(self, deep=True):
         return {
             "datetime_columns": self.datetime_columns,
         }
 
-    def fit(self, x, y=None):
-        pass
+    def set_params(self, **params):
+        for key, value in params.items():
+            setattr(self, key, value)
 
-    def transform(self, x, y=None):
-        x_transformed = x.copy()
-        y_transformed = y.copy() if y is not None else None
+        return self
+
+    def fit(self, X, y=None):
+        return self  # No fitting necessary, but method required for compatibility
+
+    def transform(self, X, y=None):
+        X_transformed = X.copy()
 
         for column in self.datetime_columns:
-            x_transformed[f"{column}_year"] = x_transformed[column].dt.year
-            x_transformed[f"{column}_month"] = x_transformed[column].dt.month
-            x_transformed[f"{column}_day"] = x_transformed[column].dt.day
-            x_transformed[f"{column}_weekday"] = x_transformed[column].dt.weekday
-            x_transformed[f"{column}_hour"] = x_transformed[column].dt.hour
-            x_transformed[f"{column}_minute"] = x_transformed[column].dt.minute
-            x_transformed[f"{column}_second"] = x_transformed[column].dt.second
+            X_transformed[f"{column}_year"] = X_transformed[column].dt.year
+            X_transformed[f"{column}_month"] = X_transformed[column].dt.month
+            X_transformed[f"{column}_day"] = X_transformed[column].dt.day
+            X_transformed[f"{column}_weekday"] = X_transformed[column].dt.weekday
+            X_transformed[f"{column}_hour"] = X_transformed[column].dt.hour
+            X_transformed[f"{column}_minute"] = X_transformed[column].dt.minute
+            X_transformed[f"{column}_second"] = X_transformed[column].dt.second
 
-        x_transformed = x_transformed.drop(columns=self.datetime_columns)
+        X_transformed = X_transformed.drop(columns=self.datetime_columns)
 
-        if y_transformed is not None:
-            return x_transformed, y_transformed
-        else:
-            return x_transformed
+        return X_transformed
 
-    def fit_transform(self, x, y=None):
-        self.fit(x, y)
-        return self.transform(x, y)
+    def fit_transform(self, X, y=None):
+        return self.fit(X, y).transform(X, y)
