@@ -6,7 +6,7 @@ from cross.transformations.utils.dtypes import numerical_columns
 
 
 class FeatureSelector:
-    def fit(self, x, y, model, scoring, direction, transformer=None, early_stopping=3):
+    def fit(self, x, y, model, scoring, direction, transformer=None, early_stopping=5):
         selected_features_idx = []
         best_score = float("-inf") if direction == "maximize" else float("inf")
         features_added_without_improvement = 0

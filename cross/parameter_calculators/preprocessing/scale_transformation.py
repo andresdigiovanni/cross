@@ -1,4 +1,3 @@
-import numpy as np
 from tqdm import tqdm
 
 from cross.parameter_calculators.shared import evaluate_model
@@ -44,12 +43,3 @@ class ScaleTransformationParamCalculator:
             }
 
         return None
-
-    def _has_outliers(self, data, threshold=1.5):
-        q1, q3 = np.percentile(data, [25, 75])
-        iqr = q3 - q1
-
-        lower_bound = q1 - threshold * iqr
-        upper_bound = q3 + threshold * iqr
-
-        return ((data < lower_bound) | (data > upper_bound)).any()

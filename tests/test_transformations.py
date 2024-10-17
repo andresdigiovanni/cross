@@ -102,16 +102,11 @@ def test_transformations_are_applied(load_data):
                 }
             ),
             NumericalBinning(
-                binning_options={
-                    "sepal length (cm)": "uniform",
-                    "sepal width (cm)": "quantile",
-                    "petal length (cm)": "kmeans",
-                },
-                num_bins={
-                    "sepal length (cm)": 5,
-                    "sepal width (cm)": 6,
-                    "petal length (cm)": 7,
-                },
+                binning_options=[
+                    ("sepal length (cm)", "uniform", 5),
+                    ("sepal width (cm)", "quantile", 6),
+                    ("petal length (cm)", "kmeans", 7),
+                ]
             ),
             MathematicalOperations(
                 operations_options=[

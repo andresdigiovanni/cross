@@ -109,7 +109,7 @@ class MissingValuesParamCalculator:
             handling_options=handling_options, n_neighbors=knn_params
         )
 
-        return evaluate_model(x[[column]], y, model, scoring, missing_values_handler)
+        return evaluate_model(x, y, model, scoring, missing_values_handler)
 
     def _build_result(self, best_handling_options, best_n_neighbors):
         missing_values_handler = MissingValuesHandler(

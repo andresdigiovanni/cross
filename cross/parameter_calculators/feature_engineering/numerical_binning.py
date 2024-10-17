@@ -15,63 +15,52 @@ class NumericalBinningParamCalculator:
 
         for column in tqdm(columns, disable=(not verbose)):
             all_transformations_info = []
-            all_binning_options = {}
-            all_n_bins_options = {}
+            all_binning_options = []
 
-            for n_bins in all_n_bins:
-                for strategy in strategies:
-                    binning_options = {column: strategy}
-                    n_bins_options = {column: n_bins}
-                    all_binning_options[column] = strategy
-                    all_n_bins_options[column] = n_bins
+            num_unique_values = x[column].nunique()
 
-                    numerical_binning = NumericalBinning(
-                        binning_options, n_bins_options
-                    )
+            for strategy in strategies:
+                for n_bins in all_n_bins:
+                    if n_bins >= num_unique_values:
+                        continue
+
+                    binning_option = (column, strategy, n_bins)
+                    all_binning_options.append(binning_option)
+
+                    # Calculate binned column name
+                    numerical_binning = NumericalBinning([binning_option])
                     x_binned = numerical_binning.fit_transform(x)
                     binned_column_name = list(set(x_binned.columns) - set(x.columns))[0]
 
                     all_transformations_info.append(
                         {
-                            "column": column,
-                            "strategy": strategy,
-                            "n_bins": n_bins,
+                            "binning_option": binning_option,
                             "transformed_column": binned_column_name,
                         }
                     )
 
-            feature_selector = FeatureSelector()
-            selected_features = feature_selector.fit(
-                x,
-                y,
-                model,
-                scoring,
-                direction,
-                transformer=NumericalBinning(all_binning_options, all_n_bins_options),
-            )
+            if len(all_binning_options):
+                feature_selector = FeatureSelector()
+                selected_features = feature_selector.fit(
+                    x,
+                    y,
+                    model,
+                    scoring,
+                    direction,
+                    transformer=NumericalBinning(all_binning_options),
+                )
+            else:
+                selected_features = []
 
             for transformation_info in all_transformations_info:
                 if transformation_info["transformed_column"] in selected_features:
                     selected_transformations.append(
-                        {
-                            "column": transformation_info["column"],
-                            "strategy": transformation_info["strategy"],
-                            "n_bins": transformation_info["n_bins"],
-                        }
+                        transformation_info["binning_option"]
                     )
 
         if selected_transformations:
-            best_binning_options = {}
-            best_n_bins_options = {}
+            numerical_binning = NumericalBinning(selected_transformations)
 
-            for t in selected_transformations:
-                if t["column"] not in best_binning_options:
-                    best_binning_options[t["column"]] = t["strategy"]
-                    best_n_bins_options[t["column"]] = t["n_bins"]
-
-            numerical_binning = NumericalBinning(
-                best_binning_options, best_n_bins_options
-            )
             return {
                 "name": numerical_binning.__class__.__name__,
                 "params": numerical_binning.get_params(),

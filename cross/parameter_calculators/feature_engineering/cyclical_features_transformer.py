@@ -53,7 +53,7 @@ class CyclicalFeaturesTransformerParamCalculator:
         n_unique_values = len(unique_values)
         pct_unique_values = n_unique_values / df.shape[0]
 
-        if n_unique_values > 1 and pct_unique_values < 0.10:
+        if n_unique_values > 2 and pct_unique_values < 0.10:
             return n_unique_values
 
         return None

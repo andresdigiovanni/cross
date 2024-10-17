@@ -2,6 +2,7 @@ import numpy as np
 from scipy.stats import skew
 from sklearn.preprocessing import PowerTransformer
 
+from cross.parameter_calculators.shared import evaluate_model
 from cross.transformations.preprocessing import NonLinearTransformation
 from cross.transformations.utils.dtypes import numerical_columns
 
@@ -12,6 +13,8 @@ class NonLinearTransformationParamCalculator:
 
         best_transformation_options = {}
         transformations = ["log", "exponential", "yeo_johnson"]
+
+        base_score = evaluate_model(x, y, model, scoring)
 
         columns = numerical_columns(x)
 
@@ -52,7 +55,19 @@ class NonLinearTransformationParamCalculator:
                     best_transformation = transformation
 
             if best_transformation:
-                best_transformation_options[column] = best_transformation
+                score = evaluate_model(
+                    x,
+                    y,
+                    model,
+                    scoring,
+                    NonLinearTransformation({column: best_transformation}),
+                )
+
+                has_improved = (direction == "maximize" and score > base_score) or (
+                    direction != "maximize" and score < base_score
+                )
+                if has_improved:
+                    best_transformation_options[column] = best_transformation
 
         if best_transformation_options:
             non_linear_transformation = NonLinearTransformation(
