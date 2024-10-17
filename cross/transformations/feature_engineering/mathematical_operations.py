@@ -38,11 +38,6 @@ class MathematicalOperations(BaseEstimator, TransformerMixin):
 
             elif operation == "divide":
                 X_transformed[new_column] = X_transformed[col1] / X_transformed[col2]
-                X_transformed[new_column] = (
-                    X_transformed[new_column]
-                    .replace([np.inf, -np.inf], np.nan)
-                    .fillna(0)
-                )
 
             elif operation == "modulus":
                 X_transformed[new_column] = X_transformed[col1] % X_transformed[col2]
@@ -56,6 +51,11 @@ class MathematicalOperations(BaseEstimator, TransformerMixin):
                 X_transformed[new_column] = (
                     X_transformed[col1] + X_transformed[col2]
                 ) / 2
+
+            # Prevent NaNs
+            X_transformed[new_column] = (
+                X_transformed[new_column].replace([np.inf, -np.inf], np.nan).fillna(0)
+            )
 
             # Prevent fragmentation by explicitly copying the DataFrame
             X_transformed = X_transformed.copy()

@@ -6,7 +6,7 @@ from cross.transformations.utils.dtypes import numerical_columns
 
 
 class NumericalBinningParamCalculator:
-    def calculate_best_params(self, x, y, problem_type, verbose):
+    def calculate_best_params(self, x, y, model, scoring, direction, verbose):
         columns = numerical_columns(x)
 
         selected_transformations = []
@@ -41,11 +41,12 @@ class NumericalBinningParamCalculator:
                     )
 
             feature_selector = FeatureSelector()
-            _, selected_features = feature_selector.fit(
+            selected_features = feature_selector.fit(
                 x,
                 y,
-                problem_type,
-                maximize=(problem_type == "classification"),
+                model,
+                scoring,
+                direction,
                 transformer=NumericalBinning(all_binning_options, all_n_bins_options),
             )
 

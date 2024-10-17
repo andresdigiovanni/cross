@@ -7,7 +7,7 @@ from cross.transformations.utils.dtypes import numerical_columns
 
 
 class NonLinearTransformationParamCalculator:
-    def calculate_best_params(self, x, y, problem_type, verbose):
+    def calculate_best_params(self, x, y, model, scoring, direction, verbose):
         skewness_threshold = 0.5
 
         best_transformation_options = {}

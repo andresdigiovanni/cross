@@ -11,7 +11,7 @@ from cross.transformations.utils.dtypes import numerical_columns
 
 
 class OutliersParamCalculator:
-    def calculate_best_params(self, x, y, problem_type, verbose):
+    def calculate_best_params(self, x, y, model, scoring, direction, verbose):
         columns = numerical_columns(x)
         outlier_methods = self._get_outlier_methods()
         outlier_actions = ["cap", "median"]
@@ -21,9 +21,19 @@ class OutliersParamCalculator:
         best_lof_params = {}
         best_iforest_params = {}
 
+        base_score = evaluate_model(x, y, model, scoring)
+
         for column in tqdm(columns, disable=(not verbose)):
             best_params = self._find_best_params_for_column(
-                x, y, problem_type, column, outlier_actions, outlier_methods
+                x,
+                y,
+                model,
+                scoring,
+                direction,
+                column,
+                base_score,
+                outlier_actions,
+                outlier_methods,
             )
 
             if best_params:
@@ -49,15 +59,24 @@ class OutliersParamCalculator:
         }
 
     def _find_best_params_for_column(
-        self, x, y, problem_type, column, outlier_actions, outlier_methods
+        self,
+        x,
+        y,
+        model,
+        scoring,
+        direction,
+        column,
+        base_score,
+        outlier_actions,
+        outlier_methods,
     ):
-        best_score = -float("inf")
+        best_score = base_score
         best_params = {}
 
         combinations = self._generate_combinations(outlier_actions, outlier_methods)
 
         for action, method, param in combinations:
-            rows_affected = None
+            rows_affected = 0
 
             if method == "iqr":
                 q1, q3 = np.percentile(x[column], [25, 75])
@@ -99,9 +118,13 @@ class OutliersParamCalculator:
                 continue
 
             kwargs = self._build_kwargs(column, action, method, param)
-            score = evaluate_model(x, y, problem_type, OutliersHandler(**kwargs))
+            score = evaluate_model(x, y, model, scoring, OutliersHandler(**kwargs))
 
-            if score > best_score:
+            has_improved = (direction == "maximize" and score > best_score) or (
+                direction != "maximize" and score < best_score
+            )
+
+            if has_improved:
                 best_score = score
                 best_params = kwargs
 

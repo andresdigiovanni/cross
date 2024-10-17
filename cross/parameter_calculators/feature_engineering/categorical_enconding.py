@@ -6,7 +6,7 @@ from cross.transformations.utils.dtypes import categorical_columns
 
 
 class CategoricalEncodingParamCalculator:
-    def calculate_best_params(self, x, y, problem_type, verbose):
+    def calculate_best_params(self, x, y, model, scoring, direction, verbose):
         columns = categorical_columns(x)
 
         best_encodings_options = {}
@@ -16,7 +16,7 @@ class CategoricalEncodingParamCalculator:
             for column in columns:
                 num_unique_values = x[column].nunique()
 
-                best_score = -float("inf")
+                best_score = float("-inf") if direction == "maximize" else float("inf")
                 best_encoding = None
 
                 for encoding in encodings:
@@ -30,8 +30,13 @@ class CategoricalEncodingParamCalculator:
                         encodings_options=encodings_options
                     )
 
-                    score = evaluate_model(x, y, problem_type, missing_values_handler)
-                    if score > best_score:
+                    score = evaluate_model(x, y, model, scoring, missing_values_handler)
+
+                    has_improved = (direction == "maximize" and score > best_score) or (
+                        direction != "maximize" and score < best_score
+                    )
+
+                    if has_improved:
                         best_score = score
                         best_encoding = encoding
 

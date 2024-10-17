@@ -103,8 +103,8 @@ class CategoricalEncoding(BaseEstimator, TransformerMixin):
                     )
 
                 elif transformation == "count":
-                    X_transformed[column] = X_transformed[column].map(
-                        self._encoders[column]
+                    X_transformed[column] = (
+                        X_transformed[column].map(self._encoders[column]).fillna(0)
                     )
 
         return X_transformed

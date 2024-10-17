@@ -6,11 +6,11 @@ from cross.transformations.utils.dtypes import numerical_columns
 
 
 class CyclicalFeaturesTransformerParamCalculator:
-    def calculate_best_params(self, x, y, problem_type, verbose):
+    def calculate_best_params(self, x, y, model, scoring, direction, verbose):
         columns = numerical_columns(x)
         columns_periods = {}
 
-        baseline_score = evaluate_model(x, y, problem_type)
+        baseline_score = evaluate_model(x, y, model, scoring)
 
         for column in tqdm(columns, disable=(not verbose)):
             period = self._get_period(x, column)
@@ -19,7 +19,7 @@ class CyclicalFeaturesTransformerParamCalculator:
                 continue
 
             cyclical_transformer = CyclicalFeaturesTransformer({column: period})
-            score = evaluate_model(x, y, problem_type, cyclical_transformer)
+            score = evaluate_model(x, y, model, scoring, cyclical_transformer)
 
             if score > baseline_score:
                 columns_periods[column] = period

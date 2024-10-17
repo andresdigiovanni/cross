@@ -45,15 +45,6 @@ class OutliersHandlingPage(OutliersHandlingBase):
             with col1:
                 st.subheader(column)
 
-                actions = self.actions.keys()
-                if selected_method in ["lof", "iforest"]:
-                    actions = [x for x in actions if x != "cap"]
-
-                selected_action = st.selectbox(
-                    f"Action for {column}", self.actions.keys(), key=f"{column}_action"
-                )
-                selected_action = self.actions[selected_action]
-
                 selected_method = st.selectbox(
                     f"Detection method for {column}",
                     self.detection_methods.keys(),
@@ -92,6 +83,15 @@ class OutliersHandlingPage(OutliersHandlingBase):
                         key=f"{column}_threshold",
                     )
                     thresholds[column] = threshold
+
+                actions = self.actions.keys()
+                if selected_method in ["lof", "iforest"]:
+                    actions = [x for x in actions if x != "cap"]
+
+                selected_action = st.selectbox(
+                    f"Action for {column}", self.actions.keys(), key=f"{column}_action"
+                )
+                selected_action = self.actions[selected_action]
 
                 handling_options[column] = (selected_action, selected_method)
 

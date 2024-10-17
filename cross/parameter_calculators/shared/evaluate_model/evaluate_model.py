@@ -1,68 +1,71 @@
 import numpy as np
 import pandas as pd
-from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
-from sklearn.metrics import accuracy_score, mean_squared_error
-from sklearn.model_selection import KFold, StratifiedKFold
+from category_encoders import BinaryEncoder
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.compose import ColumnTransformer, make_column_selector
+from sklearn.model_selection import KFold, cross_val_score
+from sklearn.pipeline import Pipeline
 
-from cross.transformations.utils.dtypes import numerical_columns
+from cross.transformations.utils.dtypes import categorical_columns
 
 
-def evaluate_model(x, y, problem_type, transformer=None, columns_idx=None):
-    if problem_type == "classification":
-        model = RandomForestClassifier(n_jobs=-1, random_state=42)
-        kfold = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
-        scoring_func = accuracy_score
+class ColumnSelector(BaseEstimator, TransformerMixin):
+    def __init__(self, columns_idx):
+        self.columns_idx = columns_idx
 
-    elif problem_type == "regression":
-        model = RandomForestRegressor(n_jobs=-1, random_state=42)
-        kfold = KFold(n_splits=5, shuffle=True, random_state=42)
-        scoring_func = mean_squared_error
+    def fit(self, X, y=None):
+        return self
 
-    else:
-        raise ValueError(f"Unsupported problem type: {problem_type}")
+    def transform(self, X):
+        if isinstance(X, pd.DataFrame):
+            return X.iloc[:, self.columns_idx]
 
-    scores = []
+        elif isinstance(X, np.ndarray):
+            return X[:, self.columns_idx]
 
-    for train_idx, test_idx in kfold.split(x, y):
-        x_train = _select_data(x, train_idx)
-        y_train = _select_data(y, train_idx)
-        x_test = _select_data(x, test_idx)
-        y_test = _select_data(y, test_idx)
-
-        if transformer:
-            x_train = transformer.fit_transform(x_train, y_train)
-            x_test = transformer.transform(x_test, y_test)
-
-        if columns_idx is not None:
-            x_train = x_train.iloc[:, columns_idx]
-            x_test = x_test.iloc[:, columns_idx]
-
-        num_columns = numerical_columns(x_train)
-        x_train = x_train[num_columns]
-        x_test = x_test[num_columns]
-
-        if len(x_train) == 0 or len(x_test) == 0:
-            continue
-
-        model.fit(x_train, y_train)
-        y_pred = model.predict(x_test)
-
-        if problem_type == "regression":
-            score = -scoring_func(y_test, y_pred)
         else:
-            score = scoring_func(y_test, y_pred)
-
-        scores.append(score)
-
-    return np.mean(scores) if len(scores) else float("-inf")
+            raise TypeError("The data type {} is not compatible.".format(type(X)))
 
 
-def _select_data(x, idx):
-    if isinstance(x, np.ndarray):
-        return x[idx]
+def evaluate_model(
+    x,
+    y,
+    model,
+    scoring,
+    transformer=None,
+    columns_idx=None,
+):
+    steps = []
 
-    elif isinstance(x, pd.DataFrame) or isinstance(x, pd.Series):
-        return x.iloc[idx]
+    if transformer:
+        steps.append(("t", transformer))
 
-    else:
-        raise TypeError("The data type {} is not compatible.".format(type(x)))
+    # Add column selection step if columns_idx is provided
+    if columns_idx is not None:
+        steps.append(("column_selection", ColumnSelector(columns_idx=columns_idx)))
+
+    # Handle categorical encoding
+    cat_columns = categorical_columns(x)
+    if len(cat_columns):
+        encoder = BinaryEncoder()
+        steps.append(("e", encoder))
+
+    # Handle numeric processing
+    numeric_transformer = ColumnTransformer(
+        transformers=[
+            ("num", "passthrough", make_column_selector(dtype_include="number"))
+        ]
+    )
+    steps.append(("numeric_processing", numeric_transformer))
+
+    # Add the model to the pipeline
+    steps.append(("m", model))
+
+    # Create pipeline with all steps
+    pipe = Pipeline(steps=steps)
+
+    # Cross-validation
+    cv = KFold(n_splits=5, shuffle=True, random_state=42)
+    scores = cross_val_score(pipe, x, y, scoring=scoring, cv=cv, n_jobs=-1)
+
+    return np.mean(scores)

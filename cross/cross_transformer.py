@@ -43,15 +43,20 @@ from cross.transformations.preprocessing import (
 
 class CrossTransformer(BaseEstimator, TransformerMixin):
     def __init__(self, transformations=None):
-        self.transformations = []
+        self.transformations = transformations
 
         if isinstance(transformations, list):
             if all(isinstance(t, dict) for t in transformations):
                 self.transformations = self._initialize_transformations(transformations)
-            else:
-                self.transformations = transformations
 
-        # self.transformations = transformations or []
+    def get_params(self, deep=True):
+        return {"transformations": self.transformations}
+
+    def set_params(self, **params):
+        for key, value in params.items():
+            setattr(self, key, value)
+
+        return self
 
     def load_transformations(self, file_path):
         with open(file_path, "rb") as f:
@@ -121,17 +126,17 @@ class CrossTransformer(BaseEstimator, TransformerMixin):
 
         return X_transformed
 
-    def auto_transform(self, X, y, problem_type, verbose=True):
+    def auto_transform(self, X, y, model, scoring, direction, verbose=True):
         if verbose:
+            date_time = self._date_time()
             print(
-                f"\n[{self._date_time()}] Starting experiment to find the best transformations"
+                f"\n[{date_time}] Starting experiment to find the bests transformations"
             )
-            print(
-                f"[{self._date_time()}] Shape: {X.shape}. Problem type: {problem_type}\n"
-            )
+            print(f"[{date_time}] Data shape: {X.shape}")
+            print(f"[{date_time}] Model: {model.__class__.__name__}")
+            print(f"[{date_time}] Scoring: {scoring}\n")
 
         X_transformed = X.copy()
-        y_transformed = y.copy()
 
         transformations = []
         calculators = [
@@ -156,13 +161,13 @@ class CrossTransformer(BaseEstimator, TransformerMixin):
 
                 calculator = calculator()
                 transformation = calculator.calculate_best_params(
-                    X_transformed, y_transformed, problem_type, verbose
+                    X_transformed, y, model, scoring, direction, verbose
                 )
                 if transformation:
                     transformations.append(transformation)
-                    transformer = self._get_transformer(
-                        transformation["name"], transformation["params"]
-                    )
+                    name = transformation["name"]
+                    params = transformation["params"]
+                    transformer = self._get_transformer(name, params)
                     X_transformed = transformer.fit_transform(X_transformed)
 
         return transformations

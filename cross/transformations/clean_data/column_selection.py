@@ -3,7 +3,7 @@ from sklearn.base import BaseEstimator, TransformerMixin
 
 class ColumnSelection(BaseEstimator, TransformerMixin):
     def __init__(self, columns=None):
-        self.columns = columns or []
+        self.columns = columns
 
     def get_params(self, deep=True):
         return {"columns": self.columns}
