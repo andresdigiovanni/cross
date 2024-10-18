@@ -6,54 +6,55 @@ from cross.transformations.utils.dtypes import numerical_columns
 
 
 class CyclicalFeaturesTransformerParamCalculator:
+    VALID_PERIODS = {
+        "_month": 12,
+        "_day": 31,
+        "_weekday": 7,
+        "_hour": 24,
+        "_minute": 60,
+        "_second": 60,
+    }
+
     def calculate_best_params(self, x, y, model, scoring, direction, verbose):
         columns = numerical_columns(x)
         columns_periods = {}
-
         baseline_score = evaluate_model(x, y, model, scoring)
 
-        for column in tqdm(columns, disable=(not verbose)):
+        for column in tqdm(columns, disable=not verbose):
             period = self._get_period(x, column)
-
-            if not period:
+            if period is None:
                 continue
 
-            cyclical_transformer = CyclicalFeaturesTransformer({column: period})
-            score = evaluate_model(x, y, model, scoring, cyclical_transformer)
+            transformer = CyclicalFeaturesTransformer({column: period})
+            score = evaluate_model(x, y, model, scoring, transformer)
 
-            if score > baseline_score:
+            if self._is_score_improved(score, baseline_score, direction):
                 columns_periods[column] = period
 
         if columns_periods:
-            datetime_transformer = CyclicalFeaturesTransformer(columns_periods)
+            transformer = CyclicalFeaturesTransformer(columns_periods)
             return {
-                "name": datetime_transformer.__class__.__name__,
-                "params": datetime_transformer.get_params(),
+                "name": transformer.__class__.__name__,
+                "params": transformer.get_params(),
             }
-
         return None
 
     def _get_period(self, df, column):
-        if column.lower().endswith("_month"):
-            return 12
+        column_lower = column.lower()
 
-        elif column.lower().endswith("_day"):
-            return 31
-
-        elif column.lower().endswith("_weekday"):
-            return 7
-
-        elif column.lower().endswith("_hour"):
-            return 24
-
-        elif column.lower().endswith("_minute") or column.lower().endswith("_second"):
-            return 60
+        for suffix, period in self.VALID_PERIODS.items():
+            if column_lower.endswith(suffix):
+                return period
 
         unique_values = df[column].dropna().unique()
-        n_unique_values = len(unique_values)
-        pct_unique_values = n_unique_values / df.shape[0]
+        pct_unique_values = len(unique_values) / df.shape[0]
 
-        if n_unique_values > 2 and pct_unique_values < 0.10:
-            return n_unique_values
+        if len(unique_values) > 2 and pct_unique_values < 0.10:
+            return len(unique_values)
 
         return None
+
+    def _is_score_improved(self, score, best_score, direction):
+        return (direction == "maximize" and score > best_score) or (
+            direction == "minimize" and score < best_score
+        )

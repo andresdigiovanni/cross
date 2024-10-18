@@ -4,6 +4,24 @@ from sklearn.model_selection import KFold, cross_val_score
 from sklearn.pipeline import Pipeline
 
 
+def build_pipeline(model, transformer=None):
+    steps = []
+
+    if transformer:
+        steps.append(("transformer", transformer))
+
+    numeric_transformer = ColumnTransformer(
+        transformers=[
+            ("numeric", "passthrough", make_column_selector(dtype_include="number"))
+        ]
+    )
+    steps.append(("numeric_processing", numeric_transformer))
+
+    steps.append(("model", model))
+
+    return Pipeline(steps=steps)
+
+
 def evaluate_model(
     x,
     y,
@@ -11,26 +29,10 @@ def evaluate_model(
     scoring,
     transformer=None,
 ):
-    steps = []
+    # Build pipeline with optional transformer and model
+    pipe = build_pipeline(model, transformer)
 
-    if transformer:
-        steps.append(("t", transformer))
-
-    # Handle numeric processing
-    numeric_transformer = ColumnTransformer(
-        transformers=[
-            ("n", "passthrough", make_column_selector(dtype_include="number"))
-        ]
-    )
-    steps.append(("numeric_processing", numeric_transformer))
-
-    # Add the model to the pipeline
-    steps.append(("m", model))
-
-    # Create pipeline with all steps
-    pipe = Pipeline(steps=steps)
-
-    # Cross-validation
+    # Perform cross-validation
     cv = KFold(n_splits=5, shuffle=True, random_state=42)
     scores = cross_val_score(pipe, x, y, scoring=scoring, cv=cv, n_jobs=-1)
 

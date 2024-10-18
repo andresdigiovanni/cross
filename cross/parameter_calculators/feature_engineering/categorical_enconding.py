@@ -8,16 +8,16 @@ from cross.transformations.utils.dtypes import categorical_columns
 class CategoricalEncodingParamCalculator:
     def calculate_best_params(self, x, y, model, scoring, direction, verbose):
         columns = categorical_columns(x)
-
-        best_encodings_options = {}
         encodings = ["label", "dummy", "binary", "target", "count"]
 
-        with tqdm(total=len(columns) * len(encodings), disable=(not verbose)) as pbar:
-            for column in columns:
-                num_unique_values = x[column].nunique()
+        best_encodings_options = {}
 
+        with tqdm(total=len(columns) * len(encodings), disable=not verbose) as pbar:
+            for column in columns:
                 best_score = float("-inf") if direction == "maximize" else float("inf")
                 best_encoding = None
+
+                num_unique_values = x[column].nunique()
 
                 for encoding in encodings:
                     pbar.update(1)
@@ -26,17 +26,10 @@ class CategoricalEncodingParamCalculator:
                         continue
 
                     encodings_options = {column: encoding}
-                    missing_values_handler = CategoricalEncoding(
-                        encodings_options=encodings_options
-                    )
+                    handler = CategoricalEncoding(encodings_options=encodings_options)
+                    score = evaluate_model(x, y, model, scoring, handler)
 
-                    score = evaluate_model(x, y, model, scoring, missing_values_handler)
-
-                    has_improved = (direction == "maximize" and score > best_score) or (
-                        direction != "maximize" and score < best_score
-                    )
-
-                    if has_improved:
+                    if self._is_score_improved(score, best_score, direction):
                         best_score = score
                         best_encoding = encoding
 
@@ -53,3 +46,8 @@ class CategoricalEncodingParamCalculator:
             }
 
         return None
+
+    def _is_score_improved(self, score, best_score, direction):
+        return (direction == "maximize" and score > best_score) or (
+            direction == "minimize" and score < best_score
+        )

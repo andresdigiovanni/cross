@@ -7,6 +7,9 @@ class ColumnSelectionParamCalculator:
         feature_selector = FeatureSelector()
         selected_features = feature_selector.fit(x, y, model, scoring, direction)
 
+        if verbose:
+            print(f"Selected {len(selected_features)} features")
+
         column_selector = ColumnSelection(selected_features)
 
         return {

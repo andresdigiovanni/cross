@@ -1,3 +1,5 @@
+from collections import ChainMap
+
 from tqdm import tqdm
 
 from cross.parameter_calculators.shared import evaluate_model
@@ -63,44 +65,63 @@ class MissingValuesParamCalculator:
         best_params = {}
 
         if is_num_column:
-            imputation_strategies = (
-                self.imputation_strategies["all"] | self.imputation_strategies["num"]
+            imputation_strategies = ChainMap(
+                self.imputation_strategies["all"], self.imputation_strategies["num"]
             )
-
         else:
-            imputation_strategies = (
-                self.imputation_strategies["all"] | self.imputation_strategies["cat"]
+            imputation_strategies = ChainMap(
+                self.imputation_strategies["all"], self.imputation_strategies["cat"]
             )
 
         for strategy, params in imputation_strategies.items():
             if strategy == "fill_knn":
-                for n_neighbors in params["n_neighbors"]:
-                    score = self._evaluate_strategy(
-                        x, y, model, scoring, column, strategy, n_neighbors
-                    )
-                    has_improved = (direction == "maximize" and score > best_score) or (
-                        direction != "maximize" and score < best_score
-                    )
-
-                    if has_improved:
-                        best_score = score
-                        best_strategy = strategy
-                        best_params = {column: n_neighbors}
-            else:
-                score = self._evaluate_strategy(x, y, model, scoring, column, strategy)
-                has_improved = (direction == "maximize" and score > best_score) or (
-                    direction != "maximize" and score < best_score
+                best_score, best_strategy, best_params = self._evaluate_knn_strategy(
+                    x,
+                    y,
+                    model,
+                    scoring,
+                    column,
+                    params,
+                    best_score,
+                    direction,
+                    best_strategy,
                 )
 
-                if has_improved:
+            else:
+                score = self._evaluate_strategy(x, y, model, scoring, column, strategy)
+
+                if self._is_score_improved(score, best_score, direction):
                     best_score = score
                     best_strategy = strategy
                     best_params = {}
 
         return best_strategy, best_params
 
+    def _evaluate_knn_strategy(
+        self, x, y, model, scoring, column, params, best_score, direction, best_strategy
+    ):
+        best_params = {}
+        for n_neighbors in params["n_neighbors"]:
+            score = self._evaluate_strategy(
+                x, y, model, scoring, column, "fill_knn", n_neighbors
+            )
+
+            if self._is_score_improved(score, best_score, direction):
+                best_score = score
+                best_strategy = "fill_knn"
+                best_params = {column: n_neighbors}
+
+        return best_score, best_strategy, best_params
+
     def _evaluate_strategy(
-        self, x, y, model, scoring, column, strategy, n_neighbors=None
+        self,
+        x,
+        y,
+        model,
+        scoring,
+        column,
+        strategy,
+        n_neighbors=None,
     ):
         handling_options = {column: strategy}
         knn_params = {column: n_neighbors} if n_neighbors else None
@@ -110,6 +131,11 @@ class MissingValuesParamCalculator:
         )
 
         return evaluate_model(x, y, model, scoring, missing_values_handler)
+
+    def _is_score_improved(self, score, best_score, direction):
+        return (direction == "maximize" and score > best_score) or (
+            direction == "minimize" and score < best_score
+        )
 
     def _build_result(self, best_handling_options, best_n_neighbors):
         missing_values_handler = MissingValuesHandler(

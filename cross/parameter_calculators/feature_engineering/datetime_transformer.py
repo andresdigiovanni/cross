@@ -6,6 +6,9 @@ class DateTimeTransformerParamCalculator:
     def calculate_best_params(self, x, y, model, scoring, direction, verbose):
         columns = datetime_columns(x)
 
+        if verbose:
+            print(f"Datetime columns: {len(columns)}")
+
         if not columns:
             return None
 
