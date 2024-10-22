@@ -1,5 +1,5 @@
 class CategoricalEncodingBase:
-    encodings = {
+    ENCODING_OPTIONS = {
         "Do nothing": "none",
         "Label Encoder": "label",
         "Ordinal Encoder": "ordinal",

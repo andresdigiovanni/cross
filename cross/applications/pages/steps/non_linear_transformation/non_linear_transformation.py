@@ -1,7 +1,7 @@
 class NonLinearTransformationBase:
-    transformations = {
+    TRANSFORMATIONS = {
         "Do nothing": "none",
-        "Log Transformation": "log",
-        "Exponential Transformation": "exponential",
-        "Yeo-Johnson Transformation": "yeo_johnson",
+        "Log": "log",
+        "Exponential": "exponential",
+        "Yeo-Johnson": "yeo_johnson",
     }

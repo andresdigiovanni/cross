@@ -1,5 +1,5 @@
 class QuantileTransformationsBase:
-    transformations = {
+    TRANSFORMATIONS = {
         "Do nothing": "none",
         "Uniform": "uniform",
         "Normal": "normal",

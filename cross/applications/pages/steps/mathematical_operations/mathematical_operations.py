@@ -1,6 +1,5 @@
 class MathematicalOperationsBase:
-    operations = {
-        "Do nothing": "none",
+    OPERATIONS = {
         "Addition": "add",
         "Subtraction": "subtract",
         "Multiplication": "multiply",

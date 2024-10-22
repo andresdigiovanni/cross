@@ -15,6 +15,20 @@ class NumericalBinningPage(NumericalBinningBase):
         if not is_data_loaded():
             return
 
+        df, num_columns, original_df, target_column = self._initialize_data()
+
+        binning_options = {}
+        num_bins = {}
+
+        self._display_binning_options(
+            df, num_columns, original_df, binning_options, num_bins
+        )
+
+        st.markdown("""---""")
+
+        self._apply_binning(df, binning_options, num_bins)
+
+    def _initialize_data(self):
         config = st.session_state.get("config", {})
         target_column = config.get("target_column", None)
 
@@ -24,9 +38,11 @@ class NumericalBinningPage(NumericalBinningBase):
         num_columns = numerical_columns(df)
         num_columns = [x for x in num_columns if x != target_column]
 
-        binning_options = {}
-        num_bins = {}
+        return df, num_columns, original_df, target_column
 
+    def _display_binning_options(
+        self, df, num_columns, original_df, binning_options, num_bins
+    ):
         for column in num_columns:
             st.markdown("""---""")
             col1, col2, col3 = st.columns(3)
@@ -35,7 +51,7 @@ class NumericalBinningPage(NumericalBinningBase):
                 st.subheader(column)
                 selected_binning = st.selectbox(
                     f"Select binning for {column}",
-                    self.binnings.keys(),
+                    self.BINNINGS.keys(),
                     key=f"{column}_binning",
                 )
                 binning_options[column] = selected_binning
@@ -55,31 +71,30 @@ class NumericalBinningPage(NumericalBinningBase):
                 st.dataframe(original_df[[column]].head())
 
             with col3:
-                if self.binnings[binning_options[column]] != "none":
-                    numerical_binning = NumericalBinning(
-                        {column: self.binnings[binning_options[column]]}, num_bins
+                if self.BINNINGS[binning_options[column]] != "none":
+                    transformed_df = self._apply_single_binning(
+                        original_df, column, binning_options[column], num_bins[column]
                     )
-                    transformed_df = numerical_binning.fit_transform(original_df)
-
-                    new_column = "{}__{}_{}".format(
-                        column, self.binnings[binning_options[column]], num_bins[column]
-                    )
+                    new_column = f"{column}__{self.BINNINGS[binning_options[column]]}_{num_bins[column]}"
                     st.write("Binned Data")
                     st.dataframe(transformed_df[[new_column]].head())
                 else:
                     st.write("No binning applied")
 
-        st.markdown("""---""")
+    def _apply_single_binning(self, df, column, binning, bins):
+        numerical_binning = NumericalBinning([(column, self.BINNINGS[binning], bins)])
+        return numerical_binning.fit_transform(df)
 
-        # Apply button
+    def _apply_binning(self, df, binning_options, num_bins):
         if st.button("Add step"):
             try:
-                binnings_mapped = {
-                    col: self.binnings[binning]
-                    for col, binning in binning_options.items()
-                }
+                binnings_mapped = [
+                    (column, self.BINNINGS[binning], num_bins[column])
+                    for column, binning in binning_options.items()
+                    if self.BINNINGS[binning] != "none"
+                ]
+                numerical_binning = NumericalBinning(binnings_mapped)
 
-                numerical_binning = NumericalBinning(binnings_mapped, num_bins)
                 transformed_df = numerical_binning.fit_transform(df)
                 st.session_state["data"] = transformed_df
 
@@ -91,4 +106,4 @@ class NumericalBinningPage(NumericalBinningBase):
                 st.success("Binning applied successfully!")
 
             except Exception as e:
-                st.error("Error applying binning: {}".format(e))
+                st.error(f"Error applying binning: {e}")

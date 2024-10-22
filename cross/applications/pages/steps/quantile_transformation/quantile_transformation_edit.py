@@ -6,7 +6,7 @@ from .quantile_transformation import QuantileTransformationsBase
 class QuantileTransformationsEdit(QuantileTransformationsBase):
     def show_component(self, params):
         transformation_options = params["transformation_options"]
-        reverse_transformations = {v: k for k, v in self.transformations.items()}
+        reverse_transformations = {v: k for k, v in self.TRANSFORMATIONS.items()}
         n_cols = 2
 
         cols = st.columns((1,) * n_cols)

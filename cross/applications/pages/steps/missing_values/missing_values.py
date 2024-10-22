@@ -1,17 +1,16 @@
 class MissingValuesBase:
     def __init__(self):
-        self.actions_all = {
+        self.ACTIONS_ALL = {
             "Do nothing": "none",
             "Fill with 0": "fill_0",
             "Fill with mode": "fill_mode",
         }
-        self.actions_cat = {
+        self.ACTIONS_CAT = {
             "Most frequent": "most_frequent",
         }
-        self.actions_num = {
+        self.ACTIONS_NUM = {
             "Fill with mean": "fill_mean",
             "Fill with median": "fill_median",
-            "Interpolate": "interpolate",
             "KNN imputation": "fill_knn",
         }
-        self.actions = self.actions_all | self.actions_cat | self.actions_num
+        self.ACTIONS = self.ACTIONS_ALL | self.ACTIONS_CAT | self.ACTIONS_NUM

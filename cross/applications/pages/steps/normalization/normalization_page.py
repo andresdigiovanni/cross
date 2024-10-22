@@ -18,6 +18,19 @@ class NormalizationPage(NormalizationBase):
         if not is_data_loaded():
             return
 
+        df, num_columns, original_df, target_column = self._initialize_data()
+
+        transformation_options = {}
+
+        self._display_transformation_options(
+            df, num_columns, original_df, transformation_options
+        )
+
+        st.markdown("""---""")
+
+        self._apply_transformations(df, transformation_options)
+
+    def _initialize_data(self):
         config = st.session_state.get("config", {})
         target_column = config.get("target_column", None)
 
@@ -27,8 +40,11 @@ class NormalizationPage(NormalizationBase):
         num_columns = numerical_columns(df)
         num_columns = [x for x in num_columns if x != target_column]
 
-        transformation_options = {}
+        return df, num_columns, original_df, target_column
 
+    def _display_transformation_options(
+        self, df, num_columns, original_df, transformation_options
+    ):
         for column in num_columns:
             st.markdown("""---""")
             col1, col2, col3 = st.columns(3)
@@ -37,42 +53,39 @@ class NormalizationPage(NormalizationBase):
                 st.subheader(column)
                 selected_transformation = st.selectbox(
                     f"Select transformation for {column}",
-                    self.transformations.keys(),
+                    self.TRANSFORMATIONS.keys(),
                     key=column,
                 )
                 transformation_options[column] = selected_transformation
 
             with col2:
-                fig, ax = plt.subplots(figsize=(4, 2))
-                sns.histplot(original_df[column], kde=True, ax=ax, color="#FF4C4B")
-
-                ax.set_title("Original Data")
-                plot_remove_borders(ax)
-
-                st.pyplot(fig)
+                self._display_distribution(original_df[column], "Original Data")
 
             with col3:
-                normalization = Normalization(
-                    {column: self.transformations[transformation_options[column]]}
+                transformed_df = self._apply_single_transformation(
+                    original_df, column, transformation_options[column]
                 )
-                transformed_df = normalization.fit_transform(original_df)
+                self._display_distribution(transformed_df[column], "Transformed Data")
 
-                fig, ax = plt.subplots(figsize=(4, 2))
-                sns.histplot(transformed_df[column], kde=True, ax=ax, color="#FF4C4B")
+    def _apply_single_transformation(self, df, column, transformation):
+        normalization = Normalization({column: self.TRANSFORMATIONS[transformation]})
+        transformed_df = normalization.fit_transform(df)
+        return transformed_df
 
-                ax.set_title("Transformed Data")
-                plot_remove_borders(ax)
+    def _display_distribution(self, column_data, title):
+        fig, ax = plt.subplots(figsize=(4, 2))
+        sns.histplot(column_data, kde=True, ax=ax, color="#FF4C4B")
+        ax.set_title(title)
+        plot_remove_borders(ax)
+        st.pyplot(fig)
 
-                st.pyplot(fig)
-
-        st.markdown("""---""")
-
-        # Apply button
+    def _apply_transformations(self, df, transformation_options):
         if st.button("Add step"):
             try:
                 transformations_mapped = {
-                    col: self.transformations[transformation]
+                    col: self.TRANSFORMATIONS[transformation]
                     for col, transformation in transformation_options.items()
+                    if self.TRANSFORMATIONS[transformation] != "none"
                 }
 
                 normalization = Normalization(transformations_mapped)
@@ -87,4 +100,4 @@ class NormalizationPage(NormalizationBase):
                 st.success("Transformations applied successfully!")
 
             except Exception as e:
-                st.error("Error applying transformations: {}".format(e))
+                st.error(f"Error applying transformations: {e}")

@@ -18,17 +18,30 @@ class CyclicalFeaturesTransformationPage:
         df = st.session_state["data"]
         original_df = df.copy()
 
+        # Select cyclical columns
         cyclical_columns = st.multiselect(
             "Select Cyclical Columns", options=df.columns.tolist(), default=[]
         )
 
+        columns_periods = self._select_periods_for_columns(
+            cyclical_columns, original_df
+        )
+
+        st.markdown("""---""")
+
+        # Apply button
+        if st.button("Add step"):
+            self._apply_cyclical_transformation(df, columns_periods)
+
+    def _select_periods_for_columns(self, cyclical_columns, df):
         columns_periods = {}
+
         for column in cyclical_columns:
             st.markdown("""---""")
             col1, col2, col3 = st.columns(3)
 
             with col1:
-                default_period = self.get_default_period(original_df, column)
+                default_period = self.get_default_period(df, column)
                 period = st.number_input(
                     f"Period for {column}",
                     min_value=1,
@@ -40,35 +53,43 @@ class CyclicalFeaturesTransformationPage:
 
             with col2:
                 st.write("Original Data")
-                st.dataframe(original_df[[column]].head())
+                st.dataframe(df[[column]].head())
 
             with col3:
-                cyclical_transformer = CyclicalFeaturesTransformer(columns_periods)
-                transformed_df = cyclical_transformer.fit_transform(df)
-
+                transformed_df = self._preview_cyclical_transformation(
+                    df, {column: period}
+                )
                 new_columns = [f"{column}_sin", f"{column}_cos"]
 
                 st.write("Transformed Data")
                 st.dataframe(transformed_df[new_columns].head())
 
-        st.markdown("""---""")
+        return columns_periods
 
-        # Apply button
-        if st.button("Add step"):
-            try:
-                cyclical_transformer = CyclicalFeaturesTransformer(columns_periods)
-                transformed_df = cyclical_transformer.fit_transform(df)
-                st.session_state["data"] = transformed_df
+    def _preview_cyclical_transformation(self, df, columns_periods):
+        cyclical_transformer = CyclicalFeaturesTransformer(columns_periods)
+        return cyclical_transformer.fit_transform(df)
 
-                params = cyclical_transformer.get_params()
-                steps = st.session_state.get("steps", [])
-                steps.append({"name": "CyclicalFeaturesTransformer", "params": params})
-                st.session_state["steps"] = steps
+    def _apply_cyclical_transformation(self, df, columns_periods):
+        try:
+            cyclical_transformer = CyclicalFeaturesTransformer(columns_periods)
+            transformed_df = cyclical_transformer.fit_transform(df)
+            st.session_state["data"] = transformed_df
 
-                st.success("Cyclical features transformed successfully!")
+            # Save the transformation step
+            steps = st.session_state.get("steps", [])
+            steps.append(
+                {
+                    "name": "CyclicalFeaturesTransformer",
+                    "params": cyclical_transformer.get_params(),
+                }
+            )
+            st.session_state["steps"] = steps
 
-            except Exception as e:
-                st.error(f"Error transforming cyclical features: {e}")
+            st.success("Cyclical features transformed successfully!")
+
+        except Exception as e:
+            st.error(f"Error transforming cyclical features: {e}")
 
     def get_default_period(self, df, column):
         unique_values = df[column].dropna().unique()

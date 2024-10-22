@@ -18,12 +18,23 @@ class CategoricalEncodingPage(CategoricalEncodingBase):
 
         df = st.session_state["data"]
         original_df = df.copy()
-
         cat_columns = categorical_columns(df)
 
         config = st.session_state.get("config", {})
         target_column = config.get("target_column", None)
 
+        # Initialize encoding options and ordinal orders
+        encodings_options, ordinal_orders = self._initialize_encoding_options(
+            cat_columns, original_df
+        )
+
+        # Apply button for encoding
+        if st.button("Add step"):
+            self._apply_encoding_step(
+                encodings_options, ordinal_orders, df, target_column
+            )
+
+    def _initialize_encoding_options(self, cat_columns, original_df):
         encodings_options = {}
         ordinal_orders = {}
 
@@ -32,85 +43,103 @@ class CategoricalEncodingPage(CategoricalEncodingBase):
             col1, col2, col3 = st.columns(3)
 
             with col1:
-                st.subheader(column)
-
-                num_categories = original_df[column].nunique()
-                st.write(f"Number of categories: {num_categories}")
-
-                selected_encoding = st.selectbox(
-                    f"Select encoding for {column}",
-                    self.encodings.keys(),
-                    key=column,
+                self._display_column_info(
+                    column, original_df, encodings_options, ordinal_orders
                 )
-                encodings_options[column] = selected_encoding
-
-                if self.encodings[selected_encoding] == "ordinal":
-                    categories = original_df[column].fillna("Unknown").unique().tolist()
-                    st.write("Order the categories")
-
-                    ordered_categories = sort_items(categories, key=f"{column}_order")
-                    ordinal_orders[column] = ordered_categories
 
             with col2:
-                st.write("Original Data")
-                st.dataframe(original_df[[column]].drop_duplicates().head())
+                self._display_original_data(column, original_df)
 
             with col3:
-                if (self.encodings[encodings_options[column]] != "none") and not (
-                    self.encodings[encodings_options[column]] == "target"
-                    and (target_column is None or target_column == "")
-                ):
-                    categorical_encoding = CategoricalEncoding(
-                        {column: self.encodings[encodings_options[column]]},
-                        ordinal_orders=ordinal_orders,
-                    )
-                    transformed_df, _ = categorical_encoding.fit_transform(
-                        original_df.loc[:, ~original_df.columns.isin([target_column])],
-                        original_df[target_column],
-                    )
-                    transformed_df[target_column] = original_df[target_column]
-
-                    # If multiple columns are created
-                    if self.encodings[encodings_options[column]] in [
-                        "onehot",
-                        "dummy",
-                        "binary",
-                    ]:
-                        new_columns = list(
-                            set(transformed_df.columns) - set(original_df.columns)
-                        )
-                    else:
-                        new_columns = [column]
-
-                    st.write("Transformed Data")
-                    st.dataframe(transformed_df[new_columns].drop_duplicates().head())
-                else:
-                    st.write("No transformation applied")
-
-        st.markdown("""---""")
-
-        # Apply button
-        if st.button("Add step"):
-            try:
-                encodings_mapped = {
-                    col: self.encodings[transformation]
-                    for col, transformation in encodings_options.items()
-                }
-
-                categorical_encoding = CategoricalEncoding(
-                    encodings_mapped,
-                    target_column=target_column,
-                    ordinal_orders=ordinal_orders,
+                self._display_transformed_data(
+                    column, original_df, encodings_options, ordinal_orders
                 )
-                transformed_df = categorical_encoding.fit_transform(df)
-                st.session_state["data"] = transformed_df
 
-                params = categorical_encoding.get_params()
-                steps = st.session_state.get("steps", [])
-                steps.append({"name": "CategoricalEncoding", "params": params})
-                st.session_state["steps"] = steps
+        return encodings_options, ordinal_orders
 
-                st.success("Encoding applied successfully!")
+    def _display_column_info(
+        self, column, original_df, encodings_options, ordinal_orders
+    ):
+        st.subheader(column)
+        num_categories = original_df[column].nunique()
+        st.write(f"Number of categories: {num_categories}")
 
-            except Exception as e:
-                st.error("Error applying encoding: {}".format(e))
+        selected_encoding = st.selectbox(
+            f"Select encoding for {column}",
+            self.ENCODING_OPTIONS.keys(),
+            key=column,
+        )
+        encodings_options[column] = selected_encoding
+
+        # Handle ordinal encoding option
+        if self.ENCODING_OPTIONS[selected_encoding] == "ordinal":
+            categories = original_df[column].fillna("Unknown").unique().tolist()
+            st.write("Order the categories")
+            ordered_categories = sort_items(categories, key=f"{column}_order")
+            ordinal_orders[column] = ordered_categories
+
+    def _display_original_data(self, column, original_df):
+        st.write("Original Data")
+        st.dataframe(original_df[[column]].drop_duplicates().head())
+
+    def _display_transformed_data(
+        self, column, original_df, encodings_options, ordinal_orders
+    ):
+        config = st.session_state.get("config", {})
+        target_column = config.get("target_column", None)
+
+        encoding_type = self.ENCODING_OPTIONS[encodings_options[column]]
+        if encoding_type != "none" and not (
+            encoding_type == "target" and not target_column
+        ):
+            categorical_encoding = CategoricalEncoding(
+                {column: encoding_type},
+                ordinal_orders=ordinal_orders,
+            )
+            transformed_df = categorical_encoding.fit_transform(
+                original_df.loc[:, ~original_df.columns.isin([target_column])],
+                original_df[target_column] if target_column else None,
+            )
+
+            # Determine if new columns are created
+            new_columns = (
+                list(set(transformed_df.columns) - set(original_df.columns))
+                if encoding_type in ["onehot", "dummy", "binary"]
+                else [column]
+            )
+
+            st.write("Transformed Data")
+            st.dataframe(transformed_df[new_columns].drop_duplicates().head())
+        else:
+            st.write("No transformation applied")
+
+    def _apply_encoding_step(
+        self, encodings_options, ordinal_orders, df, target_column
+    ):
+        try:
+            # Map valid encodings
+            encodings_mapped = {
+                col: self.ENCODING_OPTIONS[encoding]
+                for col, encoding in encodings_options.items()
+                if self.ENCODING_OPTIONS[encoding] != "none"
+            }
+
+            # Apply categorical encoding
+            categorical_encoding = CategoricalEncoding(
+                encodings_mapped, ordinal_orders=ordinal_orders
+            )
+            transformed_df = categorical_encoding.fit_transform(df)
+
+            # Update session state
+            st.session_state["data"] = transformed_df
+            params = categorical_encoding.get_params()
+
+            # Append step to session state
+            steps = st.session_state.get("steps", [])
+            steps.append({"name": "CategoricalEncoding", "params": params})
+            st.session_state["steps"] = steps
+
+            st.success("Encoding applied successfully!")
+
+        except Exception as e:
+            st.error(f"Error applying encoding: {e}")

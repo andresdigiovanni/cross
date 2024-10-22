@@ -69,16 +69,42 @@ x_train, y_train = cross.fit_transform(x_train, y_train)
 x_test, y_test = cross.transform(x_test, y_test)
 ```
 
-### Export and Import Transformations
+### Import Transformations from UI
 
-To save and reuse the transformations, export them to a file and load them in future sessions:
+You can export transformations created in the graphical interface (UI) to a file and later import them into your scripts:
 
 ```python
-# Export transformations to a file
-cross.save_transformations("cross_transformations.pkl")
+import pickle
 
-# Import transformations from the file
-cross.load_transformations("cross_transformations.pkl")
+# Load transformations from file
+with open("cross_transformations.pkl", "rb") as f:
+    transformations = pickle.load(f)
+
+cross = CrossTransformer(transformations)
+
+# Apply transformations to your dataset
+x_train, y_train = cross.fit_transform(x_train, y_train)
+x_test, y_test = cross.transform(x_test, y_test)
+```
+
+### Save and Load Transformations
+
+To save and reuse the transformations, save them and load them in future sessions:
+
+```python
+import pickle
+
+# Save transformations
+transformations = cross.get_params()
+
+with open("cross_transformations.pkl", "wb") as f:
+    pickle.dump(transformations, f)
+
+# Load transformations
+with open("cross_transformations.pkl", "rb") as f:
+    transformations = pickle.load(f)
+
+cross.set_params(**transformations)
 ```
 
 ## Transformations
@@ -86,10 +112,10 @@ cross.load_transformations("cross_transformations.pkl")
 - [Clean Data](#clean-data)
     - [Column Selection](#column-selection)
     - [Column Casting](#column-casting)
-    - [Remove Duplicates](#remove-duplicates)
     - [Missing Values](#missing-values)
     - [Handle Outliers](#handle-outliers)
 - [Preprocessing](#preprocessing)
+    - [Non-Linear Transformation](#non-linear-transformation)
     - [Quantile Transformations](#quantile-transformations)
     - [Scale Transformations](#scale-transformations)
     - [Normalization](#normalization)
@@ -139,7 +165,7 @@ CastColumns(
 Handles missing values in the dataset.
 
 - Parameters:
-    - `handling_options`: Dictionary that specifies the handling strategy for each column. Options: `fill_0`, `most_frequent`, `fill_mean`, `fill_median`, `fill_mode`, `interpolate`, `fill_knn`.
+    - `handling_options`: Dictionary that specifies the handling strategy for each column. Options: `fill_0`, `most_frequent`, `fill_mean`, `fill_median`, `fill_mode`, `fill_knn`.
     - `n_neighbors`: Number of neighbors for K-Nearest Neighbors imputation (used with `fill_knn`).
   
 ```python
@@ -147,7 +173,7 @@ MissingValuesHandler(
     handling_options={
         'sepal width (cm)': 'fill_knn',
         'petal length (cm)': 'fill_mode',
-        'petal width (cm)': 'interpolate',
+        'petal width (cm)': 'most_frequent',
         
     },
     n_neighbors= {
@@ -158,10 +184,10 @@ MissingValuesHandler(
 
 #### **Handle Outliers**
 
-Manages outliers in the dataset using different strategies.
+Manages outliers in the dataset using different strategies. The action can be either cap or median, while the method can be `iqr`, `zscore`, `lof`, or `iforest`. Note that `lof` and `iforest` only accept the `median` action.
 
 - Parameters:
-    - `handling_options`: Dictionary specifying the handling strategy. Options: `none`, `cap`, `median`, `lof`, `iforest`.
+    - `handling_options`: Dictionary specifying the handling strategy. The strategy is a tuple where the first element is the action (`cap` or `median`) and the second is the method (`iqr`, `zscore`, `lof`, `iforest`).
     - `thresholds`: Dictionary with thresholds for `iqr` and `zscore` methods.
     - `lof_params`: Dictionary specifying parameters for the LOF method.
     - `iforest_params`: Dictionary specifying parameters for Isolation Forest.
@@ -172,7 +198,7 @@ OutliersHandler(
         'sepal length (cm)': ('median', 'iqr'),
         'sepal width (cm)': ('cap', 'zscore'),
         'petal length (cm)': ('median', 'lof'),
-        'petal width (cm)': ('cap', 'iforest'),
+        'petal width (cm)': ('median', 'iforest'),
     },
     thresholds={
         'sepal length (cm)': 1.5,
@@ -192,6 +218,23 @@ OutliersHandler(
 ```
 
 ### Preprocessing
+
+### **Non-Linear Transformation**
+
+Applies non-linear transformations, including logarithmic, exponential, and Yeo-Johnson transformations.
+
+- Parameters:
+    - `transformation_options`: A dictionary specifying the transformation to be applied for each column. Options include: `log`, `exponential`, and `yeo_johnson`.
+
+```python
+NonLinearTransformation(
+    transformation_options={
+        "sepal length (cm)": "log",
+        "sepal width (cm)": "exponential",
+        "petal length (cm)": "yeo_johnson",
+    }
+)
+```
 
 #### **Quantile Transformations**
 
@@ -296,24 +339,18 @@ CyclicalFeaturesTransformer(
 
 #### **Numerical Binning**
 
-Bins numerical columns into categories.
+Bins numerical columns into categories. You can now specify the column, the binning method, and the number of bins in a tuple.
 
 - Parameters:
-    - `binning_options`: Dictionary specifying the binning method for each column. Options: `uniform`, `quantile`, `kmeans`.
-    - `num_bins`: Number of bins for each column.
+    - `binning_options`: List of tuples where each tuple specifies the column name, binning method, and number of bins. Options for binning methods are `uniform`, `quantile` or `kmeans`.
   
 ```python
 NumericalBinning(
-    binning_options={
-        "sepal length (cm)": "uniform",
-        "sepal width (cm)": "quantile",
-        "petal length (cm)": "kmeans",
-    },
-    num_bins={
-        "sepal length (cm)": 5,
-        "sepal width (cm)": 6,
-        "petal length (cm)": 7,
-    }
+    binning_options=[
+        ("sepal length (cm)", "uniform", 5),
+        ("sepal width (cm)", "quantile", 6),
+        ("petal length (cm)", "kmeans", 7),
+    ]
 )
 ```
 

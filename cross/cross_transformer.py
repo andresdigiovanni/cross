@@ -1,4 +1,3 @@
-import pickle
 import warnings
 from datetime import datetime
 
@@ -58,12 +57,6 @@ class CrossTransformer(BaseEstimator, TransformerMixin):
 
         return self
 
-    def load_transformations(self, file_path):
-        with open(file_path, "rb") as f:
-            transformations = pickle.load(f)
-
-        self.transformations = self._initialize_transformations(transformations)
-
     def _initialize_transformations(self, transformations):
         initialized_transformers = []
         for transformation in transformations:
@@ -94,15 +87,6 @@ class CrossTransformer(BaseEstimator, TransformerMixin):
             return transformer_mapping[name](**params)
 
         raise ValueError(f"Unknown transformer: {name}")
-
-    def save_transformations(self, file_path):
-        transformations_data = [
-            {"name": type(t).__name__, "params": t.get_params()}
-            for t in self.transformations
-        ]
-
-        with open(file_path, "wb") as f:
-            pickle.dump(transformations_data, f)
 
     def fit(self, X, y=None):
         X_transformed = X.copy()

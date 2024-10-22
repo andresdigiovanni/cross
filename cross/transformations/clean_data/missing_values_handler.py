@@ -64,9 +64,6 @@ class MissingValuesHandler(BaseEstimator, TransformerMixin):
                 fill_with = "Unknown" if column in cat_columns else 0
                 X_transformed[column] = X_transformed[column].fillna(fill_with)
 
-            elif action == "interpolate":
-                X_transformed[column] = X_transformed[column].interpolate()
-
             elif action in ["fill_knn", "most_frequent"]:
                 imputer = self._imputers[column]
                 X_transformed[column] = imputer.transform(

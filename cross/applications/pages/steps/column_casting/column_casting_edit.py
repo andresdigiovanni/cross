@@ -12,7 +12,7 @@ class ColumnCastingEdit:
         markdowns = [markdown.copy() for _ in range(n_cols)]
 
         for i, (column, dtype_to_cast) in enumerate(cast_options.items()):
-            markdowns[i % n_cols].append("| {} | {} |".format(column, dtype_to_cast))
+            markdowns[i % n_cols].append(f"| {column} | {dtype_to_cast} |")
 
         for col, markdown in zip(cols, markdowns):
             with col:

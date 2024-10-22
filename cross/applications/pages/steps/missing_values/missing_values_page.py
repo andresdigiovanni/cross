@@ -22,13 +22,31 @@ class MissingValuesPage(MissingValuesBase):
         if not is_data_loaded():
             return
 
+        df, cat_columns, num_columns, valid_columns, missing_values, target_column = (
+            self._initialize_data()
+        )
+
+        handling_options, n_neighbors = {}, {}
+
+        self._display_missing_values_handling(
+            df,
+            valid_columns,
+            cat_columns,
+            num_columns,
+            missing_values,
+            handling_options,
+            n_neighbors,
+        )
+
+        st.markdown("""---""")
+
+        self._apply_missing_values_handling(df, handling_options, n_neighbors)
+
+    def _initialize_data(self):
         df = st.session_state["data"]
 
         cat_columns = categorical_columns(df)
         num_columns = numerical_columns(df)
-
-        handling_options = {}
-        n_neighbors = {}
         missing_values = df.isnull().sum()
 
         config = st.session_state.get("config", {})
@@ -37,23 +55,33 @@ class MissingValuesPage(MissingValuesBase):
         columns = [x for x in df.columns if x != target_column]
         valid_columns = [x for x in columns if x in cat_columns + num_columns]
 
+        return (
+            df,
+            cat_columns,
+            num_columns,
+            valid_columns,
+            missing_values,
+            target_column,
+        )
+
+    def _display_missing_values_handling(
+        self,
+        df,
+        valid_columns,
+        cat_columns,
+        num_columns,
+        missing_values,
+        handling_options,
+        n_neighbors,
+    ):
         for column in valid_columns:
             st.markdown("""---""")
             col1, col2 = st.columns([2, 1])
 
-            if column in cat_columns:
-                actions = self.actions_all | self.actions_cat
-            else:
-                actions = self.actions_all | self.actions_num
+            actions = self._get_available_actions(column, cat_columns)
 
             with col1:
-                st.subheader(column)
-                st.write(f"Missing values: {missing_values[column]}")
-
-                if column in cat_columns:
-                    num_categories = df[column].nunique()
-                    st.write(f"Number of categories: {num_categories}")
-
+                self._display_column_info(df, column, cat_columns, missing_values)
                 handling_options[column] = st.selectbox(
                     f"Action for {column}", actions.keys(), key=column
                 )
@@ -69,26 +97,42 @@ class MissingValuesPage(MissingValuesBase):
                     n_neighbors[column] = neighbors
 
             with col2:
-                fig, ax = plt.subplots(figsize=(4, 2))
+                self._display_column_distribution(df, column, num_columns)
 
-                if column in num_columns:
-                    sns.histplot(df[column], kde=True, ax=ax, color="#FF4C4B")
-                    plot_remove_borders(ax)
+    def _get_available_actions(self, column, cat_columns):
+        if column in cat_columns:
+            return self.ACTIONS_ALL | self.ACTIONS_CAT
 
-                else:
-                    df[column].value_counts().plot.pie(autopct="%1.1f%%", ax=ax)
-                    ax.set_ylabel("")
+        return self.ACTIONS_ALL | self.ACTIONS_NUM
 
-                st.pyplot(fig)
+    def _display_column_info(self, df, column, cat_columns, missing_values):
+        st.subheader(column)
+        st.write(f"Missing values: {missing_values[column]}")
 
-        st.markdown("""---""")
+        if column in cat_columns:
+            num_categories = df[column].nunique()
+            st.write(f"Number of categories: {num_categories}")
 
-        # Convert button
+    def _display_column_distribution(self, df, column, num_columns):
+        fig, ax = plt.subplots(figsize=(4, 2))
+
+        if column in num_columns:
+            sns.histplot(df[column], kde=True, ax=ax, color="#FF4C4B")
+
+        else:
+            df[column].value_counts().plot.pie(autopct="%1.1f%%", ax=ax)
+            ax.set_ylabel("")
+
+        plot_remove_borders(ax)
+        st.pyplot(fig)
+
+    def _apply_missing_values_handling(self, df, handling_options, n_neighbors):
         if st.button("Add step"):
             try:
                 handling_options_mapped = {
-                    col: self.actions[action]
+                    col: self.ACTIONS[action]
                     for col, action in handling_options.items()
+                    if self.ACTIONS[action] != "none"
                 }
                 missing_values_handler = MissingValuesHandler(
                     handling_options_mapped, n_neighbors
@@ -104,4 +148,4 @@ class MissingValuesPage(MissingValuesBase):
                 st.success("Missing values handled successfully!")
 
             except Exception as e:
-                st.error("Error handling missing values: {}".format(e))
+                st.error(f"Error handling missing values: {e}")

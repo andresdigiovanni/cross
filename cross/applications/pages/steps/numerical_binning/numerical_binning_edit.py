@@ -6,8 +6,7 @@ from .numerical_binning import NumericalBinningBase
 class NumericalBinningEdit(NumericalBinningBase):
     def show_component(self, params):
         binning_options = params["binning_options"]
-        num_bins = params["num_bins"]
-        reverse_binnings = {v: k for k, v in self.binnings.items()}
+        reverse_binnings = {v: k for k, v in self.BINNINGS.items()}
         n_cols = 2
 
         cols = st.columns((1,) * n_cols)
@@ -15,14 +14,12 @@ class NumericalBinningEdit(NumericalBinningBase):
         markdown = ["| Column | Strategy | Number of bins", "| --- | --- | --- |"]
         markdowns = [markdown.copy() for _ in range(n_cols)]
 
-        for i, (column, strategy) in enumerate(binning_options.items()):
+        for i, (column, strategy, n_bins) in enumerate(binning_options):
             if strategy == "none":
                 continue
 
             markdowns[i % n_cols].append(
-                "| {} | {} | {} |".format(
-                    column, reverse_binnings[strategy], num_bins[column]
-                )
+                "| {} | {} | {} |".format(column, reverse_binnings[strategy], n_bins)
             )
 
         for col, markdown in zip(cols, markdowns):

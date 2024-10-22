@@ -7,7 +7,7 @@ class MissingValuesEdit(MissingValuesBase):
     def show_component(self, params):
         handling_options = params["handling_options"]
         n_neighbors = params["n_neighbors"]
-        reverse_actions = {v: k for k, v in self.actions.items()}
+        reverse_actions = {v: k for k, v in self.ACTIONS.items()}
         n_cols = 2
 
         cols = st.columns((1,) * n_cols)

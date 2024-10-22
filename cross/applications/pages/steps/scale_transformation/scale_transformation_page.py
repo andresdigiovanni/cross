@@ -24,8 +24,7 @@ class ScaleTransformationsPage(ScaleTransformationsBase):
         df = st.session_state["data"]
         original_df = df.copy()
 
-        num_columns = numerical_columns(df)
-        num_columns = [x for x in num_columns if x != target_column]
+        num_columns = [col for col in numerical_columns(df) if col != target_column]
 
         transformation_options = {}
 
@@ -37,54 +36,55 @@ class ScaleTransformationsPage(ScaleTransformationsBase):
                 st.subheader(column)
                 selected_transformation = st.selectbox(
                     f"Select transformation for {column}",
-                    self.transformations.keys(),
+                    self.TRANSFORMATIONS.keys(),
                     key=column,
                 )
-                transformation_options[column] = selected_transformation
+                transformation_options[column] = self.TRANSFORMATIONS[
+                    selected_transformation
+                ]
 
             with col2:
-                fig, ax = plt.subplots(figsize=(4, 2))
-                sns.histplot(original_df[column], kde=True, ax=ax, color="#FF4C4B")
-
-                ax.set_title("Original Data")
-                plot_remove_borders(ax)
-
-                st.pyplot(fig)
+                self._plot_column_data(original_df[column], "Original Data")
 
             with col3:
-                scale_transformation = ScaleTransformation(
-                    {column: self.transformations[transformation_options[column]]}
+                transformed_df = self._apply_transformation(
+                    original_df.copy(), column, transformation_options[column]
                 )
-                transformed_df = scale_transformation.fit_transform(original_df)
-
-                fig, ax = plt.subplots(figsize=(4, 2))
-                sns.histplot(transformed_df[column], kde=True, ax=ax, color="#FF4C4B")
-
-                ax.set_title("Transformed Data")
-                plot_remove_borders(ax)
-
-                st.pyplot(fig)
+                self._plot_column_data(transformed_df[column], "Transformed Data")
 
         st.markdown("""---""")
+        self._apply_scale_transformations(df, transformation_options)
 
-        # Apply button
+    def _plot_column_data(self, column_data, title):
+        fig, ax = plt.subplots(figsize=(4, 2))
+        sns.histplot(column_data, kde=True, ax=ax, color="#FF4C4B")
+        ax.set_title(title)
+        plot_remove_borders(ax)
+        st.pyplot(fig)
+
+    def _apply_transformation(self, df, column, transformation):
+        scale_transformation = ScaleTransformation({column: transformation})
+        return scale_transformation.fit_transform(df)
+
+    def _apply_scale_transformations(self, df, transformation_options):
         if st.button("Add step"):
             try:
-                transformations_mapped = {
-                    col: self.transformations[transformation]
+                valid_transformations = {
+                    col: transformation
                     for col, transformation in transformation_options.items()
+                    if transformation != "none"
                 }
 
-                scale_transformation = ScaleTransformation(transformations_mapped)
+                scale_transformation = ScaleTransformation(valid_transformations)
                 transformed_df = scale_transformation.fit_transform(df)
                 st.session_state["data"] = transformed_df
 
+                # Update session state with transformations
                 params = scale_transformation.get_params()
                 steps = st.session_state.get("steps", [])
                 steps.append({"name": "ScaleTransformation", "params": params})
                 st.session_state["steps"] = steps
 
                 st.success("Transformations applied successfully!")
-
             except Exception as e:
-                st.error("Error applying transformations: {}".format(e))
+                st.error(f"Error applying transformations: {e}")

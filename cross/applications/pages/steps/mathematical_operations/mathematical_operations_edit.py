@@ -6,7 +6,7 @@ from .mathematical_operations import MathematicalOperationsBase
 class MathematicalOperationsEdit(MathematicalOperationsBase):
     def show_component(self, params):
         operations_options = params["operations_options"]
-        reverse_operations = {v: k for k, v in self.encodings.items()}
+        reverse_operations = {v: k for k, v in self.OPERATIONS.items()}
         n_cols = 2
 
         cols = st.columns((1,) * n_cols)

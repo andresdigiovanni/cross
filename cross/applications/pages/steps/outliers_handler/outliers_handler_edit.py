@@ -7,8 +7,8 @@ class OutliersHandlingEdit(OutliersHandlingBase):
     def show_component(self, params):
         handling_options = params["handling_options"]
         thresholds = params["thresholds"]
-        reverse_actions = {v: k for k, v in self.actions.items()}
-        reverse_detection = {v: k for k, v in self.detection_methods.items()}
+        reverse_actions = {v: k for k, v in self.ACTIONS.items()}
+        reverse_detection = {v: k for k, v in self.DETECTION_METHODS.items()}
 
         markdown = [
             "| Column | Action | Method | Threshold |",
@@ -24,7 +24,7 @@ class OutliersHandlingEdit(OutliersHandlingBase):
                     column,
                     reverse_actions[action],
                     reverse_detection[method],
-                    thresholds[column],
+                    thresholds.get(column, ""),
                 )
             )
 

@@ -12,7 +12,8 @@ def navigation_on_change(key):
     selection = st.session_state[key]
 
     pages = navigation_pages()
-    st.session_state["page_index"] = pages["page_to_index"][selection]
+
+    st.session_state["page_index"] = pages["name_to_index"][selection]
     st.session_state["is_show_modify_page"] = False
 
 
@@ -43,7 +44,7 @@ def main():
     manual_select = st.session_state["page_index"]
     pages = navigation_pages()
 
-    if pages["index_to_page"].get(manual_select, "") == "---":
+    if pages["index_to_name"].get(manual_select, "") == "---":
         manual_select += 1
 
     if "is_show_modify_page" not in st.session_state:
@@ -69,7 +70,7 @@ def main():
 
         else:
             page_index = st.session_state["page_index"]
-            pages["pages_show"][page_index].show_page()
+            pages["index_to_show"][page_index].show_page()
 
     # Selected operations
     with col2:

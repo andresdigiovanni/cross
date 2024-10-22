@@ -18,18 +18,27 @@ class DateTimeTransformationPage:
 
         df = st.session_state["data"]
         original_df = df.copy()
-
         datetime_cols = datetime_columns(df)
 
-        # Select columns to transform
+        self._display_column_selector(datetime_cols)
+        datetime_columns_selected = st.session_state.get(
+            "datetime_columns_selected", datetime_cols
+        )
+
+        st.markdown("""---""")
+        self._preview_transformations(original_df, datetime_columns_selected)
+
+        st.markdown("""---""")
+        self._apply_transformation_button(df, datetime_columns_selected)
+
+    def _display_column_selector(self, datetime_cols):
         st.subheader("Select Datetime Columns to Transform")
         datetime_columns_selected = st.multiselect(
             "Columns", options=datetime_cols, default=datetime_cols
         )
+        st.session_state["datetime_columns_selected"] = datetime_columns_selected
 
-        st.markdown("""---""")
-
-        # Show transformations
+    def _preview_transformations(self, original_df, datetime_columns_selected):
         st.subheader("Preview Transformations")
         for column in datetime_columns_selected:
             st.markdown(f"**Column: {column}**")
@@ -41,8 +50,7 @@ class DateTimeTransformationPage:
 
             with col2:
                 datetime_transformer = DateTimeTransformer(datetime_columns_selected)
-                transformed_df = datetime_transformer.fit_transform(df)
-
+                transformed_df = datetime_transformer.fit_transform(original_df)
                 new_columns = list(
                     set(transformed_df.columns) - set(original_df.columns)
                 )
@@ -50,9 +58,7 @@ class DateTimeTransformationPage:
                 st.write("Transformed Data")
                 st.dataframe(transformed_df[new_columns].drop_duplicates().head())
 
-        st.markdown("""---""")
-
-        # Apply button
+    def _apply_transformation_button(self, df, datetime_columns_selected):
         if st.button("Add step"):
             try:
                 datetime_transformer = DateTimeTransformer(datetime_columns_selected)

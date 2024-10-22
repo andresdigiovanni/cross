@@ -1,5 +1,5 @@
 class NumericalBinningBase:
-    binnings = {
+    BINNINGS = {
         "Do nothing": "none",
         "Uniform Binning": "uniform",
         "Quantile Binning": "quantile",

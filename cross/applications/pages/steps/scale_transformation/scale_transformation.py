@@ -1,5 +1,5 @@
 class ScaleTransformationsBase:
-    transformations = {
+    TRANSFORMATIONS = {
         "Do nothing": "none",
         "Min-Max Scaling": "min_max",
         "Standardization": "standard",

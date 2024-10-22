@@ -73,7 +73,7 @@ class FeatureSelector:
     ):
         best_score = float("-inf") if direction == "maximize" else float("inf")
 
-        selected_features_idx: List[int] = []
+        selected_features_idx = []
         features_added_without_improvement = 0
 
         for idx in feature_indices:
@@ -90,14 +90,11 @@ class FeatureSelector:
             )
             score = np.mean(scores)
 
-            has_improved = (direction == "maximize" and score > best_score) or (
-                direction == "minimize" and score < best_score
-            )
-
-            if has_improved:
+            if self._is_score_improved(score, best_score, direction):
                 selected_features_idx.append(idx)
                 best_score = score
                 features_added_without_improvement = 0
+
             else:
                 features_added_without_improvement += 1
 
@@ -105,3 +102,8 @@ class FeatureSelector:
                     break
 
         return selected_features_idx
+
+    def _is_score_improved(self, score, best_score, direction):
+        return (direction == "maximize" and score > best_score) or (
+            direction == "minimize" and score < best_score
+        )
