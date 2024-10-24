@@ -3,7 +3,7 @@ import pytest
 from sklearn.datasets import load_iris
 from sklearn.neighbors import KNeighborsClassifier
 
-from cross import CrossTransformer
+from cross import CrossTransformer, auto_transform
 from cross.parameter_calculators.shared import evaluate_model
 
 
@@ -29,8 +29,7 @@ def test_auto_transform(load_data):
     assert baseline_score > 0, "Baseline score should be a positive number."
 
     # Apply auto transformations
-    transformer = CrossTransformer()
-    transformations = transformer.auto_transform(x, y, model, scoring, direction)
+    transformations = auto_transform(x, y, model, scoring, direction)
 
     # Ensure that transformations are returned as a list
     assert isinstance(

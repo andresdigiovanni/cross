@@ -8,6 +8,30 @@ Cross is a Python library for data processing to train machine learning models, 
 
 ![UI Cross](assets/ui_outliers_handling.png)
 
+- [Getting Started](#getting-started)
+- [Example of Use](#example-of-use)
+  - [Define transformations](#define-transformations)
+  - [Import Transformations from UI](#import-transformations-from-ui)
+  - [Save and Load Transformations](#save-and-load-transformations)
+  - [Auto transformations](#auto-transformations)
+- [Transformations](#transformations)
+  - [Clean Data](#clean-data)
+    - [Column Selection](#column-selection)
+    - [Column Casting](#column-casting)
+    - [Missing Values](#missing-values)
+    - [Handle Outliers](#handle-outliers)
+  - [Preprocessing](#preprocessing)
+    - [Non-Linear Transformation](#non-linear-transformation)
+    - [Quantile Transformations](#quantile-transformations)
+    - [Scale Transformations](#scale-transformations)
+    - [Normalization](#normalization)
+  - [Feature Engineering](#feature-engineering)
+    - [Categorical Encoding](#categorical-encoding)
+    - [Date Time Transforms](#date-time-transforms)
+    - [Cyclical Features Transforms](#cyclical-features-transforms)
+    - [Numerical Binning](#numerical-binning)
+    - [Mathematical Operations](#mathematical-operations)
+
 
 ## Getting Started
 
@@ -107,24 +131,31 @@ with open("cross_transformations.pkl", "rb") as f:
 cross.set_params(**transformations)
 ```
 
-## Transformations
+### Auto transformations
 
-- [Clean Data](#clean-data)
-    - [Column Selection](#column-selection)
-    - [Column Casting](#column-casting)
-    - [Missing Values](#missing-values)
-    - [Handle Outliers](#handle-outliers)
-- [Preprocessing](#preprocessing)
-    - [Non-Linear Transformation](#non-linear-transformation)
-    - [Quantile Transformations](#quantile-transformations)
-    - [Scale Transformations](#scale-transformations)
-    - [Normalization](#normalization)
-- [Feature Engineering](#feature-engineering)
-    - [Categorical Encoding](#categorical-encoding)
-    - [Date Time Transforms](#date-time-transforms)
-    - [Cyclical Features Transforms](#cyclical-features-transforms)
-    - [Numerical Binning](#numerical-binning)
-    - [Mathematical Operations](#mathematical-operations)
+You can allow the library to create automatically the transformations that best fits:
+
+```python
+from cross import auto_transform, CrossTransformer
+from sklearn.neighbors import KNeighborsClassifier
+
+# Define the model
+model = KNeighborsClassifier()
+scoring = "accuracy"
+direction = "maximize"
+
+# Run auto transformations
+transformations = auto_transform(x, y, model, scoring, direction)
+
+# Create transformer based on transformations
+transformer = CrossTransformer(transformations)
+
+# Apply transformations to your dataset
+x_train, y_train = transformer.fit_transform(x_train, y_train)
+x_test, y_test = transformer.transform(x_test, y_test)
+```
+
+## Transformations
 
 ### Clean Data
 
@@ -219,7 +250,7 @@ OutliersHandler(
 
 ### Preprocessing
 
-### **Non-Linear Transformation**
+#### **Non-Linear Transformation**
 
 Applies non-linear transformations, including logarithmic, exponential, and Yeo-Johnson transformations.
 
