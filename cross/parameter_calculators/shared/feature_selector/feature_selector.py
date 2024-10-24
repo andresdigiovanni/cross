@@ -1,5 +1,3 @@
-from typing import List
-
 import numpy as np
 from sklearn.inspection import permutation_importance
 from sklearn.model_selection import KFold, cross_val_score
