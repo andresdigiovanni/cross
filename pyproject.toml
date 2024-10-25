@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "cross"
+name = "cross_ml"
 version = "0.1.0"
 description = ""
 authors = ["Andres Di Giovanni <andresdigiovanni@gmail.com>"]

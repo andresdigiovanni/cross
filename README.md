@@ -38,7 +38,7 @@ Cross is a Python library for data processing to train machine learning models, 
 To install the Cross library, run the following command:
 
 ```bash
-pip install cross
+pip install cross_ml
 ```
 
 You can initialize the graphical interface with the command:
