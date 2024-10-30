@@ -28,7 +28,6 @@ class CategoricalEncoding(BaseEstimator, TransformerMixin):
         X_filled = X.copy()
 
         for column, transformation in self.encodings_options.items():
-            X_filled[column] = X_filled[column].fillna("Unknown")
             self._fit_encoder(X_filled, column, transformation, y)
 
         return self
@@ -43,8 +42,9 @@ class CategoricalEncoding(BaseEstimator, TransformerMixin):
             ).fit(X[[column]])
 
         elif transformation in ["onehot", "dummy"]:
+            drop = "first" if transformation == "dummy" else None
             self._encoders[column] = OneHotEncoder(
-                sparse_output=False, drop="first" if transformation == "dummy" else None
+                sparse_output=False, handle_unknown="ignore", drop=drop
             ).fit(X[[column]])
 
         elif transformation == "binary":

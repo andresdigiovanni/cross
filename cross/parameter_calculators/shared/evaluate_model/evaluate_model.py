@@ -16,7 +16,6 @@ def build_pipeline(model, transformer=None):
         ]
     )
     steps.append(("numeric_processing", numeric_transformer))
-
     steps.append(("model", model))
 
     return Pipeline(steps=steps)
