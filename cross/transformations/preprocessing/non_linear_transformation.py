@@ -23,7 +23,7 @@ class NonLinearTransformation(BaseEstimator, TransformerMixin):
 
         for column, transformation in self.transformation_options.items():
             if transformation == "yeo_johnson":
-                transformer = PowerTransformer(method="yeo-johnson")
+                transformer = PowerTransformer(method="yeo-johnson", standardize=False)
                 transformer.fit(X[[column]])
                 self._transformers[column] = transformer
 

@@ -78,7 +78,7 @@ class NonLinearTransformationParamCalculator:
             return np.exp(column_data)
 
         elif transformation == "yeo_johnson":
-            transformer = PowerTransformer(method="yeo-johnson")
+            transformer = PowerTransformer(method="yeo-johnson", standardize=False)
 
             return transformer.fit_transform(
                 column_data.values.reshape(-1, 1)
