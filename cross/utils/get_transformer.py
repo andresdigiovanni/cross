@@ -5,6 +5,7 @@ from cross.transformations.clean_data import (
 )
 from cross.transformations.feature_engineering import (
     CategoricalEncoding,
+    CorrelatedSubstringEncoder,
     CyclicalFeaturesTransformer,
     DateTimeTransformer,
     MathematicalOperations,
@@ -24,6 +25,7 @@ def get_transformer(name, params):
         "CategoricalEncoding": CategoricalEncoding,
         "CastColumns": CastColumns,
         "ColumnSelection": ColumnSelection,
+        "CorrelatedSubstringEncoder": CorrelatedSubstringEncoder,
         "CyclicalFeaturesTransformer": CyclicalFeaturesTransformer,
         "DateTimeTransformer": DateTimeTransformer,
         "OutliersHandler": OutliersHandler,

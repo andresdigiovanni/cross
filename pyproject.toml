@@ -1,10 +1,13 @@
 [tool.poetry]
 name = "cross_ml"
 version = "0.1.0"
-description = ""
+description = "A comprehensive library for data preprocessing and feature engineering in machine learning"
 authors = ["Andres Di Giovanni <andresdigiovanni@gmail.com>"]
 readme = "README.md"
 license = "MIT"
+homepage = "https://github.com/andresdigiovanni/cross"
+repository = "https://github.com/andresdigiovanni/cross"
+keywords = ["machine learning", "data preprocessing", "feature engineering", "scikit-learn", "data processing"]
 packages = [{include = "cross"}]
 
 [tool.poetry.dependencies]

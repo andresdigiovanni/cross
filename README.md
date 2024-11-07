@@ -4,6 +4,9 @@
 
 # Cross: a versatile toolkit for data preprocessing and feature engineering in machine learning
 
+![PyPI version](https://img.shields.io/pypi/v/cross_ml)
+![Downloads](https://img.shields.io/pypi/dm/cross_ml)
+
 Cross is a Python library for data processing to train machine learning models, featuring scaling, normalization, feature creation through binning, and various mathematical operations between columns. It includes a graphical interface for exploring and generating transformations, with the option to export and reuse them.
 
 ![UI Cross](assets/ui_outliers_handling.png)
@@ -26,6 +29,7 @@ Cross is a Python library for data processing to train machine learning models, 
     - [Scale Transformations](#scale-transformations)
     - [Normalization](#normalization)
   - [Feature Engineering](#feature-engineering)
+    - [Correlated Substring Encoder](#correlated-substring-encoder)
     - [Categorical Encoding](#categorical-encoding)
     - [Date Time Transforms](#date-time-transforms)
     - [Cyclical Features Transforms](#cyclical-features-transforms)
@@ -318,6 +322,22 @@ Normalization(
 ```
 
 ### Feature Engineering
+
+#### **Correlated Substring Encoder**
+
+Encodes a new column based on the presence of specific substrings in a target column. This technique is useful for finding latent relationships between categorical values that share common substrings, such as part codes or abbreviations.
+
+- Parameters:
+    - `substrings`: A dictionary where each key is a column name and the value is a list of substrings to search within that column. If a substring is found, it is added to a new column with the suffix `__corr_substring`.
+
+```python
+CorrelatedSubstringEncoder(
+    substrings={
+        "product_description": ["eco", "premium", "budget"],
+        "customer_feedback": ["satisfied", "disappointed"],
+    }
+)
+```
 
 #### **Categorical Encoding**
 
