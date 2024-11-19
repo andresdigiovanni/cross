@@ -109,10 +109,13 @@ class MathematicalOperationsPage(MathematicalOperationsBase):
     def _apply_operations(self, df):
         if st.button("Add step"):
             try:
+                # Apply math operations
                 math_operations = MathematicalOperations(
                     st.session_state.operations_options
                 )
                 transformed_df = math_operations.fit_transform(df)
+
+                # Update session state
                 st.session_state["data"] = transformed_df
 
                 params = math_operations.get_params()
