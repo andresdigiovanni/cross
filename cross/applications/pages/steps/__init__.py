@@ -1,10 +1,6 @@
 from .categorical_encoding import CategoricalEncodingEdit, CategoricalEncodingPage
 from .column_casting import ColumnCastingEdit, ColumnCastingPage
 from .column_selection import ColumnSelectionEdit, ColumnSelectionPage
-from .correlated_substring_encoder import (
-    CorrelatedSubstringEdit,
-    CorrelatedSubstringPage,
-)
 from .cyclical_transformer import (
     CyclicalFeaturesTransformationEdit,
     CyclicalFeaturesTransformationPage,

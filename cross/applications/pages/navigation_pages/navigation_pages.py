@@ -5,8 +5,6 @@ from cross.applications.pages.steps import (
     ColumnCastingPage,
     ColumnSelectionEdit,
     ColumnSelectionPage,
-    CorrelatedSubstringEdit,
-    CorrelatedSubstringPage,
     CyclicalFeaturesTransformationEdit,
     CyclicalFeaturesTransformationPage,
     DateTimeTransformationEdit,
@@ -115,13 +113,6 @@ def navigation_pages():
         ],
         # Data Transforms - Categorical
         [
-            {
-                "key": "CorrelatedSubstringEncoder",
-                "name": "Correlated substring",
-                "icon": "filter",
-                "page": CorrelatedSubstringPage(),
-                "edit": CorrelatedSubstringEdit(),
-            },
             {
                 "key": "CategoricalEncoding",
                 "name": "Categorical encoding",

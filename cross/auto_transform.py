@@ -8,7 +8,6 @@ from cross.auto_parameters.clean_data import (
 )
 from cross.auto_parameters.feature_engineering import (
     CategoricalEncodingParamCalculator,
-    CorrelatedSubstringEncoderParamCalculator,
     CyclicalFeaturesTransformerParamCalculator,
     DateTimeTransformerParamCalculator,
     MathematicalOperationsParamCalculator,
@@ -37,7 +36,6 @@ def auto_transform(X, y, model, scoring, direction, verbose=True):
         ("OutliersHandler", OutliersParamCalculator),
         ("NonLinearTransformation", NonLinearTransformationParamCalculator),
         ("ScaleTransformation", ScaleTransformationParamCalculator),
-        ("CorrelatedSubstringEncoder", CorrelatedSubstringEncoderParamCalculator),
         ("CategoricalEncoding", CategoricalEncodingParamCalculator),
         ("DateTimeTransformer", DateTimeTransformerParamCalculator),
         ("CyclicalFeaturesTransformer", CyclicalFeaturesTransformerParamCalculator),
