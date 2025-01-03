@@ -29,8 +29,7 @@ class CorrelatedSubstringEncoder(BaseEstimator, TransformerMixin):
                 print(f"Column {column} not in data.")
                 continue
 
-            new_column = f"{column}__corr_substring"
-            X[new_column] = X[column].apply(
+            X[column] = X[column].apply(
                 lambda x: next(
                     (substring for substring in substrings if substring in x),
                     self.DEFAULT_VALUE,

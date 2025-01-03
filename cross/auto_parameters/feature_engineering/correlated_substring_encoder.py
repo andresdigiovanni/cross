@@ -82,8 +82,6 @@ class CorrelatedSubstringEncoderParamCalculator:
         return substring_scores
 
     def _beam_search_best_substrings(self, x, y, column, substring_scores, direction):
-        new_column = f"{column}__corr_substring"
-
         # Initialize pending combinations with empty combinations to expand in the first iteration
         pending_combinations = [[]]
         tested_combinations = set()
@@ -123,13 +121,13 @@ class CorrelatedSubstringEncoderParamCalculator:
 
                     # Encode unique values for the transformed data
                     label_encoder = LabelEncoder()
-                    transformed_x[new_column] = label_encoder.fit_transform(
-                        transformed_x[new_column]
+                    transformed_x[column] = label_encoder.fit_transform(
+                        transformed_x[column]
                     )
 
                     # Calculate the correlation for the current combination
                     new_corr = self._evaluate_correlation(
-                        transformed_x, y, new_column, direction
+                        transformed_x, y, column, direction
                     )
 
                     all_combinations.append((updated_combination, new_corr))
