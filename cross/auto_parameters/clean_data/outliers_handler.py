@@ -6,6 +6,7 @@ from sklearn.neighbors import LocalOutlierFactor
 from tqdm import tqdm
 
 from cross.auto_parameters.shared import evaluate_model
+from cross.auto_parameters.shared.utils import is_score_improved
 from cross.transformations import OutliersHandler
 from cross.transformations.utils.dtypes import numerical_columns
 
@@ -44,10 +45,10 @@ class OutliersParamCalculator:
 
     def _get_outlier_methods(self):
         return {
-            "iqr": {"thresholds": [1.5]},
-            "zscore": {"thresholds": [3.0]},
-            "lof": {"n_neighbors": [20]},
-            "iforest": {"contamination": [0.1]},
+            "iqr": {"thresholds": [1.5, 3.0]},
+            "zscore": {"thresholds": [2.5, 3.0, 4.0]},
+            "lof": {"n_neighbors": [10, 20, 50]},
+            "iforest": {"contamination": [0.05, 0.1, 0.2]},
         }
 
     def _find_best_params_for_column(
@@ -64,7 +65,7 @@ class OutliersParamCalculator:
             kwargs = self._build_kwargs(column, action, method, param)
             score = evaluate_model(x, y, model, scoring, OutliersHandler(**kwargs))
 
-            if self._is_score_improved(score, best_score, direction):
+            if is_score_improved(score, best_score, direction):
                 best_score = score
                 best_params = kwargs
 
@@ -116,11 +117,6 @@ class OutliersParamCalculator:
         )
         is_outlier = model.fit_predict(column_data.dropna().values.reshape(-1, 1)) == -1
         return is_outlier.sum()
-
-    def _is_score_improved(self, score, best_score, direction):
-        return (direction == "maximize" and score > best_score) or (
-            direction == "minimize" and score < best_score
-        )
 
     def _build_kwargs(self, column, action, method, param):
         kwargs = {"handling_options": {column: (action, method)}}

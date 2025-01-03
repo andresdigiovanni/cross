@@ -1,6 +1,7 @@
 from tqdm import tqdm
 
 from cross.auto_parameters.shared import evaluate_model
+from cross.auto_parameters.shared.utils import is_score_improved
 from cross.transformations import CyclicalFeaturesTransformer
 from cross.transformations.utils.dtypes import numerical_columns
 
@@ -28,7 +29,7 @@ class CyclicalFeaturesTransformerParamCalculator:
             transformer = CyclicalFeaturesTransformer({column: period})
             score = evaluate_model(x, y, model, scoring, transformer)
 
-            if self._is_score_improved(score, baseline_score, direction):
+            if is_score_improved(score, baseline_score, direction):
                 columns_periods[column] = period
 
         if columns_periods:
@@ -53,8 +54,3 @@ class CyclicalFeaturesTransformerParamCalculator:
             return len(unique_values)
 
         return None
-
-    def _is_score_improved(self, score, best_score, direction):
-        return (direction == "maximize" and score > best_score) or (
-            direction == "minimize" and score < best_score
-        )

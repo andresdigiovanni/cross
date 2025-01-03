@@ -3,6 +3,7 @@ from collections import ChainMap
 from tqdm import tqdm
 
 from cross.auto_parameters.shared import evaluate_model
+from cross.auto_parameters.shared.utils import is_score_improved
 from cross.transformations import MissingValuesHandler
 from cross.transformations.utils.dtypes import categorical_columns, numerical_columns
 
@@ -17,7 +18,7 @@ class MissingValuesParamCalculator:
             "num": {
                 "fill_mean": {},
                 "fill_median": {},
-                "fill_knn": {"n_neighbors": [3, 5, 7]},
+                "fill_knn": {"n_neighbors": [3, 5, 8, 13]},
             },
             "cat": {
                 "most_frequent": {},
@@ -90,7 +91,7 @@ class MissingValuesParamCalculator:
             else:
                 score = self._evaluate_strategy(x, y, model, scoring, column, strategy)
 
-                if self._is_score_improved(score, best_score, direction):
+                if is_score_improved(score, best_score, direction):
                     best_score = score
                     best_strategy = strategy
                     best_params = {}
@@ -106,7 +107,7 @@ class MissingValuesParamCalculator:
                 x, y, model, scoring, column, "fill_knn", n_neighbors
             )
 
-            if self._is_score_improved(score, best_score, direction):
+            if is_score_improved(score, best_score, direction):
                 best_score = score
                 best_strategy = "fill_knn"
                 best_params = {column: n_neighbors}
@@ -131,11 +132,6 @@ class MissingValuesParamCalculator:
         )
 
         return evaluate_model(x, y, model, scoring, missing_values_handler)
-
-    def _is_score_improved(self, score, best_score, direction):
-        return (direction == "maximize" and score > best_score) or (
-            direction == "minimize" and score < best_score
-        )
 
     def _build_result(self, best_handling_options, best_n_neighbors):
         missing_values_handler = MissingValuesHandler(

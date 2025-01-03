@@ -4,6 +4,7 @@ from sklearn.preprocessing import PowerTransformer
 from tqdm import tqdm
 
 from cross.auto_parameters.shared import evaluate_model
+from cross.auto_parameters.shared.utils import is_score_improved
 from cross.transformations import NonLinearTransformation
 from cross.transformations.utils.dtypes import numerical_columns
 
@@ -36,7 +37,7 @@ class NonLinearTransformationParamCalculator:
                     NonLinearTransformation({column: best_transformation}),
                 )
 
-                if self._is_score_improved(score, base_score, direction):
+                if is_score_improved(score, base_score, direction):
                     best_transformation_options[column] = best_transformation
 
         if best_transformation_options:
@@ -83,11 +84,6 @@ class NonLinearTransformationParamCalculator:
             return transformer.fit_transform(
                 column_data.values.reshape(-1, 1)
             ).flatten()
-
-    def _is_score_improved(self, score, best_score, direction):
-        return (direction == "maximize" and score > best_score) or (
-            direction == "minimize" and score < best_score
-        )
 
     def _build_transformation_result(self, best_transformation_options):
         non_linear_transformation = NonLinearTransformation(

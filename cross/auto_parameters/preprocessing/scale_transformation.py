@@ -1,6 +1,7 @@
 from tqdm import tqdm
 
 from cross.auto_parameters.shared import evaluate_model
+from cross.auto_parameters.shared.utils import is_score_improved
 from cross.transformations import ScaleTransformation
 from cross.transformations.utils.dtypes import numerical_columns
 
@@ -37,16 +38,11 @@ class ScaleTransformationParamCalculator:
             scale_transformer = ScaleTransformation(params)
             score = evaluate_model(x, y, model, scoring, scale_transformer)
 
-            if self._is_score_improved(score, best_score, direction):
+            if is_score_improved(score, best_score, direction):
                 best_score = score
                 best_params = params
 
         return best_params
-
-    def _is_score_improved(self, score, best_score, direction):
-        return (direction == "maximize" and score > best_score) or (
-            direction == "minimize" and score < best_score
-        )
 
     def _build_transformation_result(self, transformation_options):
         scale_transformation = ScaleTransformation(
