@@ -2,7 +2,7 @@ from sklearn.feature_selection import mutual_info_classif, mutual_info_regressio
 from sklearn.preprocessing import LabelEncoder
 from tqdm import tqdm
 
-from cross.transformations.feature_engineering import CorrelatedSubstringEncoder
+from cross.transformations import CorrelatedSubstringEncoder
 from cross.transformations.utils.dtypes import categorical_columns
 
 

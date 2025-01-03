@@ -21,18 +21,18 @@ class NumericalBinning(BaseEstimator, TransformerMixin):
 
     def fit(self, X, y=None):
         self._binners = {}
-        X_filled = X.copy()
+        X = X.copy()
 
         for column, strategy, n_bins in self.binning_options:
             if strategy == "none":
                 continue
 
-            X_filled[column] = X_filled[column].fillna(0)
+            X[column] = X[column].fillna(0)
 
             binner = KBinsDiscretizer(
                 n_bins=n_bins, encode="ordinal", strategy=strategy
             )
-            binner.fit(X_filled[[column]])
+            binner.fit(X[[column]])
 
             binner_name = f"{column}__{strategy}_{n_bins}"
             self._binners[binner_name] = binner
@@ -40,7 +40,7 @@ class NumericalBinning(BaseEstimator, TransformerMixin):
         return self
 
     def transform(self, X, y=None):
-        X_transformed = X.copy().fillna(0)
+        X = X.copy().fillna(0)
 
         for column, strategy, n_bins in self.binning_options:
             if strategy == "none":
@@ -49,11 +49,9 @@ class NumericalBinning(BaseEstimator, TransformerMixin):
             binner_name = f"{column}__{strategy}_{n_bins}"
             binner = self._binners[binner_name]
 
-            X_transformed[binner_name] = binner.transform(
-                X_transformed[[column]]
-            ).flatten()
+            X[binner_name] = binner.transform(X[[column]]).flatten()
 
-        return X_transformed
+        return X
 
     def fit_transform(self, X, y=None):
         return self.fit(X, y).transform(X, y)

@@ -1,10 +1,7 @@
 from tqdm import tqdm
 
-from cross.parameter_calculators.shared import (
-    ProbeFeatureSelector,
-    RecursiveFeatureAddition,
-)
-from cross.transformations.feature_engineering import NumericalBinning
+from cross.auto_parameters.shared import ProbeFeatureSelector, RecursiveFeatureAddition
+from cross.transformations import NumericalBinning
 from cross.transformations.utils.dtypes import numerical_columns
 
 

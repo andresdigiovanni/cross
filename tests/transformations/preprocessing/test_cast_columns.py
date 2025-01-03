@@ -1,6 +1,6 @@
 import pandas as pd
 
-from cross.transformations.preprocessing.cast_columns import CastColumns
+from cross.transformations import CastColumns
 
 
 class TestCastColumns:

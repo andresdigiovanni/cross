@@ -4,7 +4,7 @@ import streamlit as st
 
 from cross.applications.components import is_data_loaded
 from cross.applications.styles import plot_remove_borders
-from cross.transformations.preprocessing import NonLinearTransformation
+from cross.transformations import NonLinearTransformation
 from cross.transformations.utils.dtypes import numerical_columns
 
 from .non_linear_transformation import NonLinearTransformationBase

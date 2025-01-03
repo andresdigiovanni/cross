@@ -22,22 +22,22 @@ class CorrelatedSubstringEncoder(BaseEstimator, TransformerMixin):
         return self  # No fitting necessary, but required for compatibility
 
     def transform(self, X, y=None):
-        X_transformed = X.copy()
+        X = X.copy()
 
         for column, substrings in self.substrings.items():
-            if column not in X_transformed.columns:
+            if column not in X.columns:
                 print(f"Column {column} not in data.")
                 continue
 
             new_column = f"{column}__corr_substring"
-            X_transformed[new_column] = X_transformed[column].apply(
+            X[new_column] = X[column].apply(
                 lambda x: next(
                     (substring for substring in substrings if substring in x),
                     self.DEFAULT_VALUE,
                 )
             )
 
-        return X_transformed
+        return X
 
     def fit_transform(self, X, y=None):
         return self.fit(X, y).transform(X, y)

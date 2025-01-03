@@ -51,26 +51,22 @@ class MissingValuesHandler(BaseEstimator, TransformerMixin):
         return self
 
     def transform(self, X, y=None):
-        X_transformed = X.copy()
+        X = X.copy()
         cat_columns = categorical_columns(X)
 
         for column, action in self.handling_options.items():
             if action in ["fill_mean", "fill_median", "fill_mode"]:
-                X_transformed[column] = X_transformed[column].fillna(
-                    self._statistics[column]
-                )
+                X[column] = X[column].fillna(self._statistics[column])
 
             elif action == "fill_0":
                 fill_with = "Unknown" if column in cat_columns else 0
-                X_transformed[column] = X_transformed[column].fillna(fill_with)
+                X[column] = X[column].fillna(fill_with)
 
             elif action in ["fill_knn", "most_frequent"]:
                 imputer = self._imputers[column]
-                X_transformed[column] = imputer.transform(
-                    X_transformed[[column]]
-                ).flatten()
+                X[column] = imputer.transform(X[[column]]).flatten()
 
-        return X_transformed
+        return X
 
     def fit_transform(self, X, y=None):
         return self.fit(X, y).transform(X, y)

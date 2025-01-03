@@ -6,7 +6,7 @@ import pytest
 from sklearn.discriminant_analysis import StandardScaler
 from sklearn.preprocessing import MinMaxScaler
 
-from cross.transformations.preprocessing.scale_transformation import ScaleTransformation
+from cross.transformations import ScaleTransformation
 
 
 class TestScaleTransformation:

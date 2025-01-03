@@ -1,7 +1,7 @@
 import streamlit as st
 
 from cross.applications.components import is_data_loaded
-from cross.transformations.preprocessing import CastColumns
+from cross.transformations import CastColumns
 from cross.transformations.utils.dtypes import (
     bool_columns,
     categorical_columns,

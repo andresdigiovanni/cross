@@ -31,12 +31,12 @@ class QuantileTransformation(BaseEstimator, TransformerMixin):
         return self
 
     def transform(self, X, y=None):
-        X_transformed = X.copy()
+        X = X.copy()
 
         for column, transformer in self._transformers.items():
-            X_transformed[column] = transformer.transform(X_transformed[[column]])
+            X[column] = transformer.transform(X[[column]])
 
-        return X_transformed
+        return X
 
     def fit_transform(self, X, y=None):
         return self.fit(X, y).transform(X, y)

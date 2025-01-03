@@ -2,7 +2,7 @@
 import pandas as pd
 import pytest
 
-from cross.transformations.clean_data.outliers_handler import OutliersHandler
+from cross.transformations import OutliersHandler
 
 
 class TestOutliersHandler:

@@ -32,26 +32,26 @@ class CrossTransformer(BaseEstimator, TransformerMixin):
         return initialized_transformers
 
     def fit(self, X, y=None):
-        X_transformed = X.copy()
+        X = X.copy()
         for transformer in self.transformations:
-            transformer.fit(X_transformed, y)
-            X_transformed = transformer.transform(X_transformed)
+            transformer.fit(X, y)
+            X = transformer.transform(X)
 
         return self
 
     def transform(self, X, y=None):
-        X_transformed = X.copy()
+        X = X.copy()
         for transformer in self.transformations:
-            X_transformed = transformer.transform(X_transformed)
+            X = transformer.transform(X)
 
-        return X_transformed
+        return X
 
     def fit_transform(self, X, y=None):
-        X_transformed = X.copy()
+        X = X.copy()
         for transformer in self.transformations:
-            X_transformed = transformer.fit_transform(X_transformed, y)
+            X = transformer.fit_transform(X, y)
 
-        return X_transformed
+        return X
 
     def _date_time(self):
         now = datetime.now()

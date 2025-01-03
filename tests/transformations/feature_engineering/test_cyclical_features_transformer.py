@@ -1,8 +1,6 @@
 import pandas as pd
 
-from cross.transformations.feature_engineering.cyclical_features_transformer import (
-    CyclicalFeaturesTransformer,
-)
+from cross.transformations import CyclicalFeaturesTransformer
 
 
 class TestCyclicalFeaturesTransformer:

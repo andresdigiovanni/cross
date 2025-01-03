@@ -2,10 +2,7 @@
 import pandas as pd
 import pytest
 
-from cross.transformations.clean_data.outliers_handler import OutliersHandler
-from cross.transformations.feature_engineering.categorical_enconding import (
-    CategoricalEncoding,
-)
+from cross.transformations import CategoricalEncoding, OutliersHandler
 
 
 class TestCategoricalEncoding:

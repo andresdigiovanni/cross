@@ -3,8 +3,8 @@ from scipy.stats import skew
 from sklearn.preprocessing import PowerTransformer
 from tqdm import tqdm
 
-from cross.parameter_calculators.shared import evaluate_model
-from cross.transformations.preprocessing import NonLinearTransformation
+from cross.auto_parameters.shared import evaluate_model
+from cross.transformations import NonLinearTransformation
 from cross.transformations.utils.dtypes import numerical_columns
 
 

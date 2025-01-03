@@ -4,7 +4,7 @@ import streamlit as st
 
 from cross.applications.components import is_data_loaded
 from cross.applications.styles import plot_remove_borders
-from cross.transformations.preprocessing import ScaleTransformation
+from cross.transformations import ScaleTransformation
 from cross.transformations.utils.dtypes import numerical_columns
 
 from .scale_transformation import ScaleTransformationsBase

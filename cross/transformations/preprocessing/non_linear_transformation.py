@@ -30,20 +30,20 @@ class NonLinearTransformation(BaseEstimator, TransformerMixin):
         return self
 
     def transform(self, X, y=None):
-        X_transformed = X.copy()
+        X = X.copy()
 
         for column, transformation in self.transformation_options.items():
             if transformation == "log":
-                X_transformed[column] = np.log1p(X_transformed[column])
+                X[column] = np.log1p(X[column])
 
             elif transformation == "exponential":
-                X_transformed[column] = np.exp(X_transformed[column])
+                X[column] = np.exp(X[column])
 
             elif transformation == "yeo_johnson":
                 transformer = self._transformers[column]
-                X_transformed[column] = transformer.transform(X_transformed[[column]])
+                X[column] = transformer.transform(X[[column]])
 
-        return X_transformed
+        return X
 
     def fit_transform(self, X, y=None):
         return self.fit(X, y).transform(X, y)

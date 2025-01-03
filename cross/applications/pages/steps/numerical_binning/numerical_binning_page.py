@@ -1,7 +1,7 @@
 import streamlit as st
 
 from cross.applications.components import is_data_loaded
-from cross.transformations.feature_engineering import NumericalBinning
+from cross.transformations import NumericalBinning
 from cross.transformations.utils.dtypes import numerical_columns
 
 from .numerical_binning import NumericalBinningBase

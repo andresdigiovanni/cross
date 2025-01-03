@@ -1,7 +1,7 @@
 import streamlit as st
 
 from cross.applications.components import is_data_loaded
-from cross.transformations.feature_engineering import CorrelatedSubstringEncoder
+from cross.transformations import CorrelatedSubstringEncoder
 from cross.transformations.utils.dtypes import categorical_columns
 
 

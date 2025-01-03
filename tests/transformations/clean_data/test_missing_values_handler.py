@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from cross.transformations.clean_data.missing_values_handler import MissingValuesHandler
+from cross.transformations import MissingValuesHandler
 
 
 class TestMissingValuesHandler:

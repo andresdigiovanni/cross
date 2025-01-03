@@ -4,7 +4,7 @@ from sklearn.datasets import load_iris
 from sklearn.neighbors import KNeighborsClassifier
 
 from cross import CrossTransformer, auto_transform
-from cross.parameter_calculators.shared import evaluate_model
+from cross.auto_parameters.shared import evaluate_model
 
 
 @pytest.fixture

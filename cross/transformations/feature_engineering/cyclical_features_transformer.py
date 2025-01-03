@@ -21,19 +21,15 @@ class CyclicalFeaturesTransformer(BaseEstimator, TransformerMixin):
         return self  # No fitting necessary, but required for compatibility
 
     def transform(self, X, y=None):
-        X_transformed = X.copy()
+        X = X.copy()
 
         for column, period in self.columns_periods.items():
-            X_transformed[f"{column}_sin"] = np.sin(
-                2 * np.pi * X_transformed[column] / period
-            )
-            X_transformed[f"{column}_cos"] = np.cos(
-                2 * np.pi * X_transformed[column] / period
-            )
+            X[f"{column}_sin"] = np.sin(2 * np.pi * X[column] / period)
+            X[f"{column}_cos"] = np.cos(2 * np.pi * X[column] / period)
 
-        X_transformed = X_transformed.drop(columns=self.columns_periods.keys())
+        X = X.drop(columns=self.columns_periods.keys())
 
-        return X_transformed
+        return X
 
     def fit_transform(self, X, y=None):
         return self.fit(X, y).transform(X, y)

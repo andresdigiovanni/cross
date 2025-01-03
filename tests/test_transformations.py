@@ -3,19 +3,15 @@ import pytest
 from sklearn.datasets import load_iris
 
 from cross import CrossTransformer
-from cross.transformations.clean_data import (
-    ColumnSelection,
-    MissingValuesHandler,
-    OutliersHandler,
-)
-from cross.transformations.feature_engineering import (
-    MathematicalOperations,
-    NumericalBinning,
-)
-from cross.transformations.preprocessing import (
+from cross.transformations import (
     CastColumns,
+    ColumnSelection,
+    MathematicalOperations,
+    MissingValuesHandler,
     NonLinearTransformation,
     Normalization,
+    NumericalBinning,
+    OutliersHandler,
     QuantileTransformation,
     ScaleTransformation,
 )

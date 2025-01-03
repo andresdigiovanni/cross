@@ -3,9 +3,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from cross.transformations.preprocessing.quantile_transformation import (
-    QuantileTransformation,
-)
+from cross.transformations import QuantileTransformation
 
 
 class TestQuantileTransformation:

@@ -2,7 +2,7 @@
 import pandas as pd
 import pytest
 
-from cross.transformations.feature_engineering.numerical_binning import NumericalBinning
+from cross.transformations import NumericalBinning
 
 
 class TestNumericalBinning:

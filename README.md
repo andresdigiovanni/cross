@@ -56,9 +56,18 @@ Access the application by navigating to `http://localhost:8501` in your browser.
 
 ## Example of Use
 
-### Define transformations
+### Manual transformations
 
 ```python
+from cross import CrossTransformer
+from cross.transformations import (
+    MathematicalOperations,
+    NumericalBinning,
+    OutliersHandler,
+    ScaleTransformation,
+)
+
+# Define transformations
 transformations = [
     OutliersHandler(
         handling_options={
@@ -103,8 +112,9 @@ You can export transformations created in the graphical interface (UI) to a file
 
 ```python
 import pickle
+from cross import CrossTransformer
 
-# Load transformations from file
+# Load transformations from file (generated through the UI)
 with open("cross_transformations.pkl", "rb") as f:
     transformations = pickle.load(f)
 
@@ -121,6 +131,10 @@ To save and reuse the transformations, save them and load them in future session
 
 ```python
 import pickle
+from cross import CrossTransformer
+
+# Generate transformer object
+cross = CrossTransformer(transformations)
 
 # Save transformations
 transformations = cross.get_params()
@@ -171,6 +185,8 @@ Allows you to select specific columns for further processing.
     - `columns`: List of column names to select.
   
 ```python
+from cross.transformations import ColumnSelection
+
 ColumnSelection(
     columns=[
         "sepal length (cm)",
@@ -187,6 +203,8 @@ Casts columns to specific data types.
     - `cast_options`: A dictionary specifying the type for each column. Options include: `category`, `number`, `bool`, `datetime`, `timedelta`.
   
 ```python
+from cross.transformations import CastColumns
+
 CastColumns(
     cast_options={
         "sepal length (cm)": "number",
@@ -204,6 +222,8 @@ Handles missing values in the dataset.
     - `n_neighbors`: Number of neighbors for K-Nearest Neighbors imputation (used with `fill_knn`).
   
 ```python
+from cross.transformations import MissingValuesHandler
+
 MissingValuesHandler(
     handling_options={
         'sepal width (cm)': 'fill_knn',
@@ -228,6 +248,8 @@ Manages outliers in the dataset using different strategies. The action can be ei
     - `iforest_params`: Dictionary specifying parameters for Isolation Forest.
   
 ```python
+from cross.transformations import OutliersHandler
+
 OutliersHandler(
     handling_options={
         'sepal length (cm)': ('median', 'iqr'),
@@ -262,6 +284,8 @@ Applies non-linear transformations, including logarithmic, exponential, and Yeo-
     - `transformation_options`: A dictionary specifying the transformation to be applied for each column. Options include: `log`, `exponential`, and `yeo_johnson`.
 
 ```python
+from cross.transformations import NonLinearTransformation
+
 NonLinearTransformation(
     transformation_options={
         "sepal length (cm)": "log",
@@ -279,6 +303,8 @@ Applies quantile transformations for normalizing data.
     - `transformation_options`: Dictionary specifying the transformation type. Options: `uniform`, `normal`.
   
 ```python
+from cross.transformations import QuantileTransformation
+
 QuantileTransformation(
     transformation_options={
         'sepal length (cm)': 'uniform',
@@ -295,6 +321,8 @@ Scales numerical data using different scaling methods.
     - `transformation_options`: Dictionary specifying the scaling method for each column. Options: `min_max`, `standard`, `robust`, `max_abs`.
   
 ```python
+from cross.transformations import ScaleTransformation
+
 ScaleTransformation(
     transformation_options={
         'sepal length (cm)': 'min_max',
@@ -313,6 +341,8 @@ Normalizes data using L1 or L2 norms.
     - `transformation_options`: Dictionary specifying the normalization type. Options: `l1`, `l2`.
   
 ```python
+from cross.transformations import Normalization
+
 Normalization(
     transformation_options={
         'sepal length (cm)': 'l1',
@@ -331,6 +361,8 @@ Encodes a new column based on the presence of specific substrings in a target co
     - `substrings`: A dictionary where each key is a column name and the value is a list of substrings to search within that column. If a substring is found, it is added to a new column with the suffix `__corr_substring`.
 
 ```python
+from cross.transformations import CorrelatedSubstringEncoder
+
 CorrelatedSubstringEncoder(
     substrings={
         "product_description": ["eco", "premium", "budget"],
@@ -348,6 +380,8 @@ Encodes categorical variables using various methods.
     - `ordinal_orders`: Specifies the order for ordinal encoding.
 
 ```python
+from cross.transformations import CategoricalEncoding
+
 CategoricalEncoding(
     encodings_options={
         'Sex': 'label',
@@ -367,6 +401,8 @@ Transforms datetime columns into useful features.
     - `datetime_columns`: List of columns to extract date/time features from.
   
 ```python
+from cross.transformations import DateTimeTransformer
+
 DateTimeTransformer(
     datetime_columns=["date"]
 )
@@ -380,6 +416,8 @@ Transforms cyclical features like time into a continuous representation.
     - `columns_periods`: Dictionary specifying the period for each cyclical column.
   
 ```python
+from cross.transformations import CyclicalFeaturesTransformer
+
 CyclicalFeaturesTransformer(
     columns_periods={
         "date_minute": 60,
@@ -396,6 +434,8 @@ Bins numerical columns into categories. You can now specify the column, the binn
     - `binning_options`: List of tuples where each tuple specifies the column name, binning method, and number of bins. Options for binning methods are `uniform`, `quantile` or `kmeans`.
   
 ```python
+from cross.transformations import NumericalBinning
+
 NumericalBinning(
     binning_options=[
         ("sepal length (cm)", "uniform", 5),
@@ -422,6 +462,8 @@ Performs mathematical operations between columns.
     - `mean`: Calculates the mean of two columns.
   
 ```python
+from cross.transformations import MathematicalOperations
+
 MathematicalOperations(
     operations_options=[
         ('sepal length (cm)', 'sepal width (cm)', 'add'),

@@ -48,12 +48,12 @@ class ScaleTransformation(BaseEstimator, TransformerMixin):
         return self
 
     def transform(self, X, y=None):
-        X_transformed = X.copy()
+        X = X.copy()
 
         for column, scaler in self._transformers.items():
-            X_transformed[[column]] = scaler.transform(X[[column]])
+            X[[column]] = scaler.transform(X[[column]])
 
-        return X_transformed
+        return X
 
     def fit_transform(self, X, y=None):
         return self.fit(X, y).transform(X, y)

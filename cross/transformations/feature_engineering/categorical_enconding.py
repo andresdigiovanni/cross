@@ -25,10 +25,10 @@ class CategoricalEncoding(BaseEstimator, TransformerMixin):
     def fit(self, X, y=None):
         self._encoders = {}
 
-        X_filled = X.copy()
+        X = X.copy()
 
         for column, transformation in self.encodings_options.items():
-            self._fit_encoder(X_filled, column, transformation, y)
+            self._fit_encoder(X, column, transformation, y)
 
         return self
 
@@ -60,18 +60,16 @@ class CategoricalEncoding(BaseEstimator, TransformerMixin):
         return transformer.transform([value])[0] if value in known_classes else -1
 
     def transform(self, X, y=None):
-        X_transformed = X.copy()
+        X = X.copy()
 
         for column, transformation in self.encodings_options.items():
-            X_transformed[column] = X_transformed[column].fillna("Unknown")
+            X[column] = X[column].fillna("Unknown")
 
             if column in self._encoders:
                 transformer = self._encoders[column]
-                X_transformed = self._transform_column(
-                    X_transformed, column, transformation, transformer
-                )
+                X = self._transform_column(X, column, transformation, transformer)
 
-        return X_transformed
+        return X
 
     def _transform_column(self, X, column, transformation, transformer):
         if transformation == "label":

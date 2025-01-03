@@ -1,7 +1,7 @@
 from tqdm import tqdm
 
-from cross.parameter_calculators.shared import evaluate_model
-from cross.transformations.feature_engineering import CyclicalFeaturesTransformer
+from cross.auto_parameters.shared import evaluate_model
+from cross.transformations import CyclicalFeaturesTransformer
 from cross.transformations.utils.dtypes import numerical_columns
 
 

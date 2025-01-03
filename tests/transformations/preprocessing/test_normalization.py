@@ -2,7 +2,7 @@
 import pandas as pd
 import pytest
 
-from cross.transformations.preprocessing.normalization import Normalization
+from cross.transformations import Normalization
 
 
 class TestNormalization:

@@ -1,7 +1,7 @@
 from tqdm import tqdm
 
-from cross.parameter_calculators.shared import evaluate_model
-from cross.transformations.preprocessing import ScaleTransformation
+from cross.auto_parameters.shared import evaluate_model
+from cross.transformations import ScaleTransformation
 from cross.transformations.utils.dtypes import numerical_columns
 
 

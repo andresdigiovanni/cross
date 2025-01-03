@@ -1,5 +1,5 @@
-from cross.parameter_calculators.shared import RecursiveFeatureAddition
-from cross.transformations.clean_data import ColumnSelection
+from cross.auto_parameters.shared import RecursiveFeatureAddition
+from cross.transformations import ColumnSelection
 from cross.transformations.utils.dtypes import numerical_columns
 
 

@@ -20,27 +20,25 @@ class CastColumns(BaseEstimator, TransformerMixin):
         return self
 
     def transform(self, X, y=None):
-        X_transformed = X.copy()
+        X = X.copy()
 
         for column, dtype_to_cast in self.cast_options.items():
             if dtype_to_cast == "bool":
-                X_transformed[column] = X_transformed[column].astype(bool)
+                X[column] = X[column].astype(bool)
 
             elif dtype_to_cast == "category":
-                X_transformed[column] = X_transformed[column].astype(str)
+                X[column] = X[column].astype(str)
 
             elif dtype_to_cast == "datetime":
-                X_transformed[column] = pd.to_datetime(X_transformed[column])
+                X[column] = pd.to_datetime(X[column])
 
             elif dtype_to_cast == "number":
-                X_transformed[column] = pd.to_numeric(
-                    X_transformed[column], errors="coerce"
-                )
+                X[column] = pd.to_numeric(X[column], errors="coerce")
 
             elif dtype_to_cast == "timedelta":
-                X_transformed[column] = pd.to_timedelta(X_transformed[column])
+                X[column] = pd.to_timedelta(X[column])
 
-        return X_transformed
+        return X
 
     def fit_transform(self, X, y=None):
         return self.fit(X, y).transform(X, y)

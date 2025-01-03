@@ -20,20 +20,20 @@ class DateTimeTransformer(BaseEstimator, TransformerMixin):
         return self  # No fitting necessary, but method required for compatibility
 
     def transform(self, X, y=None):
-        X_transformed = X.copy()
+        X = X.copy()
 
         for column in self.datetime_columns:
-            X_transformed[f"{column}_year"] = X_transformed[column].dt.year
-            X_transformed[f"{column}_month"] = X_transformed[column].dt.month
-            X_transformed[f"{column}_day"] = X_transformed[column].dt.day
-            X_transformed[f"{column}_weekday"] = X_transformed[column].dt.weekday
-            X_transformed[f"{column}_hour"] = X_transformed[column].dt.hour
-            X_transformed[f"{column}_minute"] = X_transformed[column].dt.minute
-            X_transformed[f"{column}_second"] = X_transformed[column].dt.second
+            X[f"{column}_year"] = X[column].dt.year
+            X[f"{column}_month"] = X[column].dt.month
+            X[f"{column}_day"] = X[column].dt.day
+            X[f"{column}_weekday"] = X[column].dt.weekday
+            X[f"{column}_hour"] = X[column].dt.hour
+            X[f"{column}_minute"] = X[column].dt.minute
+            X[f"{column}_second"] = X[column].dt.second
 
-        X_transformed = X_transformed.drop(columns=self.datetime_columns)
+        X = X.drop(columns=self.datetime_columns)
 
-        return X_transformed
+        return X
 
     def fit_transform(self, X, y=None):
         return self.fit(X, y).transform(X, y)

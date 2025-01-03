@@ -1,8 +1,6 @@
 import pandas as pd
 
-from cross.transformations.preprocessing.non_linear_transformation import (
-    NonLinearTransformation,
-)
+from cross.transformations import NonLinearTransformation
 
 
 class TestNonLinearTransformation:

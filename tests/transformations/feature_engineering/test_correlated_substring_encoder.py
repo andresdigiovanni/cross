@@ -2,9 +2,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from cross.transformations.feature_engineering.correlated_substring_encoder import (
-    CorrelatedSubstringEncoder,
-)
+from cross.transformations import CorrelatedSubstringEncoder
 
 
 class TestCorrelatedSubstringEncoder:

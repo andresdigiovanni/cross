@@ -2,8 +2,8 @@ from collections import ChainMap
 
 from tqdm import tqdm
 
-from cross.parameter_calculators.shared import evaluate_model
-from cross.transformations.clean_data import MissingValuesHandler
+from cross.auto_parameters.shared import evaluate_model
+from cross.transformations import MissingValuesHandler
 from cross.transformations.utils.dtypes import categorical_columns, numerical_columns
 
 

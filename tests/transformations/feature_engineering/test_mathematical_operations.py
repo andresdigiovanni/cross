@@ -1,8 +1,6 @@
 import pandas as pd
 
-from cross.transformations.feature_engineering.mathematical_operations import (
-    MathematicalOperations,
-)
+from cross.transformations import MathematicalOperations
 
 
 class TestMathematicalOperations:

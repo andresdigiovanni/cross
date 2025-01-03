@@ -5,8 +5,8 @@ from sklearn.ensemble import IsolationForest
 from sklearn.neighbors import LocalOutlierFactor
 from tqdm import tqdm
 
-from cross.parameter_calculators.shared import evaluate_model
-from cross.transformations.clean_data import OutliersHandler
+from cross.auto_parameters.shared import evaluate_model
+from cross.transformations import OutliersHandler
 from cross.transformations.utils.dtypes import numerical_columns
 
 

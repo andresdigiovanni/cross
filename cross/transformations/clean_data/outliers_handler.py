@@ -97,7 +97,7 @@ class OutliersHandler(BaseEstimator, TransformerMixin):
         return lower_bound, upper_bound
 
     def transform(self, X, y=None):
-        X_transformed = X.copy()
+        X = X.copy()
 
         for column, (action, method) in self.handling_options.items():
             if method in ["iqr", "zscore"]:
@@ -105,37 +105,33 @@ class OutliersHandler(BaseEstimator, TransformerMixin):
                 upper_bound = self._bounds[column]["upper_bound"]
 
             if action == "cap":
-                X_transformed[column] = np.clip(
-                    X_transformed[column], lower_bound, upper_bound
-                )
+                X[column] = np.clip(X[column], lower_bound, upper_bound)
 
             elif action == "median":
                 if method == "lof":
                     lof = LocalOutlierFactor(
                         n_neighbors=self.lof_params[column]["n_neighbors"]
                     )
-                    y_pred = lof.fit_predict(X_transformed[[column]])
+                    y_pred = lof.fit_predict(X[[column]])
                     outliers = y_pred == -1
 
                 elif method == "iforest":
                     iforest = IsolationForest(
                         contamination=self.iforest_params[column]["contamination"]
                     )
-                    y_pred = iforest.fit_predict(X_transformed[[column]].dropna())
+                    y_pred = iforest.fit_predict(X[[column]].dropna())
                     outliers = y_pred == -1
 
                 elif method in ["iqr", "zscore"]:
-                    outliers = (X_transformed[column] < lower_bound) | (
-                        X_transformed[column] > upper_bound
-                    )
+                    outliers = (X[column] < lower_bound) | (X[column] > upper_bound)
 
-                X_transformed[column] = np.where(
+                X[column] = np.where(
                     outliers,
                     self._statistics[column],
-                    X_transformed[column],
+                    X[column],
                 )
 
-        return X_transformed
+        return X
 
     def fit_transform(self, X, y=None):
         return self.fit(X, y).transform(X, y)

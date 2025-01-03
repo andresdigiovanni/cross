@@ -1,8 +1,6 @@
 import pandas as pd
 
-from cross.transformations.feature_engineering.datetime_transformer import (
-    DateTimeTransformer,
-)
+from cross.transformations import DateTimeTransformer
 
 
 class TestDateTimeTransformer:

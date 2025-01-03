@@ -3,7 +3,7 @@
 import pandas as pd
 import pytest
 
-from cross.transformations.clean_data.column_selection import ColumnSelection
+from cross.transformations import ColumnSelection
 
 
 class TestColumnSelection:

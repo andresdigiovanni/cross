@@ -19,12 +19,12 @@ class ColumnSelection(BaseEstimator, TransformerMixin):
         return self
 
     def transform(self, X, y=None):
-        X_transformed = X.copy()
+        X = X.copy()
 
         # Select only the specified columns from X
-        X_transformed = X_transformed[self.columns]
+        X = X[self.columns]
 
-        return X_transformed
+        return X
 
     def fit_transform(self, X, y=None):
         return self.fit(X, y).transform(X, y)
