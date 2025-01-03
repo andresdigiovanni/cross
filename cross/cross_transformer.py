@@ -55,4 +55,4 @@ class CrossTransformer(BaseEstimator, TransformerMixin):
 
     def _date_time(self):
         now = datetime.now()
-        return now.strftime("%d/%m/%Y %H:%M:%S")
+        return now.strftime("%Y/%m/%d %H:%M:%S")

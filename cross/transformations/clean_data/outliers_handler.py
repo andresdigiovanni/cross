@@ -19,8 +19,7 @@ class OutliersHandler(BaseEstimator, TransformerMixin):
 
         self._statistics = {}
         self._bounds = {}
-        self._lof_results = {}
-        self._iforest_results = {}
+        self._handlers = {}
 
     def get_params(self, deep=True):
         return {
@@ -39,8 +38,7 @@ class OutliersHandler(BaseEstimator, TransformerMixin):
     def fit(self, X, y=None):
         self._statistics = {}
         self._bounds = {}
-        self._lof_results = {}
-        self._iforest_results = {}
+        self._handlers = {}
 
         for column, (action, method) in self.handling_options.items():
             # Specific methods fit
@@ -64,16 +62,14 @@ class OutliersHandler(BaseEstimator, TransformerMixin):
         return self
 
     def _apply_lof(self, df, column):
-        lof = LocalOutlierFactor(**self.lof_params[column])
-        lof.fit(df[[column]])
-        lof_scores = lof.negative_outlier_factor_
-        self._lof_results[column] = lof_scores
+        lof = LocalOutlierFactor(**self.lof_params[column], novelty=True)
+        lof.fit(np.array(df[[column]]))
+        self._handlers[column] = lof
 
     def _apply_iforest(self, df, column):
         iforest = IsolationForest(**self.iforest_params[column])
-        iforest.fit(df[[column]])
-        iforest_scores = iforest.decision_function(df[[column]])
-        self._iforest_results[column] = iforest_scores
+        iforest.fit(np.array(df[[column]]))
+        self._handlers[column] = iforest
 
     def _calculate_bounds(self, df, column, method):
         if method == "iqr":
@@ -100,6 +96,8 @@ class OutliersHandler(BaseEstimator, TransformerMixin):
         X = X.copy()
 
         for column, (action, method) in self.handling_options.items():
+            lower_bound, upper_bound = 0, 0
+
             if method in ["iqr", "zscore"]:
                 lower_bound = self._bounds[column]["lower_bound"]
                 upper_bound = self._bounds[column]["upper_bound"]
@@ -108,18 +106,9 @@ class OutliersHandler(BaseEstimator, TransformerMixin):
                 X[column] = np.clip(X[column], lower_bound, upper_bound)
 
             elif action == "median":
-                if method == "lof":
-                    lof = LocalOutlierFactor(
-                        n_neighbors=self.lof_params[column]["n_neighbors"]
-                    )
-                    y_pred = lof.fit_predict(X[[column]])
-                    outliers = y_pred == -1
-
-                elif method == "iforest":
-                    iforest = IsolationForest(
-                        contamination=self.iforest_params[column]["contamination"]
-                    )
-                    y_pred = iforest.fit_predict(X[[column]].dropna())
+                if method in ["iforest", "lof"]:
+                    handler = self._handlers[column]
+                    y_pred = handler.predict(np.array(X[[column]].dropna()))
                     outliers = y_pred == -1
 
                 elif method in ["iqr", "zscore"]:
