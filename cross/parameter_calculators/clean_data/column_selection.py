@@ -1,11 +1,16 @@
-from cross.parameter_calculators.shared import FeatureSelector
+from cross.parameter_calculators.shared import RecursiveFeatureAddition
 from cross.transformations.clean_data import ColumnSelection
+from cross.transformations.utils.dtypes import numerical_columns
 
 
 class ColumnSelectionParamCalculator:
-    def calculate_best_params(self, x, y, model, scoring, direction, verbose):
-        feature_selector = FeatureSelector()
-        selected_features = feature_selector.fit(x, y, model, scoring, direction)
+    def calculate_best_params(self, X, y, model, scoring, direction, verbose):
+        numeric_columns = numerical_columns(X)
+        X = X[numeric_columns]
+
+        selected_features = RecursiveFeatureAddition.fit(
+            X, y, model, scoring, direction
+        )
 
         if verbose:
             print(f"Selected {len(selected_features)} features")

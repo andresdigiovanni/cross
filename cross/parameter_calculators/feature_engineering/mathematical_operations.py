@@ -1,6 +1,9 @@
 from tqdm import tqdm
 
-from cross.parameter_calculators.shared import FeatureSelector
+from cross.parameter_calculators.shared import (
+    ProbeFeatureSelector,
+    RecursiveFeatureAddition,
+)
 from cross.transformations.feature_engineering import MathematicalOperations
 from cross.transformations.utils.dtypes import numerical_columns
 
@@ -16,6 +19,7 @@ class MathematicalOperationsParamCalculator:
 
         idxs_columns = range(len(columns))
 
+        # Select operations per columns using probe method
         for idx_column_1 in tqdm(idxs_columns, disable=not verbose):
             column_1 = columns[idx_column_1]
 
@@ -24,14 +28,12 @@ class MathematicalOperationsParamCalculator:
             )
             all_transformations_info.extend(transformations_info)
 
-            feature_selector = FeatureSelector()
-            selected_features = feature_selector.fit(
-                x,
-                y,
-                model,
-                scoring,
-                direction,
-                transformer=MathematicalOperations(operations_options),
+            transformer = MathematicalOperations(operations_options)
+            x_transformed = transformer.fit_transform(x, y)
+            new_columns = list(set(x_transformed.columns) - set(x.columns))
+
+            selected_features = ProbeFeatureSelector.fit(
+                x_transformed[new_columns], y, model
             )
             all_selected_features.extend(selected_features)
 
@@ -39,20 +41,19 @@ class MathematicalOperationsParamCalculator:
             all_transformations_info, all_selected_features
         )
 
-        # Select most relevants
-        feature_selector = FeatureSelector()
-        selected_features = feature_selector.fit(
-            x,
-            y,
-            model,
-            scoring,
-            direction,
-            transformer=MathematicalOperations(selected_transformations),
-        )
+        # Select final binnings using RFA
+        if selected_transformations:
+            transformer = MathematicalOperations(selected_transformations)
+            x_transformed = transformer.fit_transform(x, y)
+            new_columns = list(set(x_transformed.columns) - set(x.columns))
 
-        selected_transformations = self._select_transformations(
-            all_transformations_info, selected_features
-        )
+            selected_features = RecursiveFeatureAddition.fit(
+                x_transformed[new_columns], y, model, scoring, direction
+            )
+
+            selected_transformations = self._select_transformations(
+                all_transformations_info, selected_features
+            )
 
         if selected_transformations:
             mathematical_operations = MathematicalOperations(selected_transformations)
