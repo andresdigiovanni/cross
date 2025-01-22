@@ -18,7 +18,7 @@ class MissingValuesParamCalculator:
             "num": {
                 "fill_mean": {},
                 "fill_median": {},
-                "fill_knn": {"n_neighbors": [3, 5, 8, 13]},
+                "fill_knn": {"n_neighbors": [3, 4, 5, 8, 13]},
             },
             "cat": {
                 "most_frequent": {},
@@ -76,32 +76,31 @@ class MissingValuesParamCalculator:
 
         for strategy, params in imputation_strategies.items():
             if strategy == "fill_knn":
-                best_score, best_strategy, best_params = self._evaluate_knn_strategy(
+                score, params = self._evaluate_knn_strategy(
                     x,
                     y,
                     model,
                     scoring,
                     column,
                     params,
-                    best_score,
                     direction,
-                    best_strategy,
                 )
 
             else:
                 score = self._evaluate_strategy(x, y, model, scoring, column, strategy)
+                params = {}
 
-                if is_score_improved(score, best_score, direction):
-                    best_score = score
-                    best_strategy = strategy
-                    best_params = {}
+            if is_score_improved(score, best_score, direction):
+                best_score = score
+                best_strategy = strategy
+                best_params = {}
 
         return best_strategy, best_params
 
-    def _evaluate_knn_strategy(
-        self, x, y, model, scoring, column, params, best_score, direction, best_strategy
-    ):
+    def _evaluate_knn_strategy(self, x, y, model, scoring, column, params, direction):
+        best_score = float("-inf") if direction == "maximize" else float("inf")
         best_params = {}
+
         for n_neighbors in params["n_neighbors"]:
             score = self._evaluate_strategy(
                 x, y, model, scoring, column, "fill_knn", n_neighbors
@@ -109,10 +108,9 @@ class MissingValuesParamCalculator:
 
             if is_score_improved(score, best_score, direction):
                 best_score = score
-                best_strategy = "fill_knn"
                 best_params = {column: n_neighbors}
 
-        return best_score, best_strategy, best_params
+        return best_score, best_params
 
     def _evaluate_strategy(
         self,
