@@ -34,12 +34,12 @@ def auto_transform(X, y, model, scoring, direction, verbose=True):
     calculators = [
         ("MissingValuesHandler", MissingValuesParamCalculator),
         ("OutliersHandler", OutliersParamCalculator),
-        ("NonLinearTransformation", NonLinearTransformationParamCalculator),
-        ("ScaleTransformation", ScaleTransformationParamCalculator),
-        ("CategoricalEncoding", CategoricalEncodingParamCalculator),
         ("DateTimeTransformer", DateTimeTransformerParamCalculator),
         ("CyclicalFeaturesTransformer", CyclicalFeaturesTransformerParamCalculator),
+        ("CategoricalEncoding", CategoricalEncodingParamCalculator),
+        ("NonLinearTransformation", NonLinearTransformationParamCalculator),
         ("NumericalBinning", NumericalBinningParamCalculator),
+        ("ScaleTransformation", ScaleTransformationParamCalculator),
         ("MathematicalOperations", MathematicalOperationsParamCalculator),
         ("ColumnSelection", ColumnSelectionParamCalculator),
     ]
@@ -67,4 +67,4 @@ def auto_transform(X, y, model, scoring, direction, verbose=True):
 
 def _date_time():
     now = datetime.now()
-    return now.strftime("%d/%m/%Y %H:%M:%S")
+    return now.strftime("%Y/%m/%d %H:%M:%S")
