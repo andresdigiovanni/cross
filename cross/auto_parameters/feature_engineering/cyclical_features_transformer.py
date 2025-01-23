@@ -16,10 +16,14 @@ class CyclicalFeaturesTransformerParamCalculator:
         "_second": 60,
     }
 
-    def calculate_best_params(self, x, y, model, scoring, direction, verbose):
+    PCT_UNIQUE_VALUES_THRESHOLD = 0.10
+
+    def calculate_best_params(
+        self, x, y, model, scoring, direction, cv, groups, verbose
+    ):
         columns = numerical_columns(x)
         columns_periods = {}
-        baseline_score = evaluate_model(x, y, model, scoring)
+        baseline_score = evaluate_model(x, y, model, scoring, cv, groups)
 
         for column in tqdm(columns, disable=not verbose):
             period = self._get_period(x, column)
@@ -27,7 +31,7 @@ class CyclicalFeaturesTransformerParamCalculator:
                 continue
 
             transformer = CyclicalFeaturesTransformer({column: period})
-            score = evaluate_model(x, y, model, scoring, transformer)
+            score = evaluate_model(x, y, model, scoring, cv, groups, transformer)
 
             if is_score_improved(score, baseline_score, direction):
                 columns_periods[column] = period
@@ -50,7 +54,10 @@ class CyclicalFeaturesTransformerParamCalculator:
         unique_values = df[column].dropna().unique()
         pct_unique_values = len(unique_values) / df.shape[0]
 
-        if len(unique_values) > 2 and pct_unique_values < 0.10:
+        if (
+            len(unique_values) > 2
+            and pct_unique_values < self.PCT_UNIQUE_VALUES_THRESHOLD
+        ):
             return len(unique_values)
 
         return None

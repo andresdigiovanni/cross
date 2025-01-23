@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- CV and Groups parameters to auto_transform function
+
 ### Fixed
 
 - Target encoding for multiclass in CategoricalEncoding

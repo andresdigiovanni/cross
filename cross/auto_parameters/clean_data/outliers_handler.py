@@ -12,11 +12,13 @@ from cross.transformations.utils.dtypes import numerical_columns
 
 
 class OutliersParamCalculator:
-    def calculate_best_params(self, x, y, model, scoring, direction, verbose):
+    def calculate_best_params(
+        self, x, y, model, scoring, direction, cv, groups, verbose
+    ):
         columns = numerical_columns(x)
         outlier_methods = self._get_outlier_methods()
         outlier_actions = ["cap", "median"]
-        base_score = evaluate_model(x, y, model, scoring)
+        base_score = evaluate_model(x, y, model, scoring, cv, groups)
 
         best_params = {
             "handling_options": {},
@@ -32,6 +34,8 @@ class OutliersParamCalculator:
                 model,
                 scoring,
                 direction,
+                cv,
+                groups,
                 column,
                 base_score,
                 outlier_actions,
@@ -52,7 +56,18 @@ class OutliersParamCalculator:
         }
 
     def _find_best_params_for_column(
-        self, x, y, model, scoring, direction, column, base_score, actions, methods
+        self,
+        x,
+        y,
+        model,
+        scoring,
+        direction,
+        cv,
+        groups,
+        column,
+        base_score,
+        actions,
+        methods,
     ):
         best_score = base_score
         best_params = {}
@@ -63,7 +78,9 @@ class OutliersParamCalculator:
                 continue
 
             kwargs = self._build_kwargs(column, action, method, param)
-            score = evaluate_model(x, y, model, scoring, OutliersHandler(**kwargs))
+            score = evaluate_model(
+                x, y, model, scoring, cv, groups, OutliersHandler(**kwargs)
+            )
 
             if is_score_improved(score, best_score, direction):
                 best_score = score

@@ -9,7 +9,9 @@ class NumericalBinningParamCalculator:
     STRATEGIES = ["uniform", "quantile", "kmeans"]
     ALL_N_BINS = [3, 5, 8, 12, 20]
 
-    def calculate_best_params(self, x, y, model, scoring, direction, verbose):
+    def calculate_best_params(
+        self, x, y, model, scoring, direction, cv, groups, verbose
+    ):
         columns = numerical_columns(x)
         all_transformations_info = []
         all_selected_features = []
@@ -41,7 +43,7 @@ class NumericalBinningParamCalculator:
             new_columns = list(set(x_transformed.columns) - set(x.columns))
 
             selected_features = RecursiveFeatureAddition.fit(
-                x_transformed[new_columns], y, model, scoring, direction
+                x_transformed[new_columns], y, model, scoring, direction, cv, groups
             )
 
             selected_transformations = self._select_transformations(

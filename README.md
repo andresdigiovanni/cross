@@ -172,6 +172,24 @@ x_train, y_train = transformer.fit_transform(x_train, y_train)
 x_test, y_test = transformer.transform(x_test, y_test)
 ```
 
+#### Explanation of `auto_transform`
+
+The `auto_transform` function applies a series of data transformations to enhance the performance of a given machine learning model. It evaluates different preprocessing techniques, such as handling missing values, encoding categorical features, scaling numerical features, and more. The function iterates through various transformation strategies, selecting those that yield the best model performance based on the provided scoring metric.
+
+**Parameters:**
+- `X (np.ndarray)`: Feature matrix.
+- `y (np.ndarray)`: Target variable.
+- `model`: Machine learning model with a `fit` method.
+- `scoring (str)`: Scoring metric for evaluation.
+- `direction (str, optional)`: "maximize" to increase the score or "minimize" to decrease it (default is "maximize").
+- `cv (Union[int, Callable], optional)`: Number of cross-validation folds or a custom cross-validation generator (default is 5).
+- `groups (Optional[np.ndarray], optional)`: Group labels for cross-validation splitting (default is None).
+- `verbose (bool, optional)`: Whether to print progress messages (default is True).
+
+**Returns:**
+- A list of applied transformations that can be used to create a `CrossTransformer` for applying them to new datasets.
+
+
 ## Transformations
 
 ### Clean Data

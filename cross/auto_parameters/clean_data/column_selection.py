@@ -4,12 +4,14 @@ from cross.transformations.utils.dtypes import numerical_columns
 
 
 class ColumnSelectionParamCalculator:
-    def calculate_best_params(self, X, y, model, scoring, direction, verbose):
+    def calculate_best_params(
+        self, X, y, model, scoring, direction, cv, groups, verbose
+    ):
         numeric_columns = numerical_columns(X)
         X = X[numeric_columns]
 
         selected_features = RecursiveFeatureAddition.fit(
-            X, y, model, scoring, direction
+            X, y, model, scoring, direction, cv, groups
         )
 
         if verbose:

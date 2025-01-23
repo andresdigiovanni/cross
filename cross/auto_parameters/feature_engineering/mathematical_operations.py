@@ -9,7 +9,9 @@ class MathematicalOperationsParamCalculator:
     SYMMETRIC_OPS = ["add", "subtract", "multiply", "hypotenuse", "mean"]
     NON_SYMMETRIC_OPS = ["divide", "modulus"]
 
-    def calculate_best_params(self, x, y, model, scoring, direction, verbose):
+    def calculate_best_params(
+        self, x, y, model, scoring, direction, cv, groups, verbose
+    ):
         columns = numerical_columns(x)
         all_transformations_info = []
         all_selected_features = []
@@ -45,7 +47,7 @@ class MathematicalOperationsParamCalculator:
             new_columns = list(set(x_transformed.columns) - set(x.columns))
 
             selected_features = RecursiveFeatureAddition.fit(
-                x_transformed[new_columns], y, model, scoring, direction
+                x_transformed[new_columns], y, model, scoring, direction, cv, groups
             )
 
             selected_transformations = self._select_transformations(

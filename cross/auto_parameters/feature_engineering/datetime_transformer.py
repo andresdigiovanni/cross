@@ -3,7 +3,9 @@ from cross.transformations.utils.dtypes import datetime_columns
 
 
 class DateTimeTransformerParamCalculator:
-    def calculate_best_params(self, x, y, model, scoring, direction, verbose):
+    def calculate_best_params(
+        self, x, y, model, scoring, direction, cv, groups, verbose
+    ):
         columns = datetime_columns(x)
 
         if verbose:

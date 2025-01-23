@@ -13,9 +13,11 @@ class NonLinearTransformationParamCalculator:
     SKEWNESS_THRESHOLD = 0.5
     TRANSFORMATIONS = ["log", "exponential", "yeo_johnson"]
 
-    def calculate_best_params(self, x, y, model, scoring, direction, verbose):
+    def calculate_best_params(
+        self, x, y, model, scoring, direction, cv, groups, verbose
+    ):
         best_transformation_options = {}
-        base_score = evaluate_model(x, y, model, scoring)
+        base_score = evaluate_model(x, y, model, scoring, cv, groups)
         columns = numerical_columns(x)
 
         for column in tqdm(columns, disable=not verbose):
@@ -34,6 +36,8 @@ class NonLinearTransformationParamCalculator:
                     y,
                     model,
                     scoring,
+                    cv,
+                    groups,
                     NonLinearTransformation({column: best_transformation}),
                 )
 

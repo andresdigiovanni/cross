@@ -1,5 +1,8 @@
 import warnings
 from datetime import datetime
+from typing import Callable, Optional, Union
+
+import numpy as np
 
 from cross.auto_parameters.clean_data import (
     ColumnSelectionParamCalculator,
@@ -20,7 +23,31 @@ from cross.auto_parameters.preprocessing import (
 from cross.utils import get_transformer
 
 
-def auto_transform(X, y, model, scoring, direction, verbose=True):
+def auto_transform(
+    X: np.ndarray,
+    y: np.ndarray,
+    model,
+    scoring: str,
+    direction: str = "maximize",
+    cv: Union[int, Callable] = 5,
+    groups: Optional[np.ndarray] = None,
+    verbose: bool = True,
+) -> list:
+    """Automatically applies a series of data transformations to improve model performance.
+
+    Args:
+        X (np.ndarray): Feature matrix.
+        y (np.ndarray): Target variable.
+        model: Machine learning model with a fit method.
+        scoring (str): Scoring metric for evaluation.
+        direction (str, optional): "maximize" to increase score or "minimize" to decrease. Defaults to "maximize".
+        cv (Union[int, Callable], optional): Number of cross-validation folds or a custom cross-validation generator. Defaults to 5.
+        groups (Optional[np.ndarray], optional): Group labels for cross-validation splitting. Defaults to None.
+        verbose (bool, optional): Whether to print progress messages. Defaults to True.
+
+    Returns:
+        list: A list of applied transformations.
+    """
     if verbose:
         date_time = _date_time()
         print(f"\n[{date_time}] Starting experiment to find the bests transformations")
@@ -53,13 +80,13 @@ def auto_transform(X, y, model, scoring, direction, verbose=True):
 
             calculator = calculator()
             transformation = calculator.calculate_best_params(
-                X, y, model, scoring, direction, verbose
+                X, y, model, scoring, direction, cv, groups, verbose
             )
             if transformation:
                 transformations.append(transformation)
-                name = transformation["name"]
-                params = transformation["params"]
-                transformer = get_transformer(name, params)
+                transformer = get_transformer(
+                    transformation["name"], transformation["params"]
+                )
                 X = transformer.fit_transform(X)
 
     return transformations

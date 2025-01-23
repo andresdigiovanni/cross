@@ -25,7 +25,9 @@ class MissingValuesParamCalculator:
             },
         }
 
-    def calculate_best_params(self, x, y, model, scoring, direction, verbose):
+    def calculate_best_params(
+        self, x, y, model, scoring, direction, cv, groups, verbose
+    ):
         cat_columns = categorical_columns(x)
         num_columns = numerical_columns(x)
         x = x[cat_columns + num_columns]
@@ -45,6 +47,8 @@ class MissingValuesParamCalculator:
                 model,
                 scoring,
                 direction,
+                cv,
+                groups,
                 column,
                 is_num_column=(column in num_columns),
             )
@@ -59,7 +63,7 @@ class MissingValuesParamCalculator:
         return x.columns[x.isnull().any()].tolist()
 
     def _find_best_strategy_for_column(
-        self, x, y, model, scoring, direction, column, is_num_column
+        self, x, y, model, scoring, direction, cv, groups, column, is_num_column
     ):
         best_score = float("-inf") if direction == "maximize" else float("inf")
         best_strategy = None
@@ -81,13 +85,17 @@ class MissingValuesParamCalculator:
                     y,
                     model,
                     scoring,
+                    direction,
+                    cv,
+                    groups,
                     column,
                     params,
-                    direction,
                 )
 
             else:
-                score = self._evaluate_strategy(x, y, model, scoring, column, strategy)
+                score = self._evaluate_strategy(
+                    x, y, model, scoring, cv, groups, column, strategy
+                )
                 params = {}
 
             if is_score_improved(score, best_score, direction):
@@ -97,13 +105,15 @@ class MissingValuesParamCalculator:
 
         return best_strategy, best_params
 
-    def _evaluate_knn_strategy(self, x, y, model, scoring, column, params, direction):
+    def _evaluate_knn_strategy(
+        self, x, y, model, scoring, direction, cv, groups, column, params
+    ):
         best_score = float("-inf") if direction == "maximize" else float("inf")
         best_params = {}
 
         for n_neighbors in params["n_neighbors"]:
             score = self._evaluate_strategy(
-                x, y, model, scoring, column, "fill_knn", n_neighbors
+                x, y, model, scoring, cv, groups, column, "fill_knn", n_neighbors
             )
 
             if is_score_improved(score, best_score, direction):
@@ -118,6 +128,8 @@ class MissingValuesParamCalculator:
         y,
         model,
         scoring,
+        cv,
+        groups,
         column,
         strategy,
         n_neighbors=None,
@@ -129,7 +141,7 @@ class MissingValuesParamCalculator:
             handling_options=handling_options, n_neighbors=knn_params
         )
 
-        return evaluate_model(x, y, model, scoring, missing_values_handler)
+        return evaluate_model(x, y, model, scoring, cv, groups, missing_values_handler)
 
     def _build_result(self, best_handling_options, best_n_neighbors):
         missing_values_handler = MissingValuesHandler(

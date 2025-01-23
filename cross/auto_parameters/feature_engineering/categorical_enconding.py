@@ -7,7 +7,9 @@ from cross.transformations.utils.dtypes import categorical_columns
 
 
 class CategoricalEncodingParamCalculator:
-    def calculate_best_params(self, x, y, model, scoring, direction, verbose):
+    def calculate_best_params(
+        self, x, y, model, scoring, direction, cv, groups, verbose
+    ):
         columns = categorical_columns(x)
         encodings = ["label", "dummy", "binary", "target", "count"]
 
@@ -28,7 +30,7 @@ class CategoricalEncodingParamCalculator:
 
                     encodings_options = {column: encoding}
                     handler = CategoricalEncoding(encodings_options=encodings_options)
-                    score = evaluate_model(x, y, model, scoring, handler)
+                    score = evaluate_model(x, y, model, scoring, cv, groups, handler)
 
                     if is_score_improved(score, best_score, direction):
                         best_score = score

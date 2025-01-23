@@ -9,14 +9,16 @@ from cross.transformations.utils.dtypes import numerical_columns
 class ScaleTransformationParamCalculator:
     SCALER_OPTIONS = ["min_max", "standard", "robust", "max_abs"]
 
-    def calculate_best_params(self, x, y, model, scoring, direction, verbose):
+    def calculate_best_params(
+        self, x, y, model, scoring, direction, cv, groups, verbose
+    ):
         columns = numerical_columns(x)
         transformation_options = {}
-        base_score = evaluate_model(x, y, model, scoring)
+        base_score = evaluate_model(x, y, model, scoring, cv, groups)
 
         for column in tqdm(columns, disable=not verbose):
             best_params = self._find_best_scaler_for_column(
-                x, y, model, scoring, base_score, column, direction
+                x, y, model, scoring, base_score, column, direction, cv, groups
             )
 
             if best_params:
@@ -28,7 +30,7 @@ class ScaleTransformationParamCalculator:
         return None
 
     def _find_best_scaler_for_column(
-        self, x, y, model, scoring, base_score, column, direction
+        self, x, y, model, scoring, base_score, column, direction, cv, groups
     ):
         best_score = base_score
         best_params = {}
@@ -36,7 +38,7 @@ class ScaleTransformationParamCalculator:
         for scaler in self.SCALER_OPTIONS:
             params = {column: scaler}
             scale_transformer = ScaleTransformation(params)
-            score = evaluate_model(x, y, model, scoring, scale_transformer)
+            score = evaluate_model(x, y, model, scoring, cv, groups, scale_transformer)
 
             if is_score_improved(score, best_score, direction):
                 best_score = score

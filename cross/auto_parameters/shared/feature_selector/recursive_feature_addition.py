@@ -1,3 +1,5 @@
+from typing import Callable, Optional, Union
+
 import numpy as np
 from sklearn.model_selection import KFold, cross_val_score
 
@@ -12,7 +14,8 @@ class RecursiveFeatureAddition:
         model,
         scoring: str,
         direction: str = "maximize",
-        cv: int = 5,
+        cv: Union[int, Callable] = 5,
+        groups: Optional = None,
         early_stopping: int = 3,
     ) -> list:
         """
@@ -24,7 +27,8 @@ class RecursiveFeatureAddition:
             model: Machine learning model with a fit method.
             scoring (str): Scoring metric for evaluation.
             direction (str, optional): "maximize" to increase score or "minimize" to decrease. Defaults to "maximize".
-            cv (int, optional): Number of cross-validation folds. Defaults to 5.
+            cv (Union[int, Callable]): Number of cross-validation folds or a custom cross-validation generator.
+            groups (Optional): Group labels for cross-validation splitting.
             early_stopping (int, optional): Maximum number of non-improving additions. Defaults to 3.
 
         Returns:
@@ -38,13 +42,14 @@ class RecursiveFeatureAddition:
 
         # Evaluate features and select those that improve performance
         selected_features_idx = RecursiveFeatureAddition._evaluate_features(
-            model,
             X,
             y,
+            model,
             feature_indices,
             scoring,
-            cv,
             direction,
+            cv,
+            groups,
             early_stopping,
         )
 
@@ -52,26 +57,28 @@ class RecursiveFeatureAddition:
 
     @staticmethod
     def _evaluate_features(
-        model,
         X: np.ndarray,
         y: np.ndarray,
+        model,
         feature_indices: np.ndarray,
         scoring: str,
-        cv: int,
         direction: str,
+        cv: Union[int, Callable],
+        groups: Optional,
         early_stopping: int,
     ) -> list:
         """
         Evaluates features and returns the indices of selected features.
 
         Args:
-            model: Machine learning model with a fit method.
             X (np.ndarray): Feature matrix.
             y (np.ndarray): Target variable.
+            model: Machine learning model with a fit method.
             feature_indices (np.ndarray): Indices of features sorted by importance.
             scoring (str): Scoring metric for evaluation.
-            cv (int): Number of cross-validation folds.
             direction (str): "maximize" to increase score or "minimize" to decrease.
+            cv (Union[int, Callable]): Number of cross-validation folds or a custom cross-validation generator.
+            groups (Optional): Group labels for cross-validation splitting.
             early_stopping (int): Maximum number of non-improving additions.
 
         Returns:
@@ -92,6 +99,7 @@ class RecursiveFeatureAddition:
                 y,
                 scoring=scoring,
                 cv=cv_split,
+                groups=groups,
                 n_jobs=-1,
             )
             score = np.mean(scores)
