@@ -18,6 +18,8 @@ from cross.auto_parameters.feature_engineering import (
 )
 from cross.auto_parameters.preprocessing import (
     NonLinearTransformationParamCalculator,
+    NormalizationParamCalculator,
+    QuantileTransformationParamCalculator,
     ScaleTransformationParamCalculator,
 )
 from cross.utils import get_transformer
@@ -67,6 +69,8 @@ def auto_transform(
         ("NonLinearTransformation", NonLinearTransformationParamCalculator),
         ("NumericalBinning", NumericalBinningParamCalculator),
         ("ScaleTransformation", ScaleTransformationParamCalculator),
+        ("Normalization", NormalizationParamCalculator),
+        ("QuantileTransformation", QuantileTransformationParamCalculator),
         ("MathematicalOperations", MathematicalOperationsParamCalculator),
         ("ColumnSelection", ColumnSelectionParamCalculator),
     ]

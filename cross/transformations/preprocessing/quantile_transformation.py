@@ -7,6 +7,7 @@ class QuantileTransformation(BaseEstimator, TransformerMixin):
         self.transformation_options = transformation_options or {}
 
         self._transformers = {}
+        self._n_quantiles = 1000
 
     def get_params(self, deep=True):
         return {
@@ -22,9 +23,14 @@ class QuantileTransformation(BaseEstimator, TransformerMixin):
     def fit(self, X, y=None):
         self._transformers = {}
 
+        n_samples = X.shape[0]
+        self._n_quantiles = min(1000, n_samples)
+
         for column, transformation in self.transformation_options.items():
             if transformation in ["uniform", "normal"]:
-                transformer = QuantileTransformer(output_distribution=transformation)
+                transformer = QuantileTransformer(
+                    n_quantiles=self._n_quantiles, output_distribution=transformation
+                )
                 transformer.fit(X[[column]])
                 self._transformers[column] = transformer
 
