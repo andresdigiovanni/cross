@@ -1,7 +1,7 @@
 from typing import Callable, Optional, Union
 
 import numpy as np
-from sklearn.model_selection import KFold, cross_val_score
+from sklearn.model_selection import cross_val_score
 
 from .shared import feature_importance
 
@@ -92,13 +92,12 @@ class RecursiveFeatureAddition:
         for idx in feature_indices:
             current_features_idx = selected_features_idx + [idx]
 
-            cv_split = KFold(n_splits=cv, shuffle=True, random_state=42)
             scores = cross_val_score(
                 model,
                 X.iloc[:, current_features_idx],
                 y,
                 scoring=scoring,
-                cv=cv_split,
+                cv=cv,
                 groups=groups,
                 n_jobs=-1,
             )
