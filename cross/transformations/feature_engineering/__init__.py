@@ -1,5 +1,6 @@
 from .categorical_enconding import CategoricalEncoding
 from .cyclical_features_transformer import CyclicalFeaturesTransformer
 from .datetime_transformer import DateTimeTransformer
+from .dimensionality_reduction import DimensionalityReduction
 from .mathematical_operations import MathematicalOperations
 from .numerical_binning import NumericalBinning

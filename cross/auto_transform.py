@@ -13,6 +13,7 @@ from cross.auto_parameters.feature_engineering import (
     CategoricalEncodingParamCalculator,
     CyclicalFeaturesTransformerParamCalculator,
     DateTimeTransformerParamCalculator,
+    DimensionalityReductionParamCalculator,
     MathematicalOperationsParamCalculator,
     NumericalBinningParamCalculator,
 )
@@ -72,6 +73,7 @@ def auto_transform(
         ("Normalization", NormalizationParamCalculator),
         ("QuantileTransformation", QuantileTransformationParamCalculator),
         ("MathematicalOperations", MathematicalOperationsParamCalculator),
+        ("DimensionalityReduction", DimensionalityReductionParamCalculator),
         ("ColumnSelection", ColumnSelectionParamCalculator),
     ]
 
@@ -91,7 +93,7 @@ def auto_transform(
                 transformer = get_transformer(
                     transformation["name"], transformation["params"]
                 )
-                X = transformer.fit_transform(X)
+                X = transformer.fit_transform(X, y)
 
     return transformations
 

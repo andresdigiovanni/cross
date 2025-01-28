@@ -4,6 +4,7 @@ from cross.transformations import (
     ColumnSelection,
     CyclicalFeaturesTransformer,
     DateTimeTransformer,
+    DimensionalityReduction,
     MathematicalOperations,
     MissingValuesHandler,
     NonLinearTransformation,
@@ -17,17 +18,18 @@ from cross.transformations import (
 
 def get_transformer(name, params):
     transformer_mapping = {
-        "CategoricalEncoding": CategoricalEncoding,
         "CastColumns": CastColumns,
+        "CategoricalEncoding": CategoricalEncoding,
         "ColumnSelection": ColumnSelection,
         "CyclicalFeaturesTransformer": CyclicalFeaturesTransformer,
         "DateTimeTransformer": DateTimeTransformer,
-        "OutliersHandler": OutliersHandler,
+        "DimensionalityReduction": DimensionalityReduction,
         "MathematicalOperations": MathematicalOperations,
         "MissingValuesHandler": MissingValuesHandler,
         "NonLinearTransformation": NonLinearTransformation,
         "Normalization": Normalization,
         "NumericalBinning": NumericalBinning,
+        "OutliersHandler": OutliersHandler,
         "QuantileTransformation": QuantileTransformation,
         "ScaleTransformation": ScaleTransformation,
     }

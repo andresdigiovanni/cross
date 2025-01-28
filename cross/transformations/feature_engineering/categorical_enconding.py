@@ -33,11 +33,11 @@ class CategoricalEncoding(BaseEstimator, TransformerMixin):
         X = X.copy()
 
         for column, transformation in self.encodings_options.items():
-            self._fit_encoder(X, column, transformation, y)
+            self._fit_encoder(X, y, column, transformation)
 
         return self
 
-    def _fit_encoder(self, X, column, transformation, y):
+    def _fit_encoder(self, X, y, column, transformation):
         if transformation == "label":
             self._encoders[column] = LabelEncoder().fit(X[column])
 

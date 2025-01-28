@@ -34,6 +34,7 @@ Cross is a Python library for data processing to train machine learning models, 
     - [Cyclical Features Transforms](#cyclical-features-transforms)
     - [Numerical Binning](#numerical-binning)
     - [Mathematical Operations](#mathematical-operations)
+    - [Dimensionality Reduction](#dimensionality-reduction)
 
 
 ## Getting Started
@@ -473,5 +474,35 @@ MathematicalOperations(
         ('sepal length (cm)', 'sepal width (cm)', 'hypotenuse'),
         ('petal length (cm)', 'petal width (cm)', 'mean'),
     ]
+)
+```
+
+#### **Dimensionality Reduction**
+
+Reduces the dimensionality of the dataset using various techniques, such as PCA, Factor Analysis, ICA, LDA, and others.
+
+- Parameters:
+    - `method`: The dimensionality reduction method to apply.
+    - `n_components`: Number of dimensions to reduce the data to.
+
+- **Methods**:
+    - `pca`: Principal Component Analysis.
+    - `factor_analysis`: Factor Analysis.
+    - `ica`: Independent Component Analysis.
+    - `kernel_pca`: Kernel PCA.
+    - `lda`: Linear Discriminant Analysis.
+    - `truncated_svd`: Truncated Singular Value Decomposition.
+    - `isomap`: Isomap Embedding.
+    - `lle`: Locally Linear Embedding.
+
+- **Notes**:
+For `lda`, the y target variable is required, as it uses class labels for discriminant analysis.
+
+```python
+from cross.transformations import DimensionalityReduction
+
+DimensionalityReduction(
+    method="pca",
+    n_components=3
 )
 ```

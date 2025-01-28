@@ -3,6 +3,7 @@ from .feature_engineering import (
     CategoricalEncoding,
     CyclicalFeaturesTransformer,
     DateTimeTransformer,
+    DimensionalityReduction,
     MathematicalOperations,
     NumericalBinning,
 )
