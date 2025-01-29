@@ -13,7 +13,7 @@ class RecursiveFeatureAddition:
         model,
         scoring: str,
         direction: str = "maximize",
-        cv: Union[int, Callable] = 5,
+        cv: Union[int, Callable] = None,
         groups: Optional = None,
         early_stopping: int = 3,
         target_score: bool = True,
@@ -26,8 +26,8 @@ class RecursiveFeatureAddition:
             model: Machine learning model with a fit method.
             scoring (str): Scoring metric for evaluation.
             direction (str, optional): "maximize" to increase score or "minimize" to decrease. Defaults to "maximize".
-            cv (Union[int, Callable]): Number of cross-validation folds or a custom cross-validation generator.
-            groups (Optional): Group labels for cross-validation splitting.
+            cv (Union[int, Callable], optional): Number of cross-validation folds or a custom cross-validation generator. Defaults to None.
+            groups (Optional): Group labels for cross-validation splitting. Defaults to None.
             early_stopping (int, optional): Maximum number of non-improving additions. Defaults to 3.
             target_score (bool, optional): Whether to use the full-feature score as a stopping criterion. Defaults to True.
             verbose (bool, optional): Whether to print progress messages. Defaults to False.

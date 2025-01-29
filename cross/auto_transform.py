@@ -33,7 +33,7 @@ def auto_transform(
     model,
     scoring: str,
     direction: str = "maximize",
-    cv: Union[int, Callable] = 5,
+    cv: Union[int, Callable] = None,
     groups: Optional[np.ndarray] = None,
     verbose: bool = True,
 ) -> List[dict]:
@@ -45,7 +45,7 @@ def auto_transform(
         model: Machine learning model with a fit method.
         scoring (str): Scoring metric for evaluation.
         direction (str, optional): "maximize" to increase score or "minimize" to decrease. Defaults to "maximize".
-        cv (Union[int, Callable], optional): Number of cross-validation folds or a custom cross-validation generator. Defaults to 5.
+        cv (Union[int, Callable], optional): Number of cross-validation folds or a custom cross-validation generator. Defaults to None.
         groups (Optional[np.ndarray], optional): Group labels for cross-validation splitting. Defaults to None.
         verbose (bool, optional): Whether to print progress messages. Defaults to True.
 
