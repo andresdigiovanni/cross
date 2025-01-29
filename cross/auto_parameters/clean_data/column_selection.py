@@ -10,9 +10,8 @@ class ColumnSelectionParamCalculator:
         numeric_columns = numerical_columns(X)
         X = X[numeric_columns]
 
-        selected_features = RecursiveFeatureAddition.fit(
-            X, y, model, scoring, direction, cv, groups
-        )
+        rfa = RecursiveFeatureAddition(model, scoring, direction, cv, groups)
+        selected_features = rfa.fit(X, y)
 
         if verbose:
             print(f"Selected {len(selected_features)} features")

@@ -42,9 +42,8 @@ class NumericalBinningParamCalculator:
             x_transformed = transformer.fit_transform(x, y)
             new_columns = list(set(x_transformed.columns) - set(x.columns))
 
-            selected_features = RecursiveFeatureAddition.fit(
-                x_transformed[new_columns], y, model, scoring, direction, cv, groups
-            )
+            rfa = RecursiveFeatureAddition(model, scoring, direction, cv, groups)
+            selected_features = rfa.fit(x_transformed[new_columns], y)
 
             selected_transformations = self._select_transformations(
                 all_transformations_info, selected_features
