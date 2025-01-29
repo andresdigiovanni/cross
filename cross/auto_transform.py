@@ -1,6 +1,6 @@
 import warnings
 from datetime import datetime
-from typing import Callable, Optional, Union
+from typing import Callable, List, Optional, Union
 
 import numpy as np
 
@@ -23,6 +23,7 @@ from cross.auto_parameters.preprocessing import (
     QuantileTransformationParamCalculator,
     ScaleTransformationParamCalculator,
 )
+from cross.transformations.utils.dtypes import numerical_columns
 from cross.utils import get_transformer
 
 
@@ -35,7 +36,7 @@ def auto_transform(
     cv: Union[int, Callable] = 5,
     groups: Optional[np.ndarray] = None,
     verbose: bool = True,
-) -> list:
+) -> List[dict]:
     """Automatically applies a series of data transformations to improve model performance.
 
     Args:
@@ -49,33 +50,20 @@ def auto_transform(
         verbose (bool, optional): Whether to print progress messages. Defaults to True.
 
     Returns:
-        list: A list of applied transformations.
+        List[dict]: A list of applied transformations.
     """
     if verbose:
         date_time = _date_time()
-        print(f"\n[{date_time}] Starting experiment to find the bests transformations")
+        print(f"\n[{date_time}] Starting experiment to find the best transformations")
         print(f"[{date_time}] Data shape: {X.shape}")
         print(f"[{date_time}] Model: {model.__class__.__name__}")
         print(f"[{date_time}] Scoring: {scoring}\n")
 
     X = X.copy()
+    orig_num_columns = numerical_columns(X)
 
     transformations = []
-    calculators = [
-        ("MissingValuesHandler", MissingValuesParamCalculator),
-        ("OutliersHandler", OutliersParamCalculator),
-        ("DateTimeTransformer", DateTimeTransformerParamCalculator),
-        ("CyclicalFeaturesTransformer", CyclicalFeaturesTransformerParamCalculator),
-        ("CategoricalEncoding", CategoricalEncodingParamCalculator),
-        ("NonLinearTransformation", NonLinearTransformationParamCalculator),
-        ("NumericalBinning", NumericalBinningParamCalculator),
-        ("ScaleTransformation", ScaleTransformationParamCalculator),
-        ("Normalization", NormalizationParamCalculator),
-        ("QuantileTransformation", QuantileTransformationParamCalculator),
-        ("MathematicalOperations", MathematicalOperationsParamCalculator),
-        ("DimensionalityReduction", DimensionalityReductionParamCalculator),
-        ("ColumnSelection", ColumnSelectionParamCalculator),
-    ]
+    calculators = _initialize_calculators()
 
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore")
@@ -84,10 +72,24 @@ def auto_transform(
             if verbose:
                 print(f"[{_date_time()}] Fitting transformation: {name}")
 
-            calculator = calculator()
-            transformation = calculator.calculate_best_params(
-                X, y, model, scoring, direction, cv, groups, verbose
+            columns_to_select = (
+                orig_num_columns
+                if name in ["NumericalBinning", "MathematicalOperations"]
+                else X.columns
             )
+            columns_to_select = list(set(columns_to_select).intersection(X.columns))
+
+            transformation = calculator.calculate_best_params(
+                X.loc[:, columns_to_select],
+                y,
+                model,
+                scoring,
+                direction,
+                cv,
+                groups,
+                verbose,
+            )
+
             if transformation:
                 transformations.append(transformation)
                 transformer = get_transformer(
@@ -98,6 +100,23 @@ def auto_transform(
     return transformations
 
 
-def _date_time():
-    now = datetime.now()
-    return now.strftime("%Y/%m/%d %H:%M:%S")
+def _date_time() -> str:
+    return datetime.now().strftime("%Y/%m/%d %H:%M:%S")
+
+
+def _initialize_calculators():
+    return [
+        ("MissingValuesHandler", MissingValuesParamCalculator()),
+        ("OutliersHandler", OutliersParamCalculator()),
+        ("DateTimeTransformer", DateTimeTransformerParamCalculator()),
+        ("CyclicalFeaturesTransformer", CyclicalFeaturesTransformerParamCalculator()),
+        ("CategoricalEncoding", CategoricalEncodingParamCalculator()),
+        ("NonLinearTransformation", NonLinearTransformationParamCalculator()),
+        ("NumericalBinning", NumericalBinningParamCalculator()),
+        ("ScaleTransformation", ScaleTransformationParamCalculator()),
+        ("Normalization", NormalizationParamCalculator()),
+        ("QuantileTransformation", QuantileTransformationParamCalculator()),
+        ("MathematicalOperations", MathematicalOperationsParamCalculator()),
+        ("DimensionalityReduction", DimensionalityReductionParamCalculator()),
+        ("ColumnSelection", ColumnSelectionParamCalculator()),
+    ]

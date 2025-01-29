@@ -40,7 +40,7 @@ class MathematicalOperationsParamCalculator:
             all_transformations_info, all_selected_features
         )
 
-        # Select final binnings using RFA
+        # Select final mathematical operations using RFA
         if selected_transformations:
             transformer = MathematicalOperations(selected_transformations)
             x_transformed = transformer.fit_transform(x, y)
