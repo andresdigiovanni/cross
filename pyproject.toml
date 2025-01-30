@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "cross_ml"
-version = "1.0.0"
+version = "1.1.0"
 description = "A comprehensive library for data preprocessing and feature engineering in machine learning"
 authors = ["Andres Di Giovanni <andresdigiovanni@gmail.com>"]
 readme = "README.md"

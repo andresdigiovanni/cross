@@ -7,17 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+
+## [1.1.0] - 2025-01-30
+
 ### Added
 
 - CV and Groups parameters to auto_transform function
 - Normalization and Quantile transformations in auto_transform
 - Dimensionality Reduction transformations
 
+### Changed
+
+- Internal use of RecursiveFeatureAddition
+
 ### Fixed
 
 - Target encoding for multiclass in CategoricalEncoding
 - Handle models that not support nan values
-- Internal use of RecursiveFeatureAddition
 
 ## [1.0.0] - 2025-01-03
 
