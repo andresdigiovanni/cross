@@ -25,8 +25,10 @@ dependencies = [
 [dependency-groups]
 dev-dependencies = [
     "pytest>=7.2.0",
-    "pre-commit>=2.20.0",
-    "ipykernel>=6.29.5"
+    "ipykernel>=6.29.5",
+]
+commits = [
+    "pre-commit>=4.1.0",
 ]
 
 [project.scripts]
