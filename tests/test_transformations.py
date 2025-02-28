@@ -4,7 +4,6 @@ from sklearn.datasets import load_iris
 
 from cross import CrossTransformer
 from cross.transformations import (
-    CastColumns,
     ColumnSelection,
     MathematicalOperations,
     MissingValuesHandler,
@@ -32,12 +31,6 @@ def test_transformations_are_applied(load_data):
     # Define transformer with a series of transformations
     transformer = CrossTransformer(
         [
-            CastColumns(
-                cast_options={
-                    "sepal length (cm)": "number",
-                    "sepal width (cm)": "number",
-                }
-            ),
             MissingValuesHandler(
                 handling_options={
                     "sepal length (cm)": "fill_mode",

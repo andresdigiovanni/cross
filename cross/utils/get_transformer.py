@@ -1,5 +1,4 @@
 from cross.transformations import (
-    CastColumns,
     CategoricalEncoding,
     ColumnSelection,
     CyclicalFeaturesTransformer,
@@ -18,7 +17,6 @@ from cross.transformations import (
 
 def get_transformer(name, params):
     transformer_mapping = {
-        "CastColumns": CastColumns,
         "CategoricalEncoding": CategoricalEncoding,
         "ColumnSelection": ColumnSelection,
         "CyclicalFeaturesTransformer": CyclicalFeaturesTransformer,

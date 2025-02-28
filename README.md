@@ -18,22 +18,25 @@ Cross is a Python library for data processing to train machine learning models, 
   - [Save and Load Transformations](#save-and-load-transformations)
   - [Auto transformations](#auto-transformations)
 - [Transformations](#transformations)
+
   - [Clean Data](#clean-data)
-    - [Column Selection](#column-selection)
-    - [Column Casting](#column-casting)
     - [Missing Values](#missing-values)
+  - [Numerical Features](#numerical-features)
     - [Handle Outliers](#handle-outliers)
-  - [Preprocessing](#preprocessing)
     - [Non-Linear Transformation](#non-linear-transformation)
     - [Quantile Transformations](#quantile-transformations)
     - [Scale Transformations](#scale-transformations)
     - [Normalization](#normalization)
-  - [Feature Engineering](#feature-engineering)
-    - [Categorical Encoding](#categorical-encoding)
-    - [Date Time Transforms](#date-time-transforms)
-    - [Cyclical Features Transforms](#cyclical-features-transforms)
     - [Numerical Binning](#numerical-binning)
     - [Mathematical Operations](#mathematical-operations)
+  - [Categorical Features](#categorical-features)
+    - [Categorical Encoding](#categorical-encoding)
+  - [Datetime Features](#datetime-features)
+    - [Date Time Transforms](#date-time-transforms)
+  - [Periodic Features](#periodic-features)
+    - [Cyclical Features Transforms](#cyclical-features-transforms)
+  - [Features Reduction](#features-reduction)
+    - [Column Selection](#column-selection)
     - [Dimensionality Reduction](#dimensionality-reduction)
 
 
@@ -198,42 +201,6 @@ The `auto_transform` function applies a series of data transformations to enhanc
 
 ### Clean Data
 
-#### **Column Selection**
-
-Allows you to select specific columns for further processing.
-
-- Parameters:
-    - `columns`: List of column names to select.
-  
-```python
-from cross.transformations import ColumnSelection
-
-ColumnSelection(
-    columns=[
-        "sepal length (cm)",
-        "sepal width (cm)",
-    ]
-)
-```
-
-#### **Column Casting**
-
-Casts columns to specific data types.
-
-- Parameters:
-    - `cast_options`: A dictionary specifying the type for each column. Options include: `category`, `number`, `bool`, `datetime`, `timedelta`.
-  
-```python
-from cross.transformations import CastColumns
-
-CastColumns(
-    cast_options={
-        "sepal length (cm)": "number",
-        "sepal width (cm)": "number",
-    }
-)
-```
-
 #### **Missing Values**
 
 Handles missing values in the dataset.
@@ -257,6 +224,8 @@ MissingValuesHandler(
     }
 )
 ```
+
+### Numerical Features
 
 #### **Handle Outliers**
 
@@ -294,8 +263,6 @@ OutliersHandler(
     }
 )
 ```
-
-### Preprocessing
 
 #### **Non-Linear Transformation**
 
@@ -376,63 +343,6 @@ Normalization(
 )
 ```
 
-### Feature Engineering
-
-#### **Categorical Encoding**
-
-Encodes categorical variables using various methods.
-
-- Parameters:
-    - `encodings_options`: Dictionary specifying the encoding method for each column. Options: `label`, `ordinal`, `onehot`, `dummy`, `binary`, `count`, `target`.
-    - `ordinal_orders`: Specifies the order for ordinal encoding.
-
-```python
-from cross.transformations import CategoricalEncoding
-
-CategoricalEncoding(
-    encodings_options={
-        'Sex': 'label',
-        'Size': 'ordinal',
-    },
-    ordinal_orders={
-        "Size": ["small", "medium", "large"]
-    }
-)
-```
-
-#### **Date Time Transforms**
-
-Transforms datetime columns into useful features.
-
-- Parameters:
-    - `datetime_columns`: List of columns to extract date/time features from.
-  
-```python
-from cross.transformations import DateTimeTransformer
-
-DateTimeTransformer(
-    datetime_columns=["date"]
-)
-```
-
-#### **Cyclical Features Transforms**
-
-Transforms cyclical features like time into a continuous representation.
-
-- Parameters:
-    - `columns_periods`: Dictionary specifying the period for each cyclical column.
-  
-```python
-from cross.transformations import CyclicalFeaturesTransformer
-
-CyclicalFeaturesTransformer(
-    columns_periods={
-        "date_minute": 60,
-        "date_hour": 24,
-    }
-)
-```
-
 #### **Numerical Binning**
 
 Bins numerical columns into categories. You can now specify the column, the binning method, and the number of bins in a tuple.
@@ -483,6 +393,88 @@ MathematicalOperations(
     ]
 )
 ```
+
+### Categorical Features
+
+#### **Categorical Encoding**
+
+Encodes categorical variables using various methods.
+
+- Parameters:
+    - `encodings_options`: Dictionary specifying the encoding method for each column. Options: `label`, `ordinal`, `onehot`, `dummy`, `binary`, `count`, `target`.
+    - `ordinal_orders`: Specifies the order for ordinal encoding.
+
+```python
+from cross.transformations import CategoricalEncoding
+
+CategoricalEncoding(
+    encodings_options={
+        'Sex': 'label',
+        'Size': 'ordinal',
+    },
+    ordinal_orders={
+        "Size": ["small", "medium", "large"]
+    }
+)
+```
+
+### Datetime Features
+
+#### **Date Time Transforms**
+
+Transforms datetime columns into useful features.
+
+- Parameters:
+    - `datetime_columns`: List of columns to extract date/time features from.
+  
+```python
+from cross.transformations import DateTimeTransformer
+
+DateTimeTransformer(
+    datetime_columns=["date"]
+)
+```
+
+### Periodic Features
+
+#### **Cyclical Features Transforms**
+
+Transforms cyclical features like time into a continuous representation.
+
+- Parameters:
+    - `columns_periods`: Dictionary specifying the period for each cyclical column.
+  
+```python
+from cross.transformations import CyclicalFeaturesTransformer
+
+CyclicalFeaturesTransformer(
+    columns_periods={
+        "date_minute": 60,
+        "date_hour": 24,
+    }
+)
+```
+
+### Features Reduction
+
+#### **Column Selection**
+
+Allows you to select specific columns for further processing.
+
+- Parameters:
+    - `columns`: List of column names to select.
+  
+```python
+from cross.transformations import ColumnSelection
+
+ColumnSelection(
+    columns=[
+        "sepal length (cm)",
+        "sepal width (cm)",
+    ]
+)
+```
+
 
 #### **Dimensionality Reduction**
 

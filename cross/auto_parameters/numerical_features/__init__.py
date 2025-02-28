@@ -1,4 +1,7 @@
+from .mathematical_operations import MathematicalOperationsParamCalculator
 from .non_linear_transformation import NonLinearTransformationParamCalculator
 from .normalization import NormalizationParamCalculator
+from .numerical_binning import NumericalBinningParamCalculator
+from .outliers_handler import OutliersParamCalculator
 from .quantile_transformation import QuantileTransformationParamCalculator
 from .scale_transformation import ScaleTransformationParamCalculator

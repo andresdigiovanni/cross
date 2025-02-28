@@ -1,8 +1,6 @@
 from cross.applications.pages.steps import (
     CategoricalEncodingEdit,
     CategoricalEncodingPage,
-    ColumnCastingEdit,
-    ColumnCastingPage,
     ColumnSelectionEdit,
     ColumnSelectionPage,
     CyclicalFeaturesTransformationEdit,
@@ -48,22 +46,8 @@ def navigation_pages():
                 "page": TargetSelectionPage(),
                 "edit": None,
             },
-            {
-                "key": "ColumnSelection",
-                "name": "Column selection",
-                "icon": "list-check",
-                "page": ColumnSelectionPage(),
-                "edit": ColumnSelectionEdit(),
-            },
-            {
-                "key": "CastColumns",
-                "name": "Column casting",
-                "icon": "shuffle",
-                "page": ColumnCastingPage(),
-                "edit": ColumnCastingEdit(),
-            },
         ],
-        # Data Cleaning
+        # Clean Data
         [
             {
                 "key": "MissingValuesHandler",
@@ -72,6 +56,9 @@ def navigation_pages():
                 "page": MissingValuesPage(),
                 "edit": MissingValuesEdit(),
             },
+        ],
+        # Numerical Features
+        [
             {
                 "key": "OutliersHandler",
                 "name": "Handle outliers",
@@ -79,9 +66,6 @@ def navigation_pages():
                 "page": OutliersHandlingPage(),
                 "edit": OutliersHandlingEdit(),
             },
-        ],
-        # Data Transforms - Numerical
-        [
             {
                 "key": "NonLinearTransformation",
                 "name": "Non-linear transforms",
@@ -110,33 +94,6 @@ def navigation_pages():
                 "page": NormalizationPage(),
                 "edit": NormalizationEdit(),
             },
-        ],
-        # Data Transforms - Categorical
-        [
-            {
-                "key": "CategoricalEncoding",
-                "name": "Categorical encoding",
-                "icon": "alphabet",
-                "page": CategoricalEncodingPage(),
-                "edit": CategoricalEncodingEdit(),
-            },
-            {
-                "key": "DateTimeTransformer",
-                "name": "Datetime transforms",
-                "icon": "calendar-date",
-                "page": DateTimeTransformationPage(),
-                "edit": DateTimeTransformationEdit(),
-            },
-            {
-                "key": "CyclicalFeaturesTransformer",
-                "name": "Cyclical transforms",
-                "icon": "arrow-clockwise",
-                "page": CyclicalFeaturesTransformationPage(),
-                "edit": CyclicalFeaturesTransformationEdit(),
-            },
-        ],
-        # Feature engineering
-        [
             {
                 "key": "NumericalBinning",
                 "name": "Numerical binning",
@@ -150,6 +107,46 @@ def navigation_pages():
                 "icon": "plus-slash-minus",
                 "page": MathematicalOperationsPage(),
                 "edit": MathematicalOperationsEdit(),
+            },
+        ],
+        # Categorical Features
+        [
+            {
+                "key": "CategoricalEncoding",
+                "name": "Categorical encoding",
+                "icon": "alphabet",
+                "page": CategoricalEncodingPage(),
+                "edit": CategoricalEncodingEdit(),
+            },
+        ],
+        # Datetime Features
+        [
+            {
+                "key": "DateTimeTransformer",
+                "name": "Datetime transforms",
+                "icon": "calendar-date",
+                "page": DateTimeTransformationPage(),
+                "edit": DateTimeTransformationEdit(),
+            },
+        ],
+        # Periodic Featuers
+        [
+            {
+                "key": "CyclicalFeaturesTransformer",
+                "name": "Cyclical transforms",
+                "icon": "arrow-clockwise",
+                "page": CyclicalFeaturesTransformationPage(),
+                "edit": CyclicalFeaturesTransformationEdit(),
+            },
+        ],
+        # Features Reduction
+        [
+            {
+                "key": "ColumnSelection",
+                "name": "Column selection",
+                "icon": "list-check",
+                "page": ColumnSelectionPage(),
+                "edit": ColumnSelectionEdit(),
             },
         ],
     ]

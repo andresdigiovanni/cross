@@ -4,22 +4,18 @@ from typing import Callable, List, Optional, Union
 
 import numpy as np
 
-from cross.auto_parameters.clean_data import (
-    ColumnSelectionParamCalculator,
-    MissingValuesParamCalculator,
-    OutliersParamCalculator,
-)
-from cross.auto_parameters.feature_engineering import (
+from cross.auto_parameters import (
     CategoricalEncodingParamCalculator,
+    ColumnSelectionParamCalculator,
     CyclicalFeaturesTransformerParamCalculator,
     DateTimeTransformerParamCalculator,
     DimensionalityReductionParamCalculator,
     MathematicalOperationsParamCalculator,
-    NumericalBinningParamCalculator,
-)
-from cross.auto_parameters.preprocessing import (
+    MissingValuesParamCalculator,
     NonLinearTransformationParamCalculator,
     NormalizationParamCalculator,
+    NumericalBinningParamCalculator,
+    OutliersParamCalculator,
     QuantileTransformationParamCalculator,
     ScaleTransformationParamCalculator,
 )

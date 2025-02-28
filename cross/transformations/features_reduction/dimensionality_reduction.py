@@ -65,7 +65,7 @@ class DimensionalityReduction(BaseEstimator, TransformerMixin):
         reduced_array = self._reducer.transform(X)
         reduced_df = pd.DataFrame(
             reduced_array,
-            columns=[f"{self.method}_{i+1}" for i in range(reduced_array.shape[1])],
+            columns=[f"{self.method}_{i + 1}" for i in range(reduced_array.shape[1])],
             index=X.index,
         )
         return reduced_df
