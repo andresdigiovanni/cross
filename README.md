@@ -82,8 +82,11 @@ transformations = [
     ScaleTransformation(
         transformation_options={
             "sepal length (cm)": "min_max",
-            "sepal width (cm)": "min_max",
-        }
+            "sepal width (cm)": "robust",
+        },
+        quantile_range={
+            "sepal width (cm)": (25.0, 75.0),
+        },
     ),
     NumericalBinning(
         binning_options={
@@ -337,6 +340,7 @@ Scales numerical data using different scaling methods.
 
 - Parameters:
     - `transformation_options`: Dictionary specifying the scaling method for each column. Options: `min_max`, `standard`, `robust`, `max_abs`.
+    -  `quantile_range`: Dictionary specifying the quantile ranges for robust scaling.
   
 ```python
 from cross.transformations import ScaleTransformation
@@ -347,7 +351,10 @@ ScaleTransformation(
         'sepal width (cm)': 'standard',
         'petal length (cm)': 'robust',
         'petal width (cm)': 'max_abs',
-    }
+    },
+    quantile_range={
+        "petal length (cm)": (25.0, 75.0),
+    },
 )
 ```
 

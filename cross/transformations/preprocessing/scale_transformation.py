@@ -8,14 +8,15 @@ from sklearn.preprocessing import (
 
 
 class ScaleTransformation(BaseEstimator, TransformerMixin):
-    def __init__(self, transformation_options=None):
+    def __init__(self, transformation_options=None, quantile_range=None):
         self.transformation_options = transformation_options or {}
-
+        self.quantile_range = quantile_range
         self._transformers = {}
 
     def get_params(self, deep=True):
         return {
             "transformation_options": self.transformation_options,
+            "quantile_range": self.quantile_range,
         }
 
     def set_params(self, **params):
@@ -35,7 +36,8 @@ class ScaleTransformation(BaseEstimator, TransformerMixin):
                 transformer = StandardScaler()
 
             elif transformation == "robust":
-                transformer = RobustScaler()
+                quantile_range = self.quantile_range.get(column, (25.0, 75.0))
+                transformer = RobustScaler(quantile_range=quantile_range)
 
             elif transformation == "max_abs":
                 transformer = MaxAbsScaler()

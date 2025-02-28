@@ -27,6 +27,7 @@ class ScaleTransformationsPage(ScaleTransformationsBase):
         num_columns = [col for col in numerical_columns(df) if col != target_column]
 
         transformation_options = {}
+        quantile_ranges = {}
 
         for column in num_columns:
             st.markdown("""---""")
@@ -43,17 +44,30 @@ class ScaleTransformationsPage(ScaleTransformationsBase):
                     selected_transformation
                 ]
 
+                if transformation_options[column] == "robust":
+                    quantile_range = st.slider(
+                        f"Select quantile range for {column}",
+                        min_value=1.0,
+                        max_value=99.0,
+                        value=(25.0, 75.0),
+                        key=f"{column}_quantile_range",
+                    )
+                    quantile_ranges[column] = quantile_range
+
             with col2:
                 self._plot_column_data(original_df[column], "Original Data")
 
             with col3:
                 transformed_df = self._apply_transformation(
-                    original_df.copy(), column, transformation_options[column]
+                    original_df.copy(),
+                    column,
+                    transformation_options[column],
+                    quantile_ranges,
                 )
                 self._plot_column_data(transformed_df[column], "Transformed Data")
 
         st.markdown("""---""")
-        self._apply_scale_transformations(df, transformation_options)
+        self._apply_scale_transformations(df, transformation_options, quantile_ranges)
 
     def _plot_column_data(self, column_data, title):
         fig, ax = plt.subplots(figsize=(4, 2))
@@ -62,11 +76,13 @@ class ScaleTransformationsPage(ScaleTransformationsBase):
         plot_remove_borders(ax)
         st.pyplot(fig)
 
-    def _apply_transformation(self, df, column, transformation):
-        scale_transformation = ScaleTransformation({column: transformation})
+    def _apply_transformation(self, df, column, transformation, quantile_ranges):
+        scale_transformation = ScaleTransformation(
+            {column: transformation}, quantile_ranges
+        )
         return scale_transformation.fit_transform(df)
 
-    def _apply_scale_transformations(self, df, transformation_options):
+    def _apply_scale_transformations(self, df, transformation_options, quantile_ranges):
         if st.button("Add step"):
             try:
                 valid_transformations = {
@@ -75,7 +91,9 @@ class ScaleTransformationsPage(ScaleTransformationsBase):
                     if transformation != "none"
                 }
 
-                scale_transformation = ScaleTransformation(valid_transformations)
+                scale_transformation = ScaleTransformation(
+                    valid_transformations, quantile_ranges
+                )
                 transformed_df = scale_transformation.fit_transform(df)
                 st.session_state["data"] = transformed_df
 
