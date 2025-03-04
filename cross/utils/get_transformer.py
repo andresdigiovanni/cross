@@ -12,6 +12,7 @@ from cross.transformations import (
     OutliersHandler,
     QuantileTransformation,
     ScaleTransformation,
+    SplineTransformation,
 )
 
 
@@ -30,6 +31,7 @@ def get_transformer(name, params):
         "OutliersHandler": OutliersHandler,
         "QuantileTransformation": QuantileTransformation,
         "ScaleTransformation": ScaleTransformation,
+        "SplineTransformation": SplineTransformation,
     }
 
     if name in transformer_mapping:

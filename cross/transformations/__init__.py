@@ -10,5 +10,6 @@ from .numerical_features import (
     OutliersHandler,
     QuantileTransformation,
     ScaleTransformation,
+    SplineTransformation,
 )
 from .periodic_features import CyclicalFeaturesTransformer

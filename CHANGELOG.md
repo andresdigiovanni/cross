@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Quantile range parameter in RobustScaler
+- Spline transformation for numerical data
 
 
 ## [1.1.1] - 2025-01-30

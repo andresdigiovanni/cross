@@ -5,3 +5,4 @@ from .numerical_binning import NumericalBinningParamCalculator
 from .outliers_handler import OutliersParamCalculator
 from .quantile_transformation import QuantileTransformationParamCalculator
 from .scale_transformation import ScaleTransformationParamCalculator
+from .spline_transformation import SplineTransformationParamCalculator

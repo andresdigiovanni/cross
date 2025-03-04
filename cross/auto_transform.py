@@ -18,6 +18,7 @@ from cross.auto_parameters import (
     OutliersParamCalculator,
     QuantileTransformationParamCalculator,
     ScaleTransformationParamCalculator,
+    SplineTransformationParamCalculator,
 )
 from cross.transformations.utils.dtypes import numerical_columns
 from cross.utils import get_transformer
@@ -108,6 +109,7 @@ def _initialize_calculators():
         ("CyclicalFeaturesTransformer", CyclicalFeaturesTransformerParamCalculator()),
         ("CategoricalEncoding", CategoricalEncodingParamCalculator()),
         ("NonLinearTransformation", NonLinearTransformationParamCalculator()),
+        ("SplineTransformation", SplineTransformationParamCalculator()),
         ("NumericalBinning", NumericalBinningParamCalculator()),
         ("ScaleTransformation", ScaleTransformationParamCalculator()),
         ("Normalization", NormalizationParamCalculator()),

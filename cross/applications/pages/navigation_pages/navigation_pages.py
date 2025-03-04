@@ -24,6 +24,8 @@ from cross.applications.pages.steps import (
     QuantileTransformationsPage,
     ScaleTransformationsEdit,
     ScaleTransformationsPage,
+    SplineTransformationEdit,
+    SplineTransformationsPage,
     TargetSelectionPage,
 )
 
@@ -93,6 +95,13 @@ def navigation_pages():
                 "icon": "bounding-box",
                 "page": NormalizationPage(),
                 "edit": NormalizationEdit(),
+            },
+            {
+                "key": "SplineTransformation",
+                "name": "Spline transformation",
+                "icon": "bezier",
+                "page": SplineTransformationsPage(),
+                "edit": SplineTransformationEdit(),
             },
             {
                 "key": "NumericalBinning",

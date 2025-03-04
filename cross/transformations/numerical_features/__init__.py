@@ -5,3 +5,4 @@ from .numerical_binning import NumericalBinning
 from .outliers_handler import OutliersHandler
 from .quantile_transformation import QuantileTransformation
 from .scale_transformation import ScaleTransformation
+from .spline_transformation import SplineTransformation

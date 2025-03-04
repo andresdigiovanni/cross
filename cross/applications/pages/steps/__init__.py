@@ -23,4 +23,5 @@ from .quantile_transformation import (
     QuantileTransformationsPage,
 )
 from .scale_transformation import ScaleTransformationsEdit, ScaleTransformationsPage
+from .spline_transformation import SplineTransformationEdit, SplineTransformationsPage
 from .target_selection import TargetSelectionPage

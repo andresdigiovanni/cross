@@ -13,5 +13,6 @@ from .numerical_features import (
     OutliersParamCalculator,
     QuantileTransformationParamCalculator,
     ScaleTransformationParamCalculator,
+    SplineTransformationParamCalculator,
 )
 from .periodic_features import CyclicalFeaturesTransformerParamCalculator

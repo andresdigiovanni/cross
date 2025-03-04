@@ -18,7 +18,6 @@ Cross is a Python library for data processing to train machine learning models, 
   - [Save and Load Transformations](#save-and-load-transformations)
   - [Auto transformations](#auto-transformations)
 - [Transformations](#transformations)
-
   - [Clean Data](#clean-data)
     - [Missing Values](#missing-values)
   - [Numerical Features](#numerical-features)
@@ -27,6 +26,7 @@ Cross is a Python library for data processing to train machine learning models, 
     - [Quantile Transformations](#quantile-transformations)
     - [Scale Transformations](#scale-transformations)
     - [Normalization](#normalization)
+    - [Spline Transformations](#spline-transformations)
     - [Numerical Binning](#numerical-binning)
     - [Mathematical Operations](#mathematical-operations)
   - [Categorical Features](#categorical-features)
@@ -342,6 +342,25 @@ Normalization(
     }
 )
 ```
+
+### **Spline Transformations**
+
+Applies Spline transformation to numerical features.
+
+- Parameters:
+    - `transformation_options`: Dictionary specifying the spline transformation settings for each column. Options include different numbers of knots and degrees.
+
+```python
+from cross.transformations import SplineTransformation
+
+SplineTransformation(
+    transformation_options={
+        'sepal length (cm)': {'degree': 3, 'n_knots': 3},
+        'sepal width (cm)': {'degree': 3, 'n_knots': 5},
+    }
+)
+```
+
 
 #### **Numerical Binning**
 
