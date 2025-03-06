@@ -8,4 +8,5 @@ class CategoricalEncodingBase:
         "Binary Encoder": "binary",
         "Count Encoder": "count",
         "Target Encoder": "target",
+        "Leave One Out Encoder": "loo",
     }

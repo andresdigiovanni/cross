@@ -1,5 +1,6 @@
 import pandas as pd
 from category_encoders import BinaryEncoder
+from category_encoders.leave_one_out import LeaveOneOutEncoder
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.preprocessing import (
     LabelEncoder,
@@ -53,13 +54,18 @@ class CategoricalEncoding(BaseEstimator, TransformerMixin):
             ).fit(X[[column]])
 
         elif transformation == "binary":
-            self._encoders[column] = BinaryEncoder().fit(X[[column]])
+            self._encoders[column] = BinaryEncoder(return_df=False).fit(X[[column]])
 
         elif transformation == "target" and y is not None:
             self._encoders[column] = TargetEncoder(smooth=0).fit(X[[column]], y)
 
         elif transformation == "count":
             self._encoders[column] = X[column].value_counts().to_dict()
+
+        elif transformation == "loo" and y is not None:
+            self._encoders[column] = LeaveOneOutEncoder(return_df=False).fit(
+                X[[column]], y
+            )
 
     def _safe_transform(self, value, transformer, known_classes):
         return transformer.transform([value])[0] if value in known_classes else -1
@@ -86,12 +92,12 @@ class CategoricalEncoding(BaseEstimator, TransformerMixin):
         elif transformation in ["ordinal"]:
             X[column] = transformer.transform(X[[column]])
 
-        elif transformation in ["onehot", "dummy", "binary", "target"]:
+        elif transformation in ["onehot", "dummy", "binary", "target", "loo"]:
             encoded_array = transformer.transform(X[[column]])
             columns = transformer.get_feature_names_out([column])
 
-            if transformation == "target":
-                columns = [f"{col}_target" for col in columns]
+            if transformation in ["target", "loo"]:
+                columns = [f"{col}_{transformation}" for col in columns]
 
             encoded_df = pd.DataFrame(
                 encoded_array,

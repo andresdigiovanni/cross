@@ -90,7 +90,7 @@ class CategoricalEncodingPage(CategoricalEncodingBase):
 
         encoding_type = self.ENCODING_OPTIONS[encodings_options[column]]
         if encoding_type != "none" and not (
-            encoding_type == "target" and not target_column
+            encoding_type in ["target", "loo"] and not target_column
         ):
             categorical_encoding = CategoricalEncoding(
                 {column: encoding_type},
@@ -104,7 +104,7 @@ class CategoricalEncodingPage(CategoricalEncodingBase):
             # Determine if new columns are created
             new_columns = (
                 list(set(transformed_df.columns) - set(original_df.columns))
-                if encoding_type in ["onehot", "dummy", "binary", "target"]
+                if encoding_type in ["onehot", "dummy", "binary", "target", "loo"]
                 else [column]
             )
 
