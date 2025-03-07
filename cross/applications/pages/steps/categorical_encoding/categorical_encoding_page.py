@@ -104,7 +104,8 @@ class CategoricalEncodingPage(CategoricalEncodingBase):
             # Determine if new columns are created
             new_columns = (
                 list(set(transformed_df.columns) - set(original_df.columns))
-                if encoding_type in ["onehot", "dummy", "binary", "target", "loo"]
+                if encoding_type
+                in ["onehot", "dummy", "binary", "target", "loo", "rankhot"]
                 else [column]
             )
 

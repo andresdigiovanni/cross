@@ -11,7 +11,7 @@ class CategoricalEncodingParamCalculator:
         self, x, y, model, scoring, direction, cv, groups, verbose
     ):
         columns = categorical_columns(x)
-        encodings = ["label", "dummy", "binary", "target", "count", "loo"]
+        encodings = ["label", "dummy", "binary", "target", "count", "loo", "rankhot"]
 
         best_encodings_options = {}
 

@@ -1,6 +1,7 @@
 import pandas as pd
 from category_encoders import BinaryEncoder
 from category_encoders.leave_one_out import LeaveOneOutEncoder
+from category_encoders.rankhot import RankHotEncoder
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.preprocessing import (
     LabelEncoder,
@@ -67,6 +68,9 @@ class CategoricalEncoding(BaseEstimator, TransformerMixin):
                 X[[column]], y
             )
 
+        elif transformation == "rankhot":
+            self._encoders[column] = RankHotEncoder().fit(X[[column]])
+
     def _safe_transform(self, value, transformer, known_classes):
         return transformer.transform([value])[0] if value in known_classes else -1
 
@@ -92,7 +96,14 @@ class CategoricalEncoding(BaseEstimator, TransformerMixin):
         elif transformation in ["ordinal"]:
             X[column] = transformer.transform(X[[column]])
 
-        elif transformation in ["onehot", "dummy", "binary", "target", "loo"]:
+        elif transformation in [
+            "onehot",
+            "dummy",
+            "binary",
+            "target",
+            "loo",
+            "rankhot",
+        ]:
             encoded_array = transformer.transform(X[[column]])
             columns = transformer.get_feature_names_out([column])
 

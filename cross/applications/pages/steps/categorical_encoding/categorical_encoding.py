@@ -9,4 +9,5 @@ class CategoricalEncodingBase:
         "Count Encoder": "count",
         "Target Encoder": "target",
         "Leave One Out Encoder": "loo",
+        "Rank Hot Encoder": "rankhot",
     }

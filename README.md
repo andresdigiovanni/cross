@@ -420,7 +420,7 @@ MathematicalOperations(
 Encodes categorical variables using various methods.
 
 - Parameters:
-    - `encodings_options`: Dictionary specifying the encoding method for each column. Options: `label`, `ordinal`, `onehot`, `dummy`, `binary`, `count`, `target`, `loo` (Leave One Out).
+    - `encodings_options`: Dictionary specifying the encoding method for each column. Options: `label`, `ordinal`, `onehot`, `dummy`, `binary`, `count`, `target`, `loo` (Leave One Out), `rankhot`.
     - `ordinal_orders`: Specifies the order for ordinal encoding.
 
 ```python

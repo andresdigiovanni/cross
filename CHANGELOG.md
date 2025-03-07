@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Quantile range parameter in RobustScaler
 - Spline transformation for numerical data
 - Leave One Out enconding for categorical data
+- Rank Hot encoding for categorical data
 
 
 ## [1.1.1] - 2025-01-30
