@@ -11,9 +11,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Quantile range parameter in RobustScaler
 - Spline transformation for numerical data
-- Leave One Out enconding for categorical data
-- Rank Hot encoding for categorical data
 - Missing indicator column for missing values
+- Backward Difference encoding for categorical data
+- Base N encoding for categorical data
+- Cat Boost encoding for categorical data
+- GLMM encoding for categorical data
+- Gray encoding for categorical data
+- Hashing encoding for categorical data
+- Helmert encoding for categorical data
+- JamesStein encoding for categorical data
+- Leave One Out enconding for categorical data
+- Ordinal encoding for categorical data
+- MEstimate encoding for categorical data
+- Polynomial encoding for categorical data
+- Quantile encoding for categorical data
+- Rank Hot encoding for categorical data
+- Sum encoding for categorical data
+- WOE encoding for categorical data
 
 ## [1.1.1] - 2025-01-30
 

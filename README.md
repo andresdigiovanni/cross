@@ -459,8 +459,32 @@ MathematicalOperations(
 Encodes categorical variables using various methods.
 
 - Parameters:
-    - `encodings_options`: Dictionary specifying the encoding method for each column. Options: `label`, `ordinal`, `onehot`, `dummy`, `binary`, `count`, `target`, `loo` (Leave One Out), `rankhot`.
+    - `encodings_options`: Dictionary specifying the encoding method for each column.
     - `ordinal_orders`: Specifies the order for ordinal encoding.
+
+- **Encodings**:
+    - backward_diff
+    - basen
+    - binary
+    - catboost
+    - count
+    - dummy
+    - glmm
+    - gray
+    - hashing
+    - helmert
+    - james_stein
+    - label
+    - loo
+    - m_estimate
+    - onehot
+    - ordinal
+    - polynomial
+    - quantile
+    - rankhot
+    - sum
+    - target
+    - woe
 
 - Example Usage:
 

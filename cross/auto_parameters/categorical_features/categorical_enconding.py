@@ -11,7 +11,30 @@ class CategoricalEncodingParamCalculator:
         self, x, y, model, scoring, direction, cv, groups, verbose
     ):
         columns = categorical_columns(x)
-        encodings = ["label", "dummy", "binary", "target", "count", "loo", "rankhot"]
+        encodings = [
+            "backward_diff",
+            "basen",
+            "binary",
+            "catboost",
+            "count",
+            "dummy",
+            "glmm",
+            "gray",
+            "hashing",
+            "helmert",
+            "james_stein",
+            "label",
+            "loo",
+            "m_estimate",
+            "onehot",
+            # "ordinal",
+            "polynomial",
+            "quantile",
+            "rankhot",
+            "sum",
+            "target",
+            "woe",
+        ]
 
         best_encodings_options = {}
 
@@ -20,13 +43,8 @@ class CategoricalEncodingParamCalculator:
                 best_score = float("-inf") if direction == "maximize" else float("inf")
                 best_encoding = None
 
-                num_unique_values = x[column].nunique()
-
                 for encoding in encodings:
                     pbar.update(1)
-
-                    if encoding == "dummy" and num_unique_values > 20:
-                        continue
 
                     encodings_options = {column: encoding}
                     handler = CategoricalEncoding(encodings_options=encodings_options)
