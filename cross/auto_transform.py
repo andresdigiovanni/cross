@@ -11,6 +11,7 @@ from cross.auto_parameters import (
     DateTimeTransformerParamCalculator,
     DimensionalityReductionParamCalculator,
     MathematicalOperationsParamCalculator,
+    MissingValuesIndicatorParamCalculator,
     MissingValuesParamCalculator,
     NonLinearTransformationParamCalculator,
     NormalizationParamCalculator,
@@ -103,6 +104,7 @@ def _date_time() -> str:
 
 def _initialize_calculators():
     return [
+        ("MissingValuesIndicator", MissingValuesIndicatorParamCalculator()),
         ("MissingValuesHandler", MissingValuesParamCalculator()),
         ("OutliersHandler", OutliersParamCalculator()),
         ("DateTimeTransformer", DateTimeTransformerParamCalculator()),

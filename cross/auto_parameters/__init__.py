@@ -1,5 +1,8 @@
 from .categorical_features import CategoricalEncodingParamCalculator
-from .clean_data import MissingValuesParamCalculator
+from .clean_data import (
+    MissingValuesIndicatorParamCalculator,
+    MissingValuesParamCalculator,
+)
 from .datetime_features import DateTimeTransformerParamCalculator
 from .features_reduction import (
     ColumnSelectionParamCalculator,

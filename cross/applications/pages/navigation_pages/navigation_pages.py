@@ -11,6 +11,8 @@ from cross.applications.pages.steps import (
     MathematicalOperationsEdit,
     MathematicalOperationsPage,
     MissingValuesEdit,
+    MissingValuesIndicatorEdit,
+    MissingValuesIndicatorPage,
     MissingValuesPage,
     NonLinearTransformationEdit,
     NonLinearTransformationPage,
@@ -51,6 +53,13 @@ def navigation_pages():
         ],
         # Clean Data
         [
+            {
+                "key": "MissingValuesIndicator",
+                "name": "Missing values indicator",
+                "icon": "patch-question",
+                "page": MissingValuesIndicatorPage(),
+                "edit": MissingValuesIndicatorEdit(),
+            },
             {
                 "key": "MissingValuesHandler",
                 "name": "Missing values",

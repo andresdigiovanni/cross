@@ -19,6 +19,7 @@ Cross is a Python library for data processing to train machine learning models, 
   - [Auto transformations](#auto-transformations)
 - [Transformations](#transformations)
   - [Clean Data](#clean-data)
+    - [Missing Values Indicator](#missing-values-indicator)
     - [Missing Values](#missing-values)
   - [Numerical Features](#numerical-features)
     - [Handle Outliers](#handle-outliers)
@@ -201,6 +202,26 @@ The `auto_transform` function applies a series of data transformations to enhanc
 
 ### Clean Data
 
+#### **Missing Values Indicator**
+
+Detects and encodes missing values in the dataset by adding indicator columns.
+
+- Parameters:
+    - `features`: List of column names to check for missing values. If None, all columns are considered.
+
+- Example Usage:
+
+```python
+from cross.transformations import MissingValuesIndicator
+
+MissingValuesIndicator(
+    features=[
+        'sepal width (cm)',
+        'petal length (cm)',
+    ]
+)
+```
+
 #### **Missing Values**
 
 Handles missing values in the dataset.
@@ -208,7 +229,9 @@ Handles missing values in the dataset.
 - Parameters:
     - `handling_options`: Dictionary that specifies the handling strategy for each column. Options: `fill_0`, `most_frequent`, `fill_mean`, `fill_median`, `fill_mode`, `fill_knn`.
     - `n_neighbors`: Number of neighbors for K-Nearest Neighbors imputation (used with `fill_knn`).
-  
+
+- Example Usage:
+
 ```python
 from cross.transformations import MissingValuesHandler
 
@@ -236,7 +259,9 @@ Manages outliers in the dataset using different strategies. The action can be ei
     - `thresholds`: Dictionary with thresholds for `iqr` and `zscore` methods.
     - `lof_params`: Dictionary specifying parameters for the LOF method.
     - `iforest_params`: Dictionary specifying parameters for Isolation Forest.
-  
+
+- Example Usage:
+
 ```python
 from cross.transformations import OutliersHandler
 
@@ -271,6 +296,8 @@ Applies non-linear transformations, including logarithmic, exponential, and Yeo-
 - Parameters:
     - `transformation_options`: A dictionary specifying the transformation to be applied for each column. Options include: `log`, `exponential`, and `yeo_johnson`.
 
+- Example Usage:
+
 ```python
 from cross.transformations import NonLinearTransformation
 
@@ -289,7 +316,9 @@ Applies quantile transformations for normalizing data.
 
 - Parameters:
     - `transformation_options`: Dictionary specifying the transformation type. Options: `uniform`, `normal`.
-  
+
+- Example Usage:
+
 ```python
 from cross.transformations import QuantileTransformation
 
@@ -308,7 +337,9 @@ Scales numerical data using different scaling methods.
 - Parameters:
     - `transformation_options`: Dictionary specifying the scaling method for each column. Options: `min_max`, `standard`, `robust`, `max_abs`.
     -  `quantile_range`: Dictionary specifying the quantile ranges for robust scaling.
-  
+
+- Example Usage:
+
 ```python
 from cross.transformations import ScaleTransformation
 
@@ -331,7 +362,9 @@ Normalizes data using L1 or L2 norms.
 
 - Parameters:
     - `transformation_options`: Dictionary specifying the normalization type. Options: `l1`, `l2`.
-  
+
+- Example Usage:
+
 ```python
 from cross.transformations import Normalization
 
@@ -349,6 +382,8 @@ Applies Spline transformation to numerical features.
 
 - Parameters:
     - `transformation_options`: Dictionary specifying the spline transformation settings for each column. Options include different numbers of knots and degrees.
+
+- Example Usage:
 
 ```python
 from cross.transformations import SplineTransformation
@@ -368,7 +403,9 @@ Bins numerical columns into categories. You can now specify the column, the binn
 
 - Parameters:
     - `binning_options`: List of tuples where each tuple specifies the column name, binning method, and number of bins. Options for binning methods are `uniform`, `quantile` or `kmeans`.
-  
+
+- Example Usage:
+
 ```python
 from cross.transformations import NumericalBinning
 
@@ -396,7 +433,9 @@ Performs mathematical operations between columns.
     - `modulus`: Computes the modulus of two columns.
     - `hypotenuse`: Computes the hypotenuse of two columns.
     - `mean`: Calculates the mean of two columns.
-  
+
+- Example Usage:
+
 ```python
 from cross.transformations import MathematicalOperations
 
@@ -423,6 +462,8 @@ Encodes categorical variables using various methods.
     - `encodings_options`: Dictionary specifying the encoding method for each column. Options: `label`, `ordinal`, `onehot`, `dummy`, `binary`, `count`, `target`, `loo` (Leave One Out), `rankhot`.
     - `ordinal_orders`: Specifies the order for ordinal encoding.
 
+- Example Usage:
+
 ```python
 from cross.transformations import CategoricalEncoding
 
@@ -445,7 +486,9 @@ Transforms datetime columns into useful features.
 
 - Parameters:
     - `datetime_columns`: List of columns to extract date/time features from.
-  
+
+- Example Usage:
+
 ```python
 from cross.transformations import DateTimeTransformer
 
@@ -462,7 +505,9 @@ Transforms cyclical features like time into a continuous representation.
 
 - Parameters:
     - `columns_periods`: Dictionary specifying the period for each cyclical column.
-  
+
+- Example Usage:
+
 ```python
 from cross.transformations import CyclicalFeaturesTransformer
 
@@ -482,7 +527,9 @@ Allows you to select specific columns for further processing.
 
 - Parameters:
     - `columns`: List of column names to select.
-  
+
+- Example Usage:
+
 ```python
 from cross.transformations import ColumnSelection
 
@@ -493,7 +540,6 @@ ColumnSelection(
     ]
 )
 ```
-
 
 #### **Dimensionality Reduction**
 
@@ -515,6 +561,8 @@ Reduces the dimensionality of the dataset using various techniques, such as PCA,
 
 - **Notes**:
 For `lda`, the y target variable is required, as it uses class labels for discriminant analysis.
+
+- Example Usage:
 
 ```python
 from cross.transformations import DimensionalityReduction

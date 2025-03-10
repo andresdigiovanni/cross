@@ -13,14 +13,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Spline transformation for numerical data
 - Leave One Out enconding for categorical data
 - Rank Hot encoding for categorical data
-
+- Missing indicator column for missing values
 
 ## [1.1.1] - 2025-01-30
 
 ### Fixed
 
 - Wrong package
-
 
 ## [1.1.0] - 2025-01-30
 

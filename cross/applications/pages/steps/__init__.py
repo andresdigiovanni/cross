@@ -11,6 +11,10 @@ from .mathematical_operations import (
     MathematicalOperationsPage,
 )
 from .missing_values import MissingValuesEdit, MissingValuesPage
+from .missing_values_indicator import (
+    MissingValuesIndicatorEdit,
+    MissingValuesIndicatorPage,
+)
 from .non_linear_transformation import (
     NonLinearTransformationEdit,
     NonLinearTransformationPage,

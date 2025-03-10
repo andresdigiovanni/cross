@@ -12,7 +12,7 @@ class MissingValuesEdit(MissingValuesBase):
 
         cols = st.columns((1,) * n_cols)
 
-        markdown = ["| Column | Action | N neighbors", "| --- | --- | --- |"]
+        markdown = ["| Column | Action | N neighbors |", "| --- | --- | --- |"]
         markdowns = [markdown.copy() for _ in range(n_cols)]
 
         for i, (column, action) in enumerate(handling_options.items()):
