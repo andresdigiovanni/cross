@@ -1,25 +1,21 @@
 [project]
 name = "cross_ml"
 version = "1.1.1"
-description = "A comprehensive library for data preprocessing and feature engineering in machine learning"
+description = "A comprehensive library for automatic feature engineering in machine learning"
 authors = [{ name = "Andres Di Giovanni", email = "andresdigiovanni@gmail.com" }]
 readme = "README.md"
 license = "MIT"
 homepage = "https://github.com/andresdigiovanni/cross"
 repository = "https://github.com/andresdigiovanni/cross"
-keywords = ["machine learning", "data preprocessing", "feature engineering", "scikit-learn", "data processing"]
+keywords = ["machine learning", "data preprocessing", "feature engineering", "scikit-learn", "data processing", "automl"]
 requires-python = ">=3.11"
 
 dependencies = [
-    "streamlit>=1.36.0",
-    "streamlit-option-menu>=0.3.13",
     "scikit-learn>=1.5.0",
     "pandas>=2.2.2",
     "matplotlib>=3.9.0",
-    "seaborn>=0.13.2",
     "category-encoders>=2.6.3",
-    "streamlit-sortables>=0.2.0",
-    "tqdm>=4.66.5"
+    "tqdm>=4.66.5",
 ]
 
 [dependency-groups]
@@ -30,9 +26,6 @@ dev-dependencies = [
 commits = [
     "pre-commit>=4.1.0",
 ]
-
-[project.scripts]
-cross = "cross.scripts.run:main"
 
 [build-system]
 requires = ["hatchling"]

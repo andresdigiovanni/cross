@@ -2,39 +2,36 @@
 
 -----------------
 
-# Cross: a versatile toolkit for data preprocessing and feature engineering in machine learning
+# Cross: a versatile toolkit for feature engineering in machine learning
 
 ![PyPI version](https://img.shields.io/pypi/v/cross_ml)
 ![Downloads](https://img.shields.io/pypi/dm/cross_ml)
 
-Cross is a Python library for data processing to train machine learning models, featuring scaling, normalization, feature creation through binning, and various mathematical operations between columns. It includes a graphical interface for exploring and generating transformations, with the option to export and reuse them.
-
-![UI Cross](assets/ui_outliers_handling.png)
+Cross is a Python library for feature engineering to train machine learning models, featuring scaling, normalization, feature creation through binning, and various mathematical operations between columns.
 
 - [Getting Started](#getting-started)
 - [Example of Use](#example-of-use)
   - [Define transformations](#define-transformations)
-  - [Import Transformations from UI](#import-transformations-from-ui)
   - [Save and Load Transformations](#save-and-load-transformations)
   - [Auto transformations](#auto-transformations)
 - [Transformations](#transformations)
-  - [Clean Data](#clean-data)
+  - [Missing Values and Outliers](#missing-values-and-outliers)
     - [Missing Values Indicator](#missing-values-indicator)
-    - [Missing Values](#missing-values)
-  - [Numerical Features](#numerical-features)
+    - [Missing Values Handler](#missing-values-handler)
     - [Handle Outliers](#handle-outliers)
+  - [Data Distribution and Scaling](#data-distribution-and-scaling)
     - [Non-Linear Transformation](#non-linear-transformation)
     - [Quantile Transformations](#quantile-transformations)
     - [Scale Transformations](#scale-transformations)
     - [Normalization](#normalization)
+  - [Numerical Features](#numerical-features)
     - [Spline Transformations](#spline-transformations)
     - [Numerical Binning](#numerical-binning)
     - [Mathematical Operations](#mathematical-operations)
   - [Categorical Features](#categorical-features)
     - [Categorical Encoding](#categorical-encoding)
-  - [Datetime Features](#datetime-features)
-    - [Date Time Transforms](#date-time-transforms)
   - [Periodic Features](#periodic-features)
+    - [Date Time Transforms](#date-time-transforms)
     - [Cyclical Features Transforms](#cyclical-features-transforms)
   - [Features Reduction](#features-reduction)
     - [Column Selection](#column-selection)
@@ -48,15 +45,6 @@ To install the Cross library, run the following command:
 ```bash
 pip install cross_ml
 ```
-
-You can initialize the graphical interface with the command:
-
-```bash
-cross run
-```
-
-Access the application by navigating to `http://localhost:8501` in your browser.
-
 
 ## Example of Use
 
@@ -109,25 +97,6 @@ transformations = [
 cross = CrossTransformer(transformations)
 
 # Fit & transform data
-x_train, y_train = cross.fit_transform(x_train, y_train)
-x_test, y_test = cross.transform(x_test, y_test)
-```
-
-### Import Transformations from UI
-
-You can export transformations created in the graphical interface (UI) to a file and later import them into your scripts:
-
-```python
-import pickle
-from cross import CrossTransformer
-
-# Load transformations from file (generated through the UI)
-with open("cross_transformations.pkl", "rb") as f:
-    transformations = pickle.load(f)
-
-cross = CrossTransformer(transformations)
-
-# Apply transformations to your dataset
 x_train, y_train = cross.fit_transform(x_train, y_train)
 x_test, y_test = cross.transform(x_test, y_test)
 ```
@@ -200,7 +169,7 @@ The `auto_transform` function applies a series of data transformations to enhanc
 
 ## Transformations
 
-### Clean Data
+### Missing Values and Outliers
 
 #### **Missing Values Indicator**
 
@@ -222,7 +191,7 @@ MissingValuesIndicator(
 )
 ```
 
-#### **Missing Values**
+#### **Missing Values Handler**
 
 Handles missing values in the dataset.
 
@@ -247,8 +216,6 @@ MissingValuesHandler(
     }
 )
 ```
-
-### Numerical Features
 
 #### **Handle Outliers**
 
@@ -288,6 +255,8 @@ OutliersHandler(
     }
 )
 ```
+
+### Data Distribution and Scaling
 
 #### **Non-Linear Transformation**
 
@@ -376,7 +345,9 @@ Normalization(
 )
 ```
 
-### **Spline Transformations**
+### Numerical Features
+
+#### **Spline Transformations**
 
 Applies Spline transformation to numerical features.
 
@@ -502,7 +473,7 @@ CategoricalEncoding(
 )
 ```
 
-### Datetime Features
+### Periodic Features
 
 #### **Date Time Transforms**
 
@@ -520,8 +491,6 @@ DateTimeTransformer(
     datetime_columns=["date"]
 )
 ```
-
-### Periodic Features
 
 #### **Cyclical Features Transforms**
 

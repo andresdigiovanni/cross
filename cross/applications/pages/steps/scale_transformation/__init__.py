@@ -1,2 +1,0 @@
-from .scale_transformation_edit import ScaleTransformationsEdit
-from .scale_transformation_page import ScaleTransformationsPage

@@ -1,2 +1,0 @@
-from .numerical_binning_edit import NumericalBinningEdit
-from .numerical_binning_page import NumericalBinningPage

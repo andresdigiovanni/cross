@@ -1,18 +1,7 @@
-from datetime import datetime
-
 from sklearn.base import BaseEstimator, TransformerMixin
-
-from cross.utils import get_transformer
 
 
 class CrossTransformer(BaseEstimator, TransformerMixin):
-    def __init__(self, transformations=None):
-        self.transformations = transformations
-
-        if isinstance(transformations, list):
-            if all(isinstance(t, dict) for t in transformations):
-                self.transformations = self._initialize_transformations(transformations)
-
     def get_params(self, deep=True):
         return {"transformations": self.transformations}
 
@@ -21,15 +10,6 @@ class CrossTransformer(BaseEstimator, TransformerMixin):
             setattr(self, key, value)
 
         return self
-
-    def _initialize_transformations(self, transformations):
-        initialized_transformers = []
-        for transformation in transformations:
-            transformer = get_transformer(
-                transformation["name"], transformation["params"]
-            )
-            initialized_transformers.append(transformer)
-        return initialized_transformers
 
     def fit(self, X, y=None):
         X = X.copy()
@@ -52,7 +32,3 @@ class CrossTransformer(BaseEstimator, TransformerMixin):
             X = transformer.fit_transform(X, y)
 
         return X
-
-    def _date_time(self):
-        now = datetime.now()
-        return now.strftime("%Y/%m/%d %H:%M:%S")

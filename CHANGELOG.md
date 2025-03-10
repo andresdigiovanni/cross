@@ -29,6 +29,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Sum encoding for categorical data
 - WOE encoding for categorical data
 
+### Removed
+
+- User Interface
+
 ## [1.1.1] - 2025-01-30
 
 ### Fixed
