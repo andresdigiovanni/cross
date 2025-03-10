@@ -27,8 +27,6 @@ class CyclicalFeaturesTransformer(BaseEstimator, TransformerMixin):
             X[f"{column}_sin"] = np.sin(2 * np.pi * X[column] / period)
             X[f"{column}_cos"] = np.cos(2 * np.pi * X[column] / period)
 
-        X = X.drop(columns=self.columns_periods.keys())
-
         return X
 
     def fit_transform(self, X, y=None):

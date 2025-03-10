@@ -51,7 +51,7 @@ def navigation_pages():
                 "edit": None,
             },
         ],
-        # Clean Data
+        # Manage missing values and not tipical values
         [
             {
                 "key": "MissingValuesIndicator",
@@ -67,9 +67,6 @@ def navigation_pages():
                 "page": MissingValuesPage(),
                 "edit": MissingValuesEdit(),
             },
-        ],
-        # Numerical Features
-        [
             {
                 "key": "OutliersHandler",
                 "name": "Handle outliers",
@@ -77,6 +74,9 @@ def navigation_pages():
                 "page": OutliersHandlingPage(),
                 "edit": OutliersHandlingEdit(),
             },
+        ],
+        # Distribution and scale
+        [
             {
                 "key": "NonLinearTransformation",
                 "name": "Non-linear transforms",
@@ -105,6 +105,9 @@ def navigation_pages():
                 "page": NormalizationPage(),
                 "edit": NormalizationEdit(),
             },
+        ],
+        # Numeric features
+        [
             {
                 "key": "SplineTransformation",
                 "name": "Spline transformation",
@@ -146,9 +149,6 @@ def navigation_pages():
                 "page": DateTimeTransformationPage(),
                 "edit": DateTimeTransformationEdit(),
             },
-        ],
-        # Periodic Featuers
-        [
             {
                 "key": "CyclicalFeaturesTransformer",
                 "name": "Cyclical transforms",
