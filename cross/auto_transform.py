@@ -160,12 +160,12 @@ def auto_transform(
         calculator = CategoricalEncodingParamCalculator()
         X, _ = execute_transformation(calculator, X, y)
 
-        # DimensionalityReduction
-        calculator = DimensionalityReductionParamCalculator()
-        X, _ = execute_transformation(calculator, X, y)
-
         # ColumnSelection
         calculator = ColumnSelectionParamCalculator()
+        X, _ = execute_transformation(calculator, X, y)
+
+        # DimensionalityReduction
+        calculator = DimensionalityReductionParamCalculator()
         X, _ = execute_transformation(calculator, X, y)
 
     return transformations

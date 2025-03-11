@@ -1,7 +1,25 @@
 from sklearn.base import BaseEstimator, TransformerMixin
 
+from cross.utils import get_transformer
+
 
 class CrossTransformer(BaseEstimator, TransformerMixin):
+    def __init__(self, transformations=None):
+        self.transformations = transformations
+
+        if isinstance(transformations, list):
+            if all(isinstance(t, dict) for t in transformations):
+                self.transformations = self._initialize_transformations(transformations)
+
+    def _initialize_transformations(self, transformations):
+        initialized_transformers = []
+        for transformation in transformations:
+            transformer = get_transformer(
+                transformation["name"], transformation["params"]
+            )
+            initialized_transformers.append(transformer)
+        return initialized_transformers
+
     def get_params(self, deep=True):
         return {"transformations": self.transformations}
 
