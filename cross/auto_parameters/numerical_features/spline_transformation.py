@@ -1,3 +1,5 @@
+from itertools import product
+
 from tqdm import tqdm
 
 from cross.auto_parameters.shared import evaluate_model
@@ -9,6 +11,7 @@ from cross.transformations.utils.dtypes import numerical_columns
 class SplineTransformationParamCalculator:
     N_KNOTS_OPTIONS = [3, 5, 7, 10, 15]
     DEGREE_OPTIONS = [1, 2, 3, 4]
+    EXTRAPOLATION_OPTIONS = ["constant", "linear", "continue", "periodic"]
 
     def calculate_best_params(
         self, x, y, model, scoring, direction, cv, groups, verbose
@@ -36,17 +39,25 @@ class SplineTransformationParamCalculator:
         best_score = base_score
         best_params = {}
 
-        for n_knots in self.N_KNOTS_OPTIONS:
-            for degree in self.DEGREE_OPTIONS:
-                params = {column: {"degree": degree, "n_knots": n_knots}}
-                spline_transformer = SplineTransformation(params)
-                score = evaluate_model(
-                    x, y, model, scoring, cv, groups, spline_transformer
-                )
+        for n_knots, degree, extrapolation in product(
+            self.N_KNOTS_OPTIONS, self.DEGREE_OPTIONS, self.EXTRAPOLATION_OPTIONS
+        ):
+            if extrapolation == "periodic" and degree >= n_knots:
+                continue
 
-                if is_score_improved(score, best_score, direction):
-                    best_score = score
-                    best_params = params
+            params = {
+                column: {
+                    "degree": degree,
+                    "n_knots": n_knots,
+                    "extrapolation": extrapolation,
+                }
+            }
+            spline_transformer = SplineTransformation(params)
+            score = evaluate_model(x, y, model, scoring, cv, groups, spline_transformer)
+
+            if is_score_improved(score, best_score, direction):
+                best_score = score
+                best_params = params
 
         return best_params
 
