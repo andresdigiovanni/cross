@@ -8,9 +8,14 @@ from sklearn.preprocessing import (
 
 
 class ScaleTransformation(BaseEstimator, TransformerMixin):
-    def __init__(self, transformation_options=None, quantile_range=None):
+    def __init__(
+        self, transformation_options=None, quantile_range=None, track_columns=False
+    ):
         self.transformation_options = transformation_options or {}
         self.quantile_range = quantile_range
+        self.track_columns = track_columns
+
+        self.tracked_columns = {}
         self._transformers = {}
 
     def get_params(self, deep=True):
@@ -54,6 +59,9 @@ class ScaleTransformation(BaseEstimator, TransformerMixin):
 
         for column, scaler in self._transformers.items():
             X[[column]] = scaler.transform(X[[column]])
+
+            if self.track_columns:
+                self.tracked_columns[column] = [column]
 
         return X
 

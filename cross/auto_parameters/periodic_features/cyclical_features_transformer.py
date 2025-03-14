@@ -22,7 +22,7 @@ class CyclicalFeaturesTransformerParamCalculator:
         self, x, y, model, scoring, direction, cv, groups, verbose
     ):
         columns = numerical_columns(x)
-        columns_periods = {}
+        transformation_options = {}
         baseline_score = evaluate_model(x, y, model, scoring, cv, groups)
 
         for column in tqdm(columns, disable=not verbose):
@@ -34,10 +34,10 @@ class CyclicalFeaturesTransformerParamCalculator:
             score = evaluate_model(x, y, model, scoring, cv, groups, transformer)
 
             if is_score_improved(score, baseline_score, direction):
-                columns_periods[column] = period
+                transformation_options[column] = period
 
-        if columns_periods:
-            transformer = CyclicalFeaturesTransformer(columns_periods)
+        if transformation_options:
+            transformer = CyclicalFeaturesTransformer(transformation_options)
             return {
                 "name": transformer.__class__.__name__,
                 "params": transformer.get_params(),

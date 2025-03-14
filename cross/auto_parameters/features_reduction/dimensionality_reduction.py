@@ -60,7 +60,9 @@ class DimensionalityReductionParamCalculator:
 
         if best_method and best_n_components:
             dimensionality_reduction = DimensionalityReduction(
-                method=best_method, n_components=best_n_components
+                features=list(X.columns),
+                method=best_method,
+                n_components=best_n_components,
             )
             return {
                 "name": dimensionality_reduction.__class__.__name__,
@@ -83,14 +85,18 @@ class DimensionalityReductionParamCalculator:
 
             # Evaluate performance for the two midpoints
             if mid1 not in scores:
-                handler_1 = DimensionalityReduction(method=method, n_components=mid1)
+                handler_1 = DimensionalityReduction(
+                    features=list(X.columns), method=method, n_components=mid1
+                )
                 score_1 = evaluate_model(X, y, model, scoring, cv, groups, handler_1)
                 scores[mid1] = score_1
 
             score_1 = scores[mid1]
 
             if mid2 not in scores:
-                handler_2 = DimensionalityReduction(method=method, n_components=mid2)
+                handler_2 = DimensionalityReduction(
+                    features=list(X.columns), method=method, n_components=mid2
+                )
                 score_2 = evaluate_model(X, y, model, scoring, cv, groups, handler_2)
                 scores[mid2] = score_2
 

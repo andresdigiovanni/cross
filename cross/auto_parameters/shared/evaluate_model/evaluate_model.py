@@ -13,7 +13,7 @@ def build_pipeline(model, transformer=None):
         steps.append(("transformer", transformer))
 
     # Impute 0's and select numeric columns
-    imputer = SimpleImputer(strategy="constant", fill_value=0)
+    imputer = SimpleImputer(strategy="constant", fill_value=0, keep_empty_features=True)
     numeric_transformer = ColumnTransformer(
         [
             ("imputer", imputer, make_column_selector(dtype_include="number")),

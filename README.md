@@ -62,7 +62,7 @@ from cross.transformations import (
 # Define transformations
 transformations = [
     OutliersHandler(
-        handling_options={
+        transformation_options={
             "sepal length (cm)": ("median", "iqr"),
             "sepal width (cm)": ("cap", "zscore"),
         },
@@ -81,12 +81,9 @@ transformations = [
         },
     ),
     NumericalBinning(
-        binning_options={
-            "sepal length (cm)": "uniform",
-        },
-        num_bins={
-            "sepal length (cm)": 5,
-        },
+        transformation_options={
+            "sepal length (cm)": ("uniform", 5),
+        }
     ),
     MathematicalOperations(
         operations_options=[
@@ -196,7 +193,7 @@ MissingValuesIndicator(
 Handles missing values in the dataset.
 
 - Parameters:
-    - `handling_options`: Dictionary that specifies the handling strategy for each column. Options: `fill_0`, `most_frequent`, `fill_mean`, `fill_median`, `fill_mode`, `fill_knn`.
+    - `transformation_options`: Dictionary that specifies the handling strategy for each column. Options: `fill_0`, `most_frequent`, `fill_mean`, `fill_median`, `fill_mode`, `fill_knn`.
     - `n_neighbors`: Number of neighbors for K-Nearest Neighbors imputation (used with `fill_knn`).
 
 - Example Usage:
@@ -205,7 +202,7 @@ Handles missing values in the dataset.
 from cross.transformations import MissingValuesHandler
 
 MissingValuesHandler(
-    handling_options={
+    transformation_options={
         'sepal width (cm)': 'fill_knn',
         'petal length (cm)': 'fill_mode',
         'petal width (cm)': 'most_frequent',
@@ -222,7 +219,7 @@ MissingValuesHandler(
 Manages outliers in the dataset using different strategies. The action can be either cap or median, while the method can be `iqr`, `zscore`, `lof`, or `iforest`. Note that `lof` and `iforest` only accept the `median` action.
 
 - Parameters:
-    - `handling_options`: Dictionary specifying the handling strategy. The strategy is a tuple where the first element is the action (`cap` or `median`) and the second is the method (`iqr`, `zscore`, `lof`, `iforest`).
+    - `transformation_options`: Dictionary specifying the handling strategy. The strategy is a tuple where the first element is the action (`cap` or `median`) and the second is the method (`iqr`, `zscore`, `lof`, `iforest`).
     - `thresholds`: Dictionary with thresholds for `iqr` and `zscore` methods.
     - `lof_params`: Dictionary specifying parameters for the LOF method.
     - `iforest_params`: Dictionary specifying parameters for Isolation Forest.
@@ -233,7 +230,7 @@ Manages outliers in the dataset using different strategies. The action can be ei
 from cross.transformations import OutliersHandler
 
 OutliersHandler(
-    handling_options={
+    transformation_options={
         'sepal length (cm)': ('median', 'iqr'),
         'sepal width (cm)': ('cap', 'zscore'),
         'petal length (cm)': ('median', 'lof'),
@@ -373,7 +370,7 @@ SplineTransformation(
 Bins numerical columns into categories. You can now specify the column, the binning method, and the number of bins in a tuple.
 
 - Parameters:
-    - `binning_options`: List of tuples where each tuple specifies the column name, binning method, and number of bins. Options for binning methods are `uniform`, `quantile` or `kmeans`.
+    - `transformation_options`: Dictionary specifying the binning method and number of bins for each column. Options for binning methods are `uniform`, `quantile` or `kmeans`.
 
 - Example Usage:
 
@@ -381,11 +378,11 @@ Bins numerical columns into categories. You can now specify the column, the binn
 from cross.transformations import NumericalBinning
 
 NumericalBinning(
-    binning_options=[
-        ("sepal length (cm)", "uniform", 5),
-        ("sepal width (cm)", "quantile", 6),
-        ("petal length (cm)", "kmeans", 7),
-    ]
+    transformation_options={
+        "sepal length (cm)": ("uniform", 5),
+        "sepal width (cm)": ("quantile", 6),
+        "petal length (cm)": ("kmeans", 7),
+    }
 )
 ```
 
@@ -463,7 +460,7 @@ Encodes categorical variables using various methods.
 from cross.transformations import CategoricalEncoding
 
 CategoricalEncoding(
-    encodings_options={
+    transformation_options={
         'Sex': 'label',
         'Size': 'ordinal',
     },
@@ -480,7 +477,7 @@ CategoricalEncoding(
 Transforms datetime columns into useful features.
 
 - Parameters:
-    - `datetime_columns`: List of columns to extract date/time features from.
+    - `features`: List of columns to extract date/time features from. If None, all datetime columns are considered.
 
 - Example Usage:
 
@@ -488,7 +485,7 @@ Transforms datetime columns into useful features.
 from cross.transformations import DateTimeTransformer
 
 DateTimeTransformer(
-    datetime_columns=["date"]
+    features=["date"]
 )
 ```
 
@@ -497,7 +494,7 @@ DateTimeTransformer(
 Transforms cyclical features like time into a continuous representation.
 
 - Parameters:
-    - `columns_periods`: Dictionary specifying the period for each cyclical column.
+    - `transformation_options`: Dictionary specifying the period for each cyclical column.
 
 - Example Usage:
 
@@ -505,7 +502,7 @@ Transforms cyclical features like time into a continuous representation.
 from cross.transformations import CyclicalFeaturesTransformer
 
 CyclicalFeaturesTransformer(
-    columns_periods={
+    transformation_options={
         "date_minute": 60,
         "date_hour": 24,
     }
@@ -519,7 +516,7 @@ CyclicalFeaturesTransformer(
 Allows you to select specific columns for further processing.
 
 - Parameters:
-    - `columns`: List of column names to select.
+    - `features`: List of column names to select.
 
 - Example Usage:
 
@@ -527,7 +524,7 @@ Allows you to select specific columns for further processing.
 from cross.transformations import ColumnSelection
 
 ColumnSelection(
-    columns=[
+    features=[
         "sepal length (cm)",
         "sepal width (cm)",
     ]
@@ -539,6 +536,7 @@ ColumnSelection(
 Reduces the dimensionality of the dataset using various techniques, such as PCA, Factor Analysis, ICA, LDA, and others.
 
 - Parameters:
+    - `features`: List of column names to apply the dimensionality reduction. If None, all columns are considered.
     - `method`: The dimensionality reduction method to apply.
     - `n_components`: Number of dimensions to reduce the data to.
 

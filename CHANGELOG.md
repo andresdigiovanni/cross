@@ -10,6 +10,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Extrapolation parameter in spline transformation
+- Filter not used transformations after auto_transform
+
+### Changed
+
+- Rename parameters to standardize
 
 ## [1.2.1] - 2025-03-11
 

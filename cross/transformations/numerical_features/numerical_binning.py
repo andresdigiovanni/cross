@@ -3,14 +3,16 @@ from sklearn.preprocessing import KBinsDiscretizer
 
 
 class NumericalBinning(BaseEstimator, TransformerMixin):
-    def __init__(self, binning_options=None):
-        self.binning_options = binning_options or []
+    def __init__(self, transformation_options=None, track_columns=False):
+        self.transformation_options = transformation_options or {}
+        self.track_columns = track_columns
 
+        self.tracked_columns = {}
         self._binners = {}
 
     def get_params(self, deep=True):
         return {
-            "binning_options": self.binning_options,
+            "transformation_options": self.transformation_options,
         }
 
     def set_params(self, **params):
@@ -23,33 +25,28 @@ class NumericalBinning(BaseEstimator, TransformerMixin):
         self._binners = {}
         X = X.copy()
 
-        for column, strategy, n_bins in self.binning_options:
-            if strategy == "none":
-                continue
-
+        for column, (strategy, n_bins) in self.transformation_options.items():
             X[column] = X[column].fillna(0)
 
             binner = KBinsDiscretizer(
                 n_bins=n_bins, encode="ordinal", strategy=strategy
             )
             binner.fit(X[[column]])
-
-            binner_name = f"{column}__{strategy}_{n_bins}"
-            self._binners[binner_name] = binner
+            self._binners[column] = binner
 
         return self
 
     def transform(self, X, y=None):
         X = X.copy().fillna(0)
 
-        for column, strategy, n_bins in self.binning_options:
-            if strategy == "none":
-                continue
-
+        for column, (strategy, n_bins) in self.transformation_options.items():
             binner_name = f"{column}__{strategy}_{n_bins}"
-            binner = self._binners[binner_name]
+            binner = self._binners[column]
 
             X[binner_name] = binner.transform(X[[column]]).flatten()
+
+            if self.track_columns:
+                self.tracked_columns[binner_name] = [column]
 
         return X
 

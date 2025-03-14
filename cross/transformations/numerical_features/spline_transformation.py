@@ -3,8 +3,11 @@ from sklearn.preprocessing import SplineTransformer
 
 
 class SplineTransformation(BaseEstimator, TransformerMixin):
-    def __init__(self, transformation_options=None):
+    def __init__(self, transformation_options=None, track_columns=False):
         self.transformation_options = transformation_options or {}
+        self.track_columns = track_columns
+
+        self.tracked_columns = {}
         self._transformers = {}
 
     def get_params(self, deep=True):
@@ -36,7 +39,11 @@ class SplineTransformation(BaseEstimator, TransformerMixin):
             num_features = transformed_values.shape[1]
 
             for i in range(num_features):
-                X[f"{column}__spline_{i}"] = transformed_values[:, i]
+                new_column = f"{column}__spline_{i}"
+                X[new_column] = transformed_values[:, i]
+
+                if self.track_columns:
+                    self.tracked_columns[new_column] = [column]
 
         return X
 

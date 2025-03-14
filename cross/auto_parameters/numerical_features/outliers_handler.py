@@ -21,7 +21,7 @@ class OutliersParamCalculator:
         base_score = evaluate_model(x, y, model, scoring, cv, groups)
 
         best_params = {
-            "handling_options": {},
+            "transformation_options": {},
             "thresholds": {},
             "lof_params": {},
             "iforest_params": {},
@@ -136,7 +136,7 @@ class OutliersParamCalculator:
         return is_outlier.sum()
 
     def _build_kwargs(self, column, action, method, param):
-        kwargs = {"handling_options": {column: (action, method)}}
+        kwargs = {"transformation_options": {column: (action, method)}}
 
         if method == "lof":
             kwargs["lof_params"] = {column: {"n_neighbors": param}}
@@ -150,11 +150,11 @@ class OutliersParamCalculator:
         return kwargs
 
     def _update_best_params(self, column, best_column_params, best_params):
-        action = best_column_params["handling_options"][column][0]
+        action = best_column_params["transformation_options"][column][0]
 
         if action != "none":
-            best_params["handling_options"][column] = best_column_params[
-                "handling_options"
+            best_params["transformation_options"][column] = best_column_params[
+                "transformation_options"
             ][column]
             best_params["thresholds"].update(best_column_params.get("thresholds", {}))
             best_params["lof_params"].update(best_column_params.get("lof_params", {}))
@@ -163,9 +163,9 @@ class OutliersParamCalculator:
             )
 
     def _build_outliers_handler(self, best_params):
-        if best_params["handling_options"]:
+        if best_params["transformation_options"]:
             outliers_handler = OutliersHandler(
-                handling_options=best_params["handling_options"],
+                transformation_options=best_params["transformation_options"],
                 thresholds=best_params["thresholds"],
                 lof_params=best_params["lof_params"],
                 iforest_params=best_params["iforest_params"],

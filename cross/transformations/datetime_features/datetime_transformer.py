@@ -2,12 +2,15 @@ from sklearn.base import BaseEstimator, TransformerMixin
 
 
 class DateTimeTransformer(BaseEstimator, TransformerMixin):
-    def __init__(self, datetime_columns=None):
-        self.datetime_columns = datetime_columns or []
+    def __init__(self, features=None, track_columns=False):
+        self.features = features or []
+        self.track_columns = track_columns
+
+        self.tracked_columns = {}
 
     def get_params(self, deep=True):
         return {
-            "datetime_columns": self.datetime_columns,
+            "features": self.features,
         }
 
     def set_params(self, **params):
@@ -22,7 +25,7 @@ class DateTimeTransformer(BaseEstimator, TransformerMixin):
     def transform(self, X, y=None):
         X = X.copy()
 
-        for column in self.datetime_columns:
+        for column in self.features:
             X[f"{column}_year"] = X[column].dt.year
             X[f"{column}_month"] = X[column].dt.month
             X[f"{column}_day"] = X[column].dt.day
@@ -31,7 +34,16 @@ class DateTimeTransformer(BaseEstimator, TransformerMixin):
             X[f"{column}_minute"] = X[column].dt.minute
             X[f"{column}_second"] = X[column].dt.second
 
-        X = X.drop(columns=self.datetime_columns)
+            if self.track_columns:
+                self.tracked_columns[f"{column}_year"] = [column]
+                self.tracked_columns[f"{column}_month"] = [column]
+                self.tracked_columns[f"{column}_day"] = [column]
+                self.tracked_columns[f"{column}_weekday"] = [column]
+                self.tracked_columns[f"{column}_hour"] = [column]
+                self.tracked_columns[f"{column}_minute"] = [column]
+                self.tracked_columns[f"{column}_second"] = [column]
+
+        X = X.drop(columns=self.features)
 
         return X
 

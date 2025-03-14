@@ -3,8 +3,11 @@ from sklearn.base import BaseEstimator, TransformerMixin
 
 
 class MathematicalOperations(BaseEstimator, TransformerMixin):
-    def __init__(self, operations_options=None):
+    def __init__(self, operations_options=None, track_columns=False):
         self.operations_options = operations_options or []
+        self.track_columns = track_columns
+
+        self.tracked_columns = {}
 
     def get_params(self, deep=True):
         return {
@@ -53,6 +56,9 @@ class MathematicalOperations(BaseEstimator, TransformerMixin):
 
             # Prevent fragmentation by explicitly copying the DataFrame
             X = X.copy()
+
+            if self.track_columns:
+                self.tracked_columns[new_column] = [col1, col2]
 
         return X
 

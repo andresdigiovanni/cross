@@ -6,13 +6,23 @@ from sklearn.manifold import Isomap, LocallyLinearEmbedding
 
 
 class DimensionalityReduction(BaseEstimator, TransformerMixin):
-    def __init__(self, method=None, n_components=None):
+    def __init__(
+        self, features=None, method=None, n_components=None, track_columns=False
+    ):
+        self.features = features
         self.method = method
         self.n_components = n_components
+        self.track_columns = track_columns
+
+        self.tracked_columns = {}
         self._reducer = None
 
     def get_params(self, deep=True):
-        return {"method": self.method, "n_components": self.n_components}
+        return {
+            "features": self.features,
+            "method": self.method,
+            "n_components": self.n_components,
+        }
 
     def set_params(self, **params):
         for key, value in params.items():
@@ -23,6 +33,7 @@ class DimensionalityReduction(BaseEstimator, TransformerMixin):
     def fit(self, X, y=None):
         self._reducer = None
         X = X.copy()
+        X = X[self.features]
 
         if self.method == "factor_analysis":
             self._reducer = FactorAnalysis(n_components=self.n_components).fit(X)
@@ -62,12 +73,20 @@ class DimensionalityReduction(BaseEstimator, TransformerMixin):
         return self
 
     def transform(self, X, y=None):
+        X = X[self.features]
         reduced_array = self._reducer.transform(X)
+        columns = [f"{self.method}_{i + 1}" for i in range(reduced_array.shape[1])]
+
         reduced_df = pd.DataFrame(
             reduced_array,
-            columns=[f"{self.method}_{i + 1}" for i in range(reduced_array.shape[1])],
+            columns=columns,
             index=X.index,
         )
+
+        if self.track_columns:
+            for column in columns:
+                self.tracked_columns[column] = list(X.columns)
+
         return reduced_df
 
     def fit_transform(self, X, y=None):

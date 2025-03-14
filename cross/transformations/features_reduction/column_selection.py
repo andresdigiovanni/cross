@@ -2,11 +2,14 @@ from sklearn.base import BaseEstimator, TransformerMixin
 
 
 class ColumnSelection(BaseEstimator, TransformerMixin):
-    def __init__(self, columns=None):
-        self.columns = columns
+    def __init__(self, features=None, track_columns=False):
+        self.features = features
+        self.track_columns = track_columns
+
+        self.tracked_columns = {}
 
     def get_params(self, deep=True):
-        return {"columns": self.columns}
+        return {"features": self.features}
 
     def set_params(self, **params):
         for key, value in params.items():
@@ -22,7 +25,10 @@ class ColumnSelection(BaseEstimator, TransformerMixin):
         X = X.copy()
 
         # Select only the specified columns from X
-        X = X[self.columns]
+        X = X[self.features]
+
+        if self.track_columns:
+            self.tracked_columns = {column: [column] for column in self.features}
 
         return X
 

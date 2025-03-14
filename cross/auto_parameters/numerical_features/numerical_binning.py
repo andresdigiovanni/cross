@@ -1,6 +1,9 @@
+from itertools import product
+
 from tqdm import tqdm
 
-from cross.auto_parameters.shared import ProbeFeatureSelector, RecursiveFeatureAddition
+from cross.auto_parameters.shared import evaluate_model
+from cross.auto_parameters.shared.utils import is_score_improved
 from cross.transformations import NumericalBinning
 from cross.transformations.utils.dtypes import numerical_columns
 
@@ -10,87 +13,40 @@ class NumericalBinningParamCalculator:
     ALL_N_BINS = [3, 5, 8, 12, 20]
 
     def calculate_best_params(
-        self, x, y, model, scoring, direction, cv, groups, verbose
+        self, X, y, model, scoring, direction, cv, groups, verbose
     ):
-        columns = numerical_columns(x)
-        all_transformations_info = []
-        all_selected_features = []
+        columns = numerical_columns(X)
+        best_transformations = {}
+        base_score = evaluate_model(X, y, model, scoring, cv, groups)
 
-        # Select operations per columns using probe method
-        for column in tqdm(columns, disable=not verbose):
-            binning_options, transformations_info = self._generate_binning_options(
-                x, column
-            )
-            all_transformations_info.extend(transformations_info)
+        combinations = list(product(self.STRATEGIES, self.ALL_N_BINS))
 
-            transformer = NumericalBinning(binning_options)
-            x_transformed = transformer.fit_transform(x, y)
-            new_columns = list(set(x_transformed.columns) - set(x.columns))
+        with tqdm(total=len(columns) * len(combinations), disable=not verbose) as pbar:
+            for column in columns:
+                best_score = base_score
+                best_transformation = None
 
-            selected_features = ProbeFeatureSelector.fit(
-                x_transformed[new_columns], y, model
-            )
-            all_selected_features.extend(selected_features)
+                for strategy, n_bins in combinations:
+                    pbar.update(1)
 
-        selected_transformations = self._select_transformations(
-            all_transformations_info, all_selected_features
-        )
+                    transformation_options = {column: (strategy, n_bins)}
+                    transformer = NumericalBinning(transformation_options)
+                    score = evaluate_model(
+                        X, y, model, scoring, cv, groups, transformer
+                    )
 
-        # Select final binnings using RFA
-        if selected_transformations:
-            transformer = NumericalBinning(selected_transformations)
-            x_transformed = transformer.fit_transform(x, y)
-            new_columns = list(set(x_transformed.columns) - set(x.columns))
+                    if is_score_improved(score, best_score, direction):
+                        best_score = score
+                        best_transformation = (strategy, n_bins)
 
-            rfa = RecursiveFeatureAddition(model, scoring, direction, cv, groups)
-            selected_features = rfa.fit(x_transformed[new_columns], y)
+                if best_transformation:
+                    best_transformations[column] = best_transformation
 
-            selected_transformations = self._select_transformations(
-                all_transformations_info, selected_features
-            )
-
-        if selected_transformations:
-            numerical_binning = NumericalBinning(selected_transformations)
+        if best_transformations:
+            transformer = NumericalBinning(best_transformations)
             return {
-                "name": numerical_binning.__class__.__name__,
-                "params": numerical_binning.get_params(),
+                "name": transformer.__class__.__name__,
+                "params": transformer.get_params(),
             }
 
         return None
-
-    def _generate_binning_options(self, x, column):
-        all_binning_options = []
-        all_transformations_info = []
-
-        num_unique_values = x[column].nunique()
-
-        for strategy in self.STRATEGIES:
-            for n_bins in self.ALL_N_BINS:
-                if n_bins >= num_unique_values:
-                    continue
-
-                binning_option = (column, strategy, n_bins)
-                all_binning_options.append(binning_option)
-
-                # Calculate binned column name
-                numerical_binning = NumericalBinning([binning_option])
-                x_binned = numerical_binning.fit_transform(x)
-                binned_column_name = list(set(x_binned.columns) - set(x.columns))[0]
-
-                all_transformations_info.append(
-                    {
-                        "binning_option": binning_option,
-                        "transformed_column": binned_column_name,
-                    }
-                )
-
-        return all_binning_options, all_transformations_info
-
-    def _select_transformations(self, all_transformations_info, all_selected_features):
-        selected_transformations = []
-
-        for transformation_info in all_transformations_info:
-            if transformation_info["transformed_column"] in all_selected_features:
-                selected_transformations.append(transformation_info["binning_option"])
-
-        return selected_transformations

@@ -4,8 +4,11 @@ from sklearn.impute import MissingIndicator
 
 
 class MissingValuesIndicator(BaseEstimator, TransformerMixin):
-    def __init__(self, features=None):
+    def __init__(self, features=None, track_columns=False):
         self.features = features
+        self.track_columns = track_columns
+
+        self.tracked_columns = {}
         self._indicator = None
 
     def get_params(self, deep=True):
@@ -26,7 +29,7 @@ class MissingValuesIndicator(BaseEstimator, TransformerMixin):
         X = X.copy()
 
         transformed_array = self._indicator.transform(X[self.features])
-        columns = [f"{col}__is_missing" for col in self.features]
+        columns = [f"{column}__is_missing" for column in self.features]
 
         encoded_df = pd.DataFrame(
             transformed_array.astype(int),
@@ -34,6 +37,11 @@ class MissingValuesIndicator(BaseEstimator, TransformerMixin):
             index=X.index,
         )
         X = pd.concat([X, encoded_df], axis=1)
+
+        if self.track_columns:
+            self.tracked_columns = {
+                f"{column}__is_missing": [column] for column in self.features
+            }
 
         return X
 

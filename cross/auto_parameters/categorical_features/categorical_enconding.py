@@ -36,7 +36,7 @@ class CategoricalEncodingParamCalculator:
             "woe",
         ]
 
-        best_encodings_options = {}
+        best_transformation_options = {}
 
         with tqdm(total=len(columns) * len(encodings), disable=not verbose) as pbar:
             for column in columns:
@@ -46,8 +46,8 @@ class CategoricalEncodingParamCalculator:
                 for encoding in encodings:
                     pbar.update(1)
 
-                    encodings_options = {column: encoding}
-                    handler = CategoricalEncoding(encodings_options=encodings_options)
+                    transformation_options = {column: encoding}
+                    handler = CategoricalEncoding(transformation_options)
                     score = evaluate_model(x, y, model, scoring, cv, groups, handler)
 
                     if is_score_improved(score, best_score, direction):
@@ -55,12 +55,10 @@ class CategoricalEncodingParamCalculator:
                         best_encoding = encoding
 
                 if best_encoding:
-                    best_encodings_options[column] = best_encoding
+                    best_transformation_options[column] = best_encoding
 
-        if best_encodings_options:
-            categorical_encoding = CategoricalEncoding(
-                encodings_options=best_encodings_options
-            )
+        if best_transformation_options:
+            categorical_encoding = CategoricalEncoding(best_transformation_options)
             return {
                 "name": categorical_encoding.__class__.__name__,
                 "params": categorical_encoding.get_params(),

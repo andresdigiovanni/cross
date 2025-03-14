@@ -4,9 +4,11 @@ from sklearn.preprocessing import PowerTransformer
 
 
 class NonLinearTransformation(BaseEstimator, TransformerMixin):
-    def __init__(self, transformation_options=None):
+    def __init__(self, transformation_options=None, track_columns=False):
         self.transformation_options = transformation_options
+        self.track_columns = track_columns
 
+        self.tracked_columns = {}
         self._transformers = {}
 
     def get_params(self, deep=True):
@@ -42,6 +44,9 @@ class NonLinearTransformation(BaseEstimator, TransformerMixin):
             elif transformation == "yeo_johnson":
                 transformer = self._transformers[column]
                 X[column] = transformer.transform(X[[column]])
+
+            if self.track_columns:
+                self.tracked_columns[column] = [column]
 
         return X
 

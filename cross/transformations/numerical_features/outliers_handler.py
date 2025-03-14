@@ -7,23 +7,26 @@ from sklearn.neighbors import LocalOutlierFactor
 class OutliersHandler(BaseEstimator, TransformerMixin):
     def __init__(
         self,
-        handling_options=None,
+        transformation_options=None,
         thresholds=None,
         lof_params=None,
         iforest_params=None,
+        track_columns=False,
     ):
-        self.handling_options = handling_options
+        self.transformation_options = transformation_options
         self.thresholds = thresholds
         self.lof_params = lof_params
         self.iforest_params = iforest_params
+        self.track_columns = track_columns
 
+        self.tracked_columns = {}
         self._statistics = {}
         self._bounds = {}
         self._handlers = {}
 
     def get_params(self, deep=True):
         return {
-            "handling_options": self.handling_options,
+            "transformation_options": self.transformation_options,
             "thresholds": self.thresholds,
             "lof_params": self.lof_params,
             "iforest_params": self.iforest_params,
@@ -40,7 +43,7 @@ class OutliersHandler(BaseEstimator, TransformerMixin):
         self._bounds = {}
         self._handlers = {}
 
-        for column, (action, method) in self.handling_options.items():
+        for column, (action, method) in self.transformation_options.items():
             # Specific methods fit
             if method == "lof":
                 self._apply_lof(X, column)
@@ -95,7 +98,7 @@ class OutliersHandler(BaseEstimator, TransformerMixin):
     def transform(self, X, y=None):
         X = X.copy()
 
-        for column, (action, method) in self.handling_options.items():
+        for column, (action, method) in self.transformation_options.items():
             lower_bound, upper_bound = 0, 0
 
             if method in ["iqr", "zscore"]:
@@ -119,6 +122,9 @@ class OutliersHandler(BaseEstimator, TransformerMixin):
                     self._statistics[column],
                     X[column],
                 )
+
+            if self.track_columns:
+                self.tracked_columns[column] = [column]
 
         return X
 

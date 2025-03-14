@@ -4,14 +4,19 @@ from sklearn.base import BaseEstimator, TransformerMixin
 
 
 class CategoricalEncoding(BaseEstimator, TransformerMixin):
-    def __init__(self, encodings_options=None, ordinal_orders=None):
-        self.encodings_options = encodings_options or {}
+    def __init__(
+        self, transformation_options=None, ordinal_orders=None, track_columns=False
+    ):
+        self.transformation_options = transformation_options or {}
         self.ordinal_orders = ordinal_orders
+        self.track_columns = track_columns
+
+        self.tracked_columns = {}
         self._encoders = {}
 
     def get_params(self, deep=True):
         return {
-            "encodings_options": self.encodings_options,
+            "transformation_options": self.transformation_options,
             "ordinal_orders": self.ordinal_orders,
         }
 
@@ -24,7 +29,7 @@ class CategoricalEncoding(BaseEstimator, TransformerMixin):
         self._encoders = {}
         X = X.copy()
 
-        for column, transformation in self.encodings_options.items():
+        for column, transformation in self.transformation_options.items():
             self._fit_encoder(X, y, column, transformation)
 
         return self
@@ -69,30 +74,27 @@ class CategoricalEncoding(BaseEstimator, TransformerMixin):
 
         else:
             encoder_class = encoder_classes.get(transformation)
-
-            if callable(encoder_class):
-                self._encoders[column] = (
-                    encoder_class().fit(X[[column]], y)
-                    if y is not None
-                    else encoder_class().fit(X[[column]])
-                )
-
-            else:
-                self._encoders[column] = encoder_class().fit(X[[column]])
+            self._encoders[column] = (
+                encoder_class().fit(X[[column]], y)
+                if y is not None
+                else encoder_class().fit(X[[column]])
+            )
 
     def transform(self, X, y=None):
         X = X.copy()
-        for column, transformation in self.encodings_options.items():
+        for column, transformation in self.transformation_options.items():
             X[column] = X[column].fillna("Unknown")
-            if column in self._encoders:
-                X = self._transform_column(
-                    X, column, transformation, self._encoders[column]
-                )
+            X = self._transform_column(
+                X, column, transformation, self._encoders[column]
+            )
         return X
 
     def _transform_column(self, X, column, transformation, transformer):
         if transformation in ["label", "ordinal"]:
             X[column] = transformer.transform(X[[column]])
+
+            if self.track_columns:
+                self.tracked_columns[column] = [column]
 
         elif transformation in [
             "backward_diff",
@@ -120,8 +122,15 @@ class CategoricalEncoding(BaseEstimator, TransformerMixin):
             encoded_df = pd.DataFrame(encoded_array, columns=columns, index=X.index)
             X = pd.concat([X.drop(columns=[column]), encoded_df], axis=1)
 
+            if self.track_columns:
+                for new_column in columns:
+                    self.tracked_columns[new_column] = [column]
+
         elif transformation == "count":
             X[column] = X[column].map(self._encoders[column]).fillna(0)
+
+            if self.track_columns:
+                self.tracked_columns[column] = [column]
 
         return X
 

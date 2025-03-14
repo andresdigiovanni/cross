@@ -5,16 +5,20 @@ from cross.transformations.utils.dtypes import categorical_columns
 
 
 class MissingValuesHandler(BaseEstimator, TransformerMixin):
-    def __init__(self, handling_options=None, n_neighbors=None):
-        self.handling_options = handling_options
+    def __init__(
+        self, transformation_options=None, n_neighbors=None, track_columns=False
+    ):
+        self.transformation_options = transformation_options
         self.n_neighbors = n_neighbors
+        self.track_columns = track_columns
 
+        self.tracked_columns = {}
         self._statistics = {}
         self._imputers = {}
 
     def get_params(self, deep=True):
         return {
-            "handling_options": self.handling_options,
+            "transformation_options": self.transformation_options,
             "n_neighbors": self.n_neighbors,
         }
 
@@ -28,7 +32,7 @@ class MissingValuesHandler(BaseEstimator, TransformerMixin):
         self._statistics = {}
         self._imputers = {}
 
-        for column, action in self.handling_options.items():
+        for column, action in self.transformation_options.items():
             if action == "fill_mean":
                 self._statistics[column] = X[column].mean()
 
@@ -54,7 +58,7 @@ class MissingValuesHandler(BaseEstimator, TransformerMixin):
         X = X.copy()
         cat_columns = categorical_columns(X)
 
-        for column, action in self.handling_options.items():
+        for column, action in self.transformation_options.items():
             if action in ["fill_mean", "fill_median", "fill_mode"]:
                 X[column] = X[column].fillna(self._statistics[column])
 
@@ -65,6 +69,9 @@ class MissingValuesHandler(BaseEstimator, TransformerMixin):
             elif action in ["fill_knn", "most_frequent"]:
                 imputer = self._imputers[column]
                 X[column] = imputer.transform(X[[column]]).flatten()
+
+            if self.track_columns:
+                self.tracked_columns[column] = [column]
 
         return X
 
