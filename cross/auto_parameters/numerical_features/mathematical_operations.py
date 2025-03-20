@@ -6,7 +6,7 @@ from cross.transformations.utils.dtypes import numerical_columns
 
 
 class MathematicalOperationsParamCalculator:
-    SYMMETRIC_OPS = ["add", "subtract", "multiply", "hypotenuse", "mean"]
+    SYMMETRIC_OPS = ["add", "subtract", "multiply"]
     NON_SYMMETRIC_OPS = ["divide", "modulus"]
 
     def calculate_best_params(
@@ -29,11 +29,8 @@ class MathematicalOperationsParamCalculator:
 
             transformer = MathematicalOperations(operations_options)
             x_transformed = transformer.fit_transform(x, y)
-            new_columns = list(set(x_transformed.columns) - set(x.columns))
 
-            selected_features = ProbeFeatureSelector.fit(
-                x_transformed[new_columns], y, model
-            )
+            selected_features = ProbeFeatureSelector.fit(x_transformed, y, model)
             all_selected_features.extend(selected_features)
 
         selected_transformations = self._select_transformations(
@@ -44,10 +41,9 @@ class MathematicalOperationsParamCalculator:
         if selected_transformations:
             transformer = MathematicalOperations(selected_transformations)
             x_transformed = transformer.fit_transform(x, y)
-            new_columns = list(set(x_transformed.columns) - set(x.columns))
 
             rfa = RecursiveFeatureAddition(model, scoring, direction, cv, groups)
-            selected_features = rfa.fit(x_transformed[new_columns], y)
+            selected_features = rfa.fit(x_transformed, y)
 
             selected_transformations = self._select_transformations(
                 all_transformations_info, selected_features
@@ -111,11 +107,11 @@ class MathematicalOperationsParamCalculator:
 
         return transformations_info, operations_options
 
-    def _select_transformations(self, all_transformations_info, all_selected_features):
+    def _select_transformations(self, transformations_info, selected_features):
         selected_transformations = []
 
-        for transformation_info in all_transformations_info:
-            if transformation_info["transformed_column"] in all_selected_features:
-                selected_transformations.append(transformation_info["operation_option"])
+        for transformation in transformations_info:
+            if transformation["transformed_column"] in selected_features:
+                selected_transformations.append(transformation["operation_option"])
 
         return selected_transformations

@@ -58,7 +58,6 @@ class RecursiveFeatureAddition:
         """
         X = X.copy()
 
-        self.model.fit(X, y)
         scores = cross_val_score(
             self.model,
             X,
@@ -72,6 +71,7 @@ class RecursiveFeatureAddition:
         if self.verbose:
             print(f"Target score: {self.target_score_value}")
 
+        self.model.fit(X, y)
         feature_importances = feature_importance(self.model, X, y)
         feature_indices = np.argsort(feature_importances)[::-1]
 

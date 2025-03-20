@@ -18,7 +18,7 @@ class MissingValuesParamCalculator:
             "num": {
                 "fill_mean": {},
                 "fill_median": {},
-                "fill_knn": {"n_neighbors": [3, 4, 5, 8, 13]},
+                "fill_knn": {"n_neighbors": [3, 5, 10]},
             },
             "cat": {
                 "most_frequent": {},

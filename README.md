@@ -158,6 +158,7 @@ The `auto_transform` function applies a series of data transformations to enhanc
 - `direction (str, optional)`: "maximize" to increase the score or "minimize" to decrease it (default is "maximize").
 - `cv (Union[int, Callable], optional)`: Number of cross-validation folds or a custom cross-validation generator (default is 5).
 - `groups (Optional[np.ndarray], optional)`: Group labels for cross-validation splitting (default is None).
+- `distribution_similarity_threshold (float, optional)`: Significance level to accept that distributions are similar. Used to select a representative subset of the data. Defaults to 0.05.
 - `verbose (bool, optional)`: Whether to print progress messages (default is True).
 
 **Returns:**

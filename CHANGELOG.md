@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Extrapolation parameter in spline transformation
 - Filter not used transformations after auto_transform
+- Subsample data for auto_transform
 
 ### Changed
 

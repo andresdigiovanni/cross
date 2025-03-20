@@ -1,15 +1,19 @@
 from .categorical_features import CategoricalEncoding
-from .clean_data import MissingValuesHandler, MissingValuesIndicator
-from .datetime_features import DateTimeTransformer
-from .features_reduction import ColumnSelection, DimensionalityReduction
-from .numerical_features import (
-    MathematicalOperations,
+from .distribution_n_scale import (
     NonLinearTransformation,
     Normalization,
-    NumericalBinning,
-    OutliersHandler,
     QuantileTransformation,
     ScaleTransformation,
+)
+from .features_reduction import ColumnSelection, DimensionalityReduction
+from .missing_n_outliers import (
+    MissingValuesHandler,
+    MissingValuesIndicator,
+    OutliersHandler,
+)
+from .numerical_features import (
+    MathematicalOperations,
+    NumericalBinning,
     SplineTransformation,
 )
-from .periodic_features import CyclicalFeaturesTransformer
+from .periodic_features import CyclicalFeaturesTransformer, DateTimeTransformer
