@@ -20,7 +20,7 @@ def auto_transform(
     direction: str = "maximize",
     cv: Union[int, Callable] = None,
     groups: Optional[np.ndarray] = None,
-    distribution_similarity_threshold: float = 0.05,
+    subsample_threshold: Optional[float] = 0.05,
     verbose: bool = True,
 ) -> List[dict]:
     """Automatically applies a series of data transformations to improve model performance.
@@ -33,8 +33,8 @@ def auto_transform(
         direction (str, optional): "maximize" or "minimize". Defaults to "maximize".
         cv (Union[int, Callable], optional): Cross-validation strategy. Defaults to None.
         groups (Optional[np.ndarray], optional): Group labels for cross-validation splitting. Defaults to None.
-        distribution_similarity_threshold (float, optional): Significance level to accept that distributions are similar.
-            Used to select a representative subset of the data. Defaults to 0.05.
+        subsample_threshold (Optional[float], optional): Significance level to accept that distributions are similar.
+            If set to None or a value less than or equal to 0, all data will be used. Defaults to 0.05.
         verbose (bool, optional): Whether to print progress messages. Defaults to True.
 
     Returns:
@@ -53,9 +53,7 @@ def auto_transform(
     initial_num_columns = numerical_columns(X)
     transformations, tracked_columns = [], []
 
-    X, y = find_minimal_representative_sample(
-        X, y, threshold=distribution_similarity_threshold
-    )
+    X, y = find_minimal_representative_sample(X, y, threshold=subsample_threshold)
 
     if verbose:
         print(f"[{date_time()}] Resampled data: {X.shape}")
@@ -238,7 +236,8 @@ def find_minimal_representative_sample(
             - X_reduced (pd.DataFrame or np.ndarray): Reduced feature matrix.
             - y_reduced (pd.Series or np.ndarray): Reduced target vector.
     """
-    np.random.seed(random_state)
+    if threshold is None or threshold <= 0:
+        return X, y
 
     # Ensure X and y are pandas DataFrame/Series
     X = pd.DataFrame(X) if not isinstance(X, pd.DataFrame) else X

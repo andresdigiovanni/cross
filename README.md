@@ -2,18 +2,19 @@
 
 -----------------
 
-# Cross: a versatile toolkit for feature engineering in machine learning
+# Cross: A Versatile Toolkit for Feature Engineering in Machine Learning
 
 ![PyPI version](https://img.shields.io/pypi/v/cross_ml)
 ![Downloads](https://img.shields.io/pypi/dm/cross_ml)
 
-Cross is a Python library for feature engineering to train machine learning models, featuring scaling, normalization, feature creation through binning, and various mathematical operations between columns.
+**Cross** is a Python library for feature engineering, providing tools for scaling, normalization, feature creation through binning, and mathematical operations between columns. It streamlines preprocessing for machine learning models, improving data quality and model performance.
 
+## 📌 Table of Contents
 - [Getting Started](#getting-started)
 - [Example of Use](#example-of-use)
-  - [Define transformations](#define-transformations)
-  - [Save and Load Transformations](#save-and-load-transformations)
-  - [Auto transformations](#auto-transformations)
+  - [Manual Transformations](#manual-transformations)
+  - [Saving and Loading Transformations](#saving-and-loading-transformations)
+  - [Automated Transformations](#automated-transformations)
 - [Transformations](#transformations)
   - [Missing Values and Outliers](#missing-values-and-outliers)
     - [Missing Values Indicator](#missing-values-indicator)
@@ -38,17 +39,20 @@ Cross is a Python library for feature engineering to train machine learning mode
     - [Dimensionality Reduction](#dimensionality-reduction)
 
 
-## Getting Started
+<a id="getting-started"></a>
+## 🚀 Getting Started
 
-To install the Cross library, run the following command:
+To install **Cross**, run the following command:
 
 ```bash
 pip install cross_ml
 ```
 
-## Example of Use
+<a id="example-of-use"></a>
+## 📖 Example of Use
 
-### Manual transformations
+<a id="manual-transformations"></a>
+### 🔹 Manual Transformations
 
 ```python
 from cross import CrossTransformer
@@ -91,6 +95,7 @@ transformations = [
         ]
     ),
 ]
+
 cross = CrossTransformer(transformations)
 
 # Fit & transform data
@@ -98,15 +103,15 @@ x_train, y_train = cross.fit_transform(x_train, y_train)
 x_test, y_test = cross.transform(x_test, y_test)
 ```
 
-### Save and Load Transformations
+<a id="saving-and-loading-transformations"></a>
+### 💾 Saving and Loading Transformations
 
-To save and reuse the transformations, save them and load them in future sessions:
+Save and reuse transformations for consistency across multiple sessions:
 
 ```python
 import pickle
 from cross import CrossTransformer
 
-# Generate transformer object
 cross = CrossTransformer(transformations)
 
 # Save transformations
@@ -122,61 +127,43 @@ with open("cross_transformations.pkl", "rb") as f:
 cross.set_params(**transformations)
 ```
 
-### Auto transformations
+<a id="automated-transformations"></a>
+### 🔄 Automated Transformations
 
-You can allow the library to create automatically the transformations that best fits:
+Automatically select the best transformations for a dataset:
 
 ```python
 from cross import auto_transform, CrossTransformer
 from sklearn.neighbors import KNeighborsClassifier
 
-# Define the model
+# Define model
 model = KNeighborsClassifier()
 scoring = "accuracy"
 direction = "maximize"
 
-# Run auto transformations
+# Run automated feature engineering
 transformations = auto_transform(x, y, model, scoring, direction)
-
-# Create transformer based on transformations
 transformer = CrossTransformer(transformations)
 
-# Apply transformations to your dataset
+# Apply transformations
 x_train, y_train = transformer.fit_transform(x_train, y_train)
 x_test, y_test = transformer.transform(x_test, y_test)
 ```
 
-#### Explanation of `auto_transform`
+---
 
-The `auto_transform` function applies a series of data transformations to enhance the performance of a given machine learning model. It evaluates different preprocessing techniques, such as handling missing values, encoding categorical features, scaling numerical features, and more. The function iterates through various transformation strategies, selecting those that yield the best model performance based on the provided scoring metric.
+<a id="transformations"></a>
+## 🔍 Transformations
 
-**Parameters:**
-- `X (np.ndarray)`: Feature matrix.
-- `y (np.ndarray)`: Target variable.
-- `model`: Machine learning model with a `fit` method.
-- `scoring (str)`: Scoring metric for evaluation.
-- `direction (str, optional)`: "maximize" to increase the score or "minimize" to decrease it (default is "maximize").
-- `cv (Union[int, Callable], optional)`: Number of cross-validation folds or a custom cross-validation generator (default is 5).
-- `groups (Optional[np.ndarray], optional)`: Group labels for cross-validation splitting (default is None).
-- `distribution_similarity_threshold (float, optional)`: Significance level to accept that distributions are similar. Used to select a representative subset of the data. Defaults to 0.05.
-- `verbose (bool, optional)`: Whether to print progress messages (default is True).
-
-**Returns:**
-- A list of applied transformations that can be used to create a `CrossTransformer` for applying them to new datasets.
-
-
-## Transformations
-
-### Missing Values and Outliers
+<a id="missing-values-and-outliers"></a>
+### 📌 Missing Values and Outliers
 
 #### **Missing Values Indicator**
 
-Detects and encodes missing values in the dataset by adding indicator columns.
+Adds indicator columns for missing values in selected features.
 
 - Parameters:
     - `features`: List of column names to check for missing values. If None, all columns are considered.
-
-- Example Usage:
 
 ```python
 from cross.transformations import MissingValuesIndicator
@@ -191,13 +178,11 @@ MissingValuesIndicator(
 
 #### **Missing Values Handler**
 
-Handles missing values in the dataset.
+Handles missing values.
 
 - Parameters:
     - `transformation_options`: Dictionary that specifies the handling strategy for each column. Options: `fill_0`, `most_frequent`, `fill_mean`, `fill_median`, `fill_mode`, `fill_knn`.
     - `n_neighbors`: Number of neighbors for K-Nearest Neighbors imputation (used with `fill_knn`).
-
-- Example Usage:
 
 ```python
 from cross.transformations import MissingValuesHandler
@@ -217,15 +202,13 @@ MissingValuesHandler(
 
 #### **Handle Outliers**
 
-Manages outliers in the dataset using different strategies. The action can be either cap or median, while the method can be `iqr`, `zscore`, `lof`, or `iforest`. Note that `lof` and `iforest` only accept the `median` action.
+Detects and mitigates outliers using methods like `iqr`, `zscore`, `lof`, or `iforest`.
 
 - Parameters:
     - `transformation_options`: Dictionary specifying the handling strategy. The strategy is a tuple where the first element is the action (`cap` or `median`) and the second is the method (`iqr`, `zscore`, `lof`, `iforest`).
     - `thresholds`: Dictionary with thresholds for `iqr` and `zscore` methods.
     - `lof_params`: Dictionary specifying parameters for the LOF method.
     - `iforest_params`: Dictionary specifying parameters for Isolation Forest.
-
-- Example Usage:
 
 ```python
 from cross.transformations import OutliersHandler
@@ -254,16 +237,15 @@ OutliersHandler(
 )
 ```
 
-### Data Distribution and Scaling
+<a id="data-distribution-and-scaling"></a>
+### 📌 Data Distribution and Scaling
 
 #### **Non-Linear Transformation**
 
-Applies non-linear transformations, including logarithmic, exponential, and Yeo-Johnson transformations.
+Applies logarithmic, exponential, or Yeo-Johnson transformations.
 
 - Parameters:
     - `transformation_options`: A dictionary specifying the transformation to be applied for each column. Options include: `log`, `exponential`, and `yeo_johnson`.
-
-- Example Usage:
 
 ```python
 from cross.transformations import NonLinearTransformation
@@ -279,12 +261,10 @@ NonLinearTransformation(
 
 #### **Quantile Transformations**
 
-Applies quantile transformations for normalizing data.
+Transforms data to follow a normal or uniform distribution.
 
 - Parameters:
     - `transformation_options`: Dictionary specifying the transformation type. Options: `uniform`, `normal`.
-
-- Example Usage:
 
 ```python
 from cross.transformations import QuantileTransformation
@@ -343,7 +323,8 @@ Normalization(
 )
 ```
 
-### Numerical Features
+<a id="numerical-features"></a>
+### 📌 Numerical Features
 
 #### **Spline Transformations**
 
@@ -421,7 +402,8 @@ MathematicalOperations(
 )
 ```
 
-### Categorical Features
+<a id="categorical-features"></a>
+### 📌 Categorical Features
 
 #### **Categorical Encoding**
 
@@ -471,7 +453,8 @@ CategoricalEncoding(
 )
 ```
 
-### Periodic Features
+<a id="periodic-features"></a>
+### 📌 Periodic Features
 
 #### **Date Time Transforms**
 
@@ -510,7 +493,8 @@ CyclicalFeaturesTransformer(
 )
 ```
 
-### Features Reduction
+<a id="features-reduction"></a>
+### 📌 Features Reduction
 
 #### **Column Selection**
 
@@ -564,3 +548,15 @@ DimensionalityReduction(
     n_components=3
 )
 ```
+
+---
+
+## 🛠️ Contributing
+We welcome contributions! Feel free to submit pull requests or report issues.
+
+## 📄 License
+Cross is open-source and licensed under the MIT License.
+
+---
+
+🚀 **Enhance your feature engineering pipeline with Cross!**
