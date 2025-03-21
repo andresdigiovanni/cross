@@ -285,8 +285,6 @@ Scales numerical data using different scaling methods.
     - `transformation_options`: Dictionary specifying the scaling method for each column. Options: `min_max`, `standard`, `robust`, `max_abs`.
     -  `quantile_range`: Dictionary specifying the quantile ranges for robust scaling.
 
-- Example Usage:
-
 ```python
 from cross.transformations import ScaleTransformation
 
@@ -310,8 +308,6 @@ Normalizes data using L1 or L2 norms.
 - Parameters:
     - `transformation_options`: Dictionary specifying the normalization type. Options: `l1`, `l2`.
 
-- Example Usage:
-
 ```python
 from cross.transformations import Normalization
 
@@ -333,8 +329,6 @@ Applies Spline transformation to numerical features.
 - Parameters:
     - `transformation_options`: Dictionary specifying the spline transformation settings for each column. Options include different numbers of knots and degrees.
 
-- Example Usage:
-
 ```python
 from cross.transformations import SplineTransformation
 
@@ -353,8 +347,6 @@ Bins numerical columns into categories. You can now specify the column, the binn
 
 - Parameters:
     - `transformation_options`: Dictionary specifying the binning method and number of bins for each column. Options for binning methods are `uniform`, `quantile` or `kmeans`.
-
-- Example Usage:
 
 ```python
 from cross.transformations import NumericalBinning
@@ -384,8 +376,6 @@ Performs mathematical operations between columns.
     - `hypotenuse`: Computes the hypotenuse of two columns.
     - `mean`: Calculates the mean of two columns.
 
-- Example Usage:
-
 ```python
 from cross.transformations import MathematicalOperations
 
@@ -414,30 +404,28 @@ Encodes categorical variables using various methods.
     - `ordinal_orders`: Specifies the order for ordinal encoding.
 
 - **Encodings**:
-    - backward_diff
-    - basen
-    - binary
-    - catboost
-    - count
-    - dummy
-    - glmm
-    - gray
-    - hashing
-    - helmert
-    - james_stein
-    - label
-    - loo
-    - m_estimate
-    - onehot
-    - ordinal
-    - polynomial
-    - quantile
-    - rankhot
-    - sum
-    - target
-    - woe
-
-- Example Usage:
+    - `backward_diff`: Uses backward difference coding to compare each category to the previous one.
+    - `basen`: Encodes categorical features using a base-N representation.
+    - `binary`: Converts categorical variables into binary representations.
+    - `catboost`: Implements the CatBoost encoding, which is a target-based encoding method.
+    - `count`: Replaces categories with the count of occurrences in the dataset.
+    - `dummy`: Applies dummy coding, similar to one-hot encoding but with one less category to avoid collinearity.
+    - `glmm`: Uses Generalized Linear Mixed Models to encode categorical variables.
+    - `gray`: Converts categories into Gray code, a binary numeral system where two successive values differ in only one bit.
+    - `hashing`: Uses a hashing trick to encode categorical features into a fixed number of dimensions.
+    - `helmert`: Compares each level of a categorical variable to the mean of subsequent levels.
+    - `james_stein`: Applies James-Stein shrinkage estimation for target encoding.
+    - `label`: Assigns each category a unique integer label.
+    - `loo`: Uses leave-one-out target encoding to replace categories with the mean target value, excluding the current row.
+    - `m_estimate`: A variant of target encoding that applies an m-estimate to regularize values.
+    - `onehot`: Converts categorical variables into binary vectors where each category is represented by a separate column.
+    - `ordinal`: Replaces categories with ordinal values based on their ordering.
+    - `polynomial`: Applies polynomial contrast coding to categorical variables.
+    - `quantile`: Maps categorical variables to quantiles based on their distribution.
+    - `rankhot`: Encodes categories based on their ranking, similar to one-hot but considering order.
+    - `sum`: Uses sum coding to compare each level to the overall mean.
+    - `target`: Encodes categories using the mean of the target variable for each category.
+    - `woe`: Applies Weight of Evidence (WoE) encoding, useful in logistic regression by transforming categorical data into log odds.
 
 ```python
 from cross.transformations import CategoricalEncoding
@@ -463,8 +451,6 @@ Transforms datetime columns into useful features.
 - Parameters:
     - `features`: List of columns to extract date/time features from. If None, all datetime columns are considered.
 
-- Example Usage:
-
 ```python
 from cross.transformations import DateTimeTransformer
 
@@ -479,8 +465,6 @@ Transforms cyclical features like time into a continuous representation.
 
 - Parameters:
     - `transformation_options`: Dictionary specifying the period for each cyclical column.
-
-- Example Usage:
 
 ```python
 from cross.transformations import CyclicalFeaturesTransformer
@@ -502,8 +486,6 @@ Allows you to select specific columns for further processing.
 
 - Parameters:
     - `features`: List of column names to select.
-
-- Example Usage:
 
 ```python
 from cross.transformations import ColumnSelection
@@ -537,8 +519,6 @@ Reduces the dimensionality of the dataset using various techniques, such as PCA,
 
 - **Notes**:
 For `lda`, the y target variable is required, as it uses class labels for discriminant analysis.
-
-- Example Usage:
 
 ```python
 from cross.transformations import DimensionalityReduction
