@@ -15,6 +15,7 @@
   - [Manual Transformations](#manual-transformations)
   - [Saving and Loading Transformations](#saving-and-loading-transformations)
   - [Automated Transformations](#automated-transformations)
+- [Public Methods](#public-methods)
 - [Transformations](#transformations)
   - [Missing Values and Outliers](#missing-values-and-outliers)
     - [Missing Values Indicator](#missing-values-indicator)
@@ -99,8 +100,8 @@ transformations = [
 cross = CrossTransformer(transformations)
 
 # Fit & transform data
-x_train, y_train = cross.fit_transform(x_train, y_train)
-x_test, y_test = cross.transform(x_test, y_test)
+x_train = cross.fit_transform(x_train, y_train)
+x_test = cross.transform(x_test, y_test)
 ```
 
 <a id="saving-and-loading-transformations"></a>
@@ -146,9 +147,71 @@ transformations = auto_transform(x, y, model, scoring, direction)
 transformer = CrossTransformer(transformations)
 
 # Apply transformations
-x_train, y_train = transformer.fit_transform(x_train, y_train)
-x_test, y_test = transformer.transform(x_test, y_test)
+x_train = transformer.fit_transform(x_train, y_train)
+x_test = transformer.transform(x_test, y_test)
 ```
+
+---
+
+<a id="public-methods"></a>
+## 🧩 Public Methods
+
+### **auto_transform**
+
+Automatically applies a series of data transformations to improve model performance based on a selected scoring metric and estimator.
+
+```python
+from cross import auto_transform
+```
+
+#### **Parameters:**
+- `X` (`np.ndarray`): Feature matrix.
+- `y` (`np.ndarray`): Target variable.
+- `model`: A machine learning model implementing a `fit` method.
+- `scoring` (`str`): Evaluation metric (e.g., `"accuracy"`, `"f1"`, `"roc_auc"`).
+- `direction` (`str`, optional): Optimization direction: `"maximize"` or `"minimize"`. Default is `"maximize"`.
+- `cv` (`int` or callable, optional): Cross-validation strategy (e.g., number of folds or a custom splitter). Default is `None`.
+- `groups` (`np.ndarray`, optional): Group labels for cross-validation splitting.
+- `subsample_threshold` (`float`, optional): Significance threshold for distribution similarity. Default is `0.05`. Set to `None` or `<= 0` to disable subsampling.
+- `verbose` (`bool`, optional): Whether to display progress logs. Default is `True`.
+
+#### **Returns:**
+- `List[dict]`: A list of transformation dictionaries to be used with `CrossTransformer`.
+
+---
+
+### **CrossTransformer**
+
+A wrapper for applying a pipeline of transformations defined in the Cross framework.
+
+```python
+from cross import CrossTransformer
+```
+
+#### **Constructor Parameters:**
+- `transformations` (`list`, optional): List of transformation objects or dictionaries.
+
+#### **Public Methods:**
+
+- `fit(X, y=None)`  
+    Fits each transformation in the pipeline to the dataset.
+    - **Returns:** `self`
+
+- `transform(X, y=None)`  
+    Applies each fitted transformation in sequence.
+    - **Returns:** Transformed feature matrix (`np.ndarray` or `pd.DataFrame`)
+
+- `fit_transform(X, y=None)`  
+    Combines `fit` and `transform` for each transformation.
+    - **Returns:** Transformed feature matrix.
+
+- `get_params(deep=True)`  
+    Retrieves the parameters of the pipeline (mainly the transformations).
+    - **Returns:** Dictionary of parameters.
+
+- `set_params(**params)`  
+    Sets or updates the pipeline parameters.
+    - **Returns:** `self`
 
 ---
 
