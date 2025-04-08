@@ -119,6 +119,10 @@ class CategoricalEncoding(BaseEstimator, TransformerMixin):
         ]:
             encoded_array = transformer.transform(X[[column]])
             columns = transformer.get_feature_names_out([column])
+
+            if transformation in ["hashing"]:
+                columns = [c.replace("col_", f"{column}_") for c in columns]
+
             encoded_df = pd.DataFrame(encoded_array, columns=columns, index=X.index)
             X = pd.concat([X.drop(columns=[column]), encoded_df], axis=1)
 
