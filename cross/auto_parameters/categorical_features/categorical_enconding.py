@@ -5,7 +5,7 @@ from tqdm import tqdm
 from cross.auto_parameters.shared import evaluate_model
 from cross.auto_parameters.shared.utils import is_score_improved
 from cross.transformations import CategoricalEncoding
-from cross.transformations.utils.dtypes import categorical_columns
+from cross.transformations.utils import dtypes
 
 
 class CategoricalEncodingParamCalculator:
@@ -41,7 +41,7 @@ class CategoricalEncodingParamCalculator:
         return None
 
     def _select_categorical_encodings(self, X):
-        cat_columns = categorical_columns(X)
+        cat_columns = dtypes.categorical_columns(X)
         category_counts = {col: X[col].nunique() for col in cat_columns}
 
         selected_encodings = defaultdict(list)

@@ -1,12 +1,12 @@
 from cross.transformations import DateTimeTransformer
-from cross.transformations.utils.dtypes import datetime_columns
+from cross.transformations.utils import dtypes
 
 
 class DateTimeTransformerParamCalculator:
     def calculate_best_params(
         self, x, y, model, scoring, direction, cv, groups, verbose
     ):
-        columns = datetime_columns(x)
+        columns = dtypes.datetime_columns(x)
 
         if verbose:
             print(f"Datetime columns: {len(columns)}")

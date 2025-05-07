@@ -2,7 +2,7 @@ from tqdm import tqdm
 
 from cross.auto_parameters.shared import ProbeFeatureSelector, RecursiveFeatureAddition
 from cross.transformations import MathematicalOperations
-from cross.transformations.utils.dtypes import numerical_columns
+from cross.transformations.utils import dtypes
 
 
 class MathematicalOperationsParamCalculator:
@@ -12,7 +12,7 @@ class MathematicalOperationsParamCalculator:
     def calculate_best_params(
         self, x, y, model, scoring, direction, cv, groups, verbose
     ):
-        columns = numerical_columns(x)
+        columns = dtypes.numerical_columns(x)
         all_transformations_info = []
         all_selected_features = []
 

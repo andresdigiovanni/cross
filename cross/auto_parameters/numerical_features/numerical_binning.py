@@ -5,7 +5,7 @@ from tqdm import tqdm
 from cross.auto_parameters.shared import evaluate_model
 from cross.auto_parameters.shared.utils import is_score_improved
 from cross.transformations import NumericalBinning
-from cross.transformations.utils.dtypes import numerical_columns
+from cross.transformations.utils import dtypes
 
 
 class NumericalBinningParamCalculator:
@@ -15,7 +15,7 @@ class NumericalBinningParamCalculator:
     def calculate_best_params(
         self, X, y, model, scoring, direction, cv, groups, verbose
     ):
-        columns = numerical_columns(X)
+        columns = dtypes.numerical_columns(X)
         best_transformations = {}
         base_score = evaluate_model(X, y, model, scoring, cv, groups)
 

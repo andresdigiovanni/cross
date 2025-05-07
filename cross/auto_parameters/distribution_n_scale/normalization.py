@@ -3,7 +3,7 @@ from tqdm import tqdm
 from cross.auto_parameters.shared import evaluate_model
 from cross.auto_parameters.shared.utils import is_score_improved
 from cross.transformations import Normalization
-from cross.transformations.utils.dtypes import numerical_columns
+from cross.transformations.utils import dtypes
 
 
 class NormalizationParamCalculator:
@@ -12,7 +12,7 @@ class NormalizationParamCalculator:
     def calculate_best_params(
         self, x, y, model, scoring, direction, cv, groups, verbose
     ):
-        columns = numerical_columns(x)
+        columns = dtypes.numerical_columns(x)
         transformation_options = {}
         base_score = evaluate_model(x, y, model, scoring, cv, groups)
 

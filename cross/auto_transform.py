@@ -4,11 +4,12 @@ from typing import Callable, List, Optional, Union
 import numpy as np
 import pandas as pd
 from scipy.stats import chi2_contingency, ks_2samp
+from sklearn.utils import check_random_state
 
 import cross.auto_parameters as pc
 from cross.auto_parameters.shared import evaluate_model
 from cross.transformations import ColumnSelection
-from cross.transformations.utils.dtypes import numerical_columns
+from cross.transformations.utils import dtypes
 from cross.utils import get_transformer
 
 
@@ -50,59 +51,78 @@ def auto_transform(
     X = X.copy()
     y = y.copy()
     initial_columns = set(X.columns)
-    initial_num_columns = numerical_columns(X)
+    initial_num_columns = dtypes.numerical_columns(X)
     transformations, tracked_columns = [], []
+
+    exclude_from_selection = set()
+    exclude_from_dimred = set()
 
     X, y = find_minimal_representative_sample(X, y, threshold=subsample_threshold)
 
     if verbose:
         print(f"[{date_time()}] Resampled data: {X.shape}")
 
-    def wrapper(transformer, X, y, transformations, tracked_columns, subset=None):
-        X, new_transformations, new_tracked_columns = execute_transformation(
-            transformer,
-            X,
-            y,
-            model,
-            scoring,
-            direction,
-            cv,
-            groups,
-            verbose,
-            subset,
+    def wrapper(
+        transformer,
+        X,
+        y,
+        transformations,
+        tracked_columns,
+        subset=None,
+        extra_columns=None,
+    ):
+        X_transformed, new_transformations, new_tracked_columns = (
+            execute_transformation(
+                transformer,
+                X,
+                y,
+                model,
+                scoring,
+                direction,
+                cv,
+                groups,
+                verbose,
+                subset,
+                extra_columns,
+            )
         )
 
         transformations.extend(new_transformations)
         tracked_columns.extend(new_tracked_columns)
+        new_columns = set(X_transformed.columns) - set(X.columns)
 
-        return X, transformations, tracked_columns
+        return X_transformed, transformations, tracked_columns, new_columns
 
     # Apply Missing and Outlier handling
     transformer = pc.MissingValuesIndicatorParamCalculator()
-    X, transformations, tracked_columns = wrapper(
+    X, transformations, tracked_columns, new_columns = wrapper(
         transformer, X, y, transformations, tracked_columns
     )
+    exclude_from_dimred.update(new_columns)
 
     transformer = pc.MissingValuesParamCalculator()
-    X, transformations, tracked_columns = wrapper(
+    X, transformations, tracked_columns, _ = wrapper(
         transformer, X, y, transformations, tracked_columns
     )
 
     transformer = pc.OutliersParamCalculator()
-    X, transformations, tracked_columns = wrapper(
+    X, transformations, tracked_columns, _ = wrapper(
         transformer, X, y, transformations, tracked_columns
     )
 
     # Feature Engineering
     transformer = pc.SplineTransformationParamCalculator()
-    X, transformations, tracked_columns = wrapper(
-        transformer, X, y, transformations, tracked_columns, initial_num_columns
+    X, transformations, tracked_columns, new_columns = wrapper(
+        transformer, X, y, transformations, tracked_columns, subset=initial_num_columns
     )
+    exclude_from_selection.update(new_columns)
+    exclude_from_dimred.update(new_columns)
 
     transformer = pc.NumericalBinningParamCalculator()
-    X, transformations, tracked_columns = wrapper(
-        transformer, X, y, transformations, tracked_columns, initial_num_columns
+    X, transformations, tracked_columns, new_columns = wrapper(
+        transformer, X, y, transformations, tracked_columns, subset=initial_num_columns
     )
+    exclude_from_dimred.update(new_columns)
 
     # Distribution Transformations (choose best)
     transformations_1, transformations_2 = [], []
@@ -110,18 +130,18 @@ def auto_transform(
 
     ## Option 1: NonLinear + Normalization
     transformer = pc.NonLinearTransformationParamCalculator()
-    X_1, transformations_1, tracked_columns_1 = wrapper(
+    X_1, transformations_1, tracked_columns_1, _ = wrapper(
         transformer, X, y, transformations_1, tracked_columns_1
     )
 
     transformer = pc.NormalizationParamCalculator()
-    X_1, transformations_1, tracked_columns_1 = wrapper(
+    X_1, transformations_1, tracked_columns_1, _ = wrapper(
         transformer, X_1, y, transformations_1, tracked_columns_1
     )
 
     ## Option 2: Quantile Transformation
     transformer = pc.QuantileTransformationParamCalculator()
-    X_2, transformations_2, tracked_columns_2 = wrapper(
+    X_2, transformations_2, tracked_columns_2, _ = wrapper(
         transformer, X, y, transformations_2, tracked_columns_2
     )
 
@@ -140,45 +160,68 @@ def auto_transform(
 
     # Apply Mathematical Operations
     transformer = pc.MathematicalOperationsParamCalculator()
-    X, transformations, tracked_columns = wrapper(
-        transformer, X, y, transformations, tracked_columns, initial_num_columns
+    X, transformations, tracked_columns, _ = wrapper(
+        transformer, X, y, transformations, tracked_columns, subset=initial_num_columns
     )
 
     # Final scaling after all transformations
     transformer = pc.ScaleTransformationParamCalculator()
-    X, transformations, tracked_columns = wrapper(
+    X, transformations, tracked_columns, _ = wrapper(
         transformer, X, y, transformations, tracked_columns
     )
 
     # Periodic Features
-    datetime_initial_columns = set(X.columns)
     transformer = pc.DateTimeTransformerParamCalculator()
-    X, transformations, tracked_columns = wrapper(
+    X, transformations, tracked_columns, datetime_columns = wrapper(
         transformer, X, y, transformations, tracked_columns
     )
-    datetime_columns = set(X.columns) - datetime_initial_columns
 
     if datetime_columns:
         transformer = pc.CyclicalFeaturesTransformerParamCalculator()
-        X, transformations, tracked_columns = wrapper(
-            transformer, X, y, transformations, tracked_columns, datetime_columns
+        X, transformations, tracked_columns, new_columns = wrapper(
+            transformer, X, y, transformations, tracked_columns, subset=datetime_columns
         )
+        exclude_from_dimred.update(new_columns)
 
     # Categorical Encoding
     transformer = pc.CategoricalEncodingParamCalculator()
-    X, transformations, tracked_columns = wrapper(
+    X, transformations, tracked_columns, new_columns = wrapper(
         transformer, X, y, transformations, tracked_columns
     )
+    exclude_from_selection.update(new_columns)
+    exclude_from_dimred.update(new_columns)
 
     # Dimensionality Reduction
+    candidate_columns = dtypes.numerical_columns(X)
+    columns_for_selection = [
+        col for col in candidate_columns if col not in exclude_from_selection
+    ]
+
     transformer = pc.ColumnSelectionParamCalculator()
-    X, transformations, tracked_columns = wrapper(
-        transformer, X, y, transformations, tracked_columns
+    X, transformations, tracked_columns, _ = wrapper(
+        transformer,
+        X,
+        y,
+        transformations,
+        tracked_columns,
+        subset=columns_for_selection,
+        extra_columns=exclude_from_selection,
     )
 
+    candidate_columns = dtypes.numerical_columns(X)
+    columns_for_dimred = [
+        col for col in candidate_columns if col not in exclude_from_dimred
+    ]
+
     transformer = pc.DimensionalityReductionParamCalculator()
-    X, transformations, tracked_columns = wrapper(
-        transformer, X, y, transformations, tracked_columns
+    X, transformations, tracked_columns, _ = wrapper(
+        transformer,
+        X,
+        y,
+        transformations,
+        tracked_columns,
+        subset=columns_for_dimred,
+        extra_columns=exclude_from_dimred,
     )
 
     # Remove unnecessary tranformations
@@ -194,7 +237,17 @@ def date_time() -> str:
 
 
 def execute_transformation(
-    calculator, X, y, model, scoring, direction, cv, groups, verbose, subset=None
+    calculator,
+    X,
+    y,
+    model,
+    scoring,
+    direction,
+    cv,
+    groups,
+    verbose,
+    subset=None,
+    extra_columns=None,
 ):
     """Executes a given transformation and returns the transformed data along with metadata."""
     if verbose:
@@ -209,6 +262,11 @@ def execute_transformation(
     )
     if not transformation:
         return X, [], []
+
+    if extra_columns:
+        features = transformation["params"]["features"]
+        features.extend(extra_columns)
+        transformation["params"]["features"] = features
 
     transformer = get_transformer(
         transformation["name"], {**transformation["params"], "track_columns": True}
@@ -239,6 +297,8 @@ def find_minimal_representative_sample(
     if threshold is None or threshold <= 0:
         return X, y
 
+    rs = check_random_state(random_state)
+
     # Ensure X and y are pandas DataFrame/Series
     X = pd.DataFrame(X) if not isinstance(X, pd.DataFrame) else X
     y = pd.Series(y) if not isinstance(y, pd.Series) else y
@@ -249,8 +309,9 @@ def find_minimal_representative_sample(
 
     while sample_size <= len(X):  # Stop when the sample size reaches the full dataset
         # Take a new sample with the current sample size
-        sample_data = X.sample(n=sample_size, random_state=random_state)
-        sample_labels = y.loc[sample_data.index]
+        sample_idx = rs.choice(X.index, size=sample_size, replace=False)
+        sample_data = X.loc[sample_idx]
+        sample_labels = y.loc[sample_idx]
 
         all_features_match = True
 

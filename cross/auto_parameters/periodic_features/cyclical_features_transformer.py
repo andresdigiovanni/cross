@@ -1,7 +1,7 @@
 from tqdm import tqdm
 
 from cross.transformations import CyclicalFeaturesTransformer
-from cross.transformations.utils.dtypes import numerical_columns
+from cross.transformations.utils import dtypes
 
 
 class CyclicalFeaturesTransformerParamCalculator:
@@ -19,7 +19,7 @@ class CyclicalFeaturesTransformerParamCalculator:
     def calculate_best_params(
         self, x, y, model, scoring, direction, cv, groups, verbose
     ):
-        columns = numerical_columns(x)
+        columns = dtypes.numerical_columns(x)
         transformation_options = {}
 
         for column in tqdm(columns, disable=not verbose):

@@ -1,7 +1,7 @@
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.impute import KNNImputer, SimpleImputer
 
-from cross.transformations.utils.dtypes import categorical_columns
+from cross.transformations.utils import dtypes
 
 
 class MissingValuesHandler(BaseEstimator, TransformerMixin):
@@ -56,7 +56,7 @@ class MissingValuesHandler(BaseEstimator, TransformerMixin):
 
     def transform(self, X, y=None):
         X = X.copy()
-        cat_columns = categorical_columns(X)
+        cat_columns = dtypes.categorical_columns(X)
 
         for column, action in self.transformation_options.items():
             if action in ["fill_mean", "fill_median", "fill_mode"]:

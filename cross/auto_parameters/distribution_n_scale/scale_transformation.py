@@ -3,7 +3,7 @@ from tqdm import tqdm
 from cross.auto_parameters.shared import evaluate_model
 from cross.auto_parameters.shared.utils import is_score_improved
 from cross.transformations import ScaleTransformation
-from cross.transformations.utils.dtypes import numerical_columns
+from cross.transformations.utils import dtypes
 
 
 class ScaleTransformationParamCalculator:
@@ -13,7 +13,7 @@ class ScaleTransformationParamCalculator:
     def calculate_best_params(
         self, x, y, model, scoring, direction, cv, groups, verbose
     ):
-        columns = numerical_columns(x)
+        columns = dtypes.numerical_columns(x)
         base_score = evaluate_model(x, y, model, scoring, cv, groups)
 
         best_params = {
@@ -34,7 +34,10 @@ class ScaleTransformationParamCalculator:
                     best_column_params.get("quantile_range", {})
                 )
 
-        return self._build_transformation_result(best_params)
+        if len(best_params["transformation_options"]):
+            return self._build_transformation_result(best_params)
+
+        return None
 
     def _find_best_scaler_for_column(
         self, x, y, model, scoring, base_score, column, direction, cv, groups

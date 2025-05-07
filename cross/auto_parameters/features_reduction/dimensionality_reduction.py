@@ -23,6 +23,9 @@ class DimensionalityReductionParamCalculator:
         n_features = X.shape[1]
         n_classes = y.nunique()
 
+        if n_features < 2:
+            return None
+
         n_components_ranges = {
             "factor_analysis": (2, min(50, n_features)),
             "ica": (2, min(50, n_features)),

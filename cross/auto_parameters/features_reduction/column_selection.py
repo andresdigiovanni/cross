@@ -1,13 +1,13 @@
 from cross.auto_parameters.shared import RecursiveFeatureAddition
 from cross.transformations import ColumnSelection
-from cross.transformations.utils.dtypes import numerical_columns
+from cross.transformations.utils import dtypes
 
 
 class ColumnSelectionParamCalculator:
     def calculate_best_params(
         self, X, y, model, scoring, direction, cv, groups, verbose
     ):
-        numeric_columns = numerical_columns(X)
+        numeric_columns = dtypes.numerical_columns(X)
         X = X[numeric_columns]
 
         rfa = RecursiveFeatureAddition(model, scoring, direction, cv, groups)

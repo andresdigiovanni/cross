@@ -2,7 +2,7 @@ from scipy.stats import skew
 from tqdm import tqdm
 
 from cross.transformations import NonLinearTransformation
-from cross.transformations.utils.dtypes import numerical_columns
+from cross.transformations.utils import dtypes
 
 
 class NonLinearTransformationParamCalculator:
@@ -12,7 +12,7 @@ class NonLinearTransformationParamCalculator:
         self, x, y, model, scoring, direction, cv, groups, verbose
     ):
         best_transformation_options = {}
-        columns = numerical_columns(x)
+        columns = dtypes.numerical_columns(x)
 
         for column in tqdm(columns, disable=not verbose):
             column_skewness = skew(x[column].dropna())

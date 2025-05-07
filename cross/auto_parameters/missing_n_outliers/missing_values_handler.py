@@ -5,7 +5,7 @@ from tqdm import tqdm
 from cross.auto_parameters.shared import evaluate_model
 from cross.auto_parameters.shared.utils import is_score_improved
 from cross.transformations import MissingValuesHandler
-from cross.transformations.utils.dtypes import categorical_columns, numerical_columns
+from cross.transformations.utils import dtypes
 
 
 class MissingValuesParamCalculator:
@@ -28,8 +28,8 @@ class MissingValuesParamCalculator:
     def calculate_best_params(
         self, x, y, model, scoring, direction, cv, groups, verbose
     ):
-        cat_columns = categorical_columns(x)
-        num_columns = numerical_columns(x)
+        cat_columns = dtypes.categorical_columns(x)
+        num_columns = dtypes.numerical_columns(x)
         x = x[cat_columns + num_columns]
 
         columns_with_nulls = self._get_columns_with_nulls(x)

@@ -25,7 +25,7 @@ class ColumnSelection(BaseEstimator, TransformerMixin):
         X = X.copy()
 
         # Select only the specified columns from X
-        X = X[self.features]
+        X = X[X.columns.intersection(self.features)]
 
         if self.track_columns:
             self.tracked_columns = {column: [column] for column in self.features}

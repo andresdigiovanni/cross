@@ -1,13 +1,13 @@
 from cross.transformations import MissingValuesIndicator
-from cross.transformations.utils.dtypes import categorical_columns, numerical_columns
+from cross.transformations.utils import dtypes
 
 
 class MissingValuesIndicatorParamCalculator:
     def calculate_best_params(
         self, x, y, model, scoring, direction, cv, groups, verbose
     ):
-        cat_columns = categorical_columns(x)
-        num_columns = numerical_columns(x)
+        cat_columns = dtypes.categorical_columns(x)
+        num_columns = dtypes.numerical_columns(x)
         x = x[cat_columns + num_columns]
 
         columns_with_nulls = self._get_columns_with_nulls(x)

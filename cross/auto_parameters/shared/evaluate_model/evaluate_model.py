@@ -3,25 +3,46 @@ from sklearn.compose import ColumnTransformer, make_column_selector
 from sklearn.impute import SimpleImputer
 from sklearn.model_selection import cross_val_score
 from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import OrdinalEncoder
 
 
 def build_pipeline(model, transformer=None):
     steps = []
 
-    # Add the custom transformations
+    # Step 1: Optional custom transformer
     if transformer:
         steps.append(("transformer", transformer))
 
-    # Impute 0's and select numeric columns
-    imputer = SimpleImputer(strategy="constant", fill_value=0, keep_empty_features=True)
-    numeric_transformer = ColumnTransformer(
+    # Step 2: Define imputers
+    numeric_imputer = SimpleImputer(strategy="constant", fill_value=0)
+    categorical_imputer = SimpleImputer(strategy="constant", fill_value="missing")
+
+    # Step 3: Categorical pipeline: impute + encode
+    categorical_pipeline = Pipeline(
         [
-            ("imputer", imputer, make_column_selector(dtype_include="number")),
+            ("imputer", categorical_imputer),
+            (
+                "label_encoder",
+                OrdinalEncoder(handle_unknown="use_encoded_value", unknown_value=-1),
+            ),
         ]
     )
-    steps.append(("numeric_processing", numeric_transformer))
 
-    # Add model
+    # Step 4: Combine both pipelines
+    preprocessor = ColumnTransformer(
+        transformers=[
+            ("numeric", numeric_imputer, make_column_selector(dtype_include="number")),
+            (
+                "categorical",
+                categorical_pipeline,
+                make_column_selector(dtype_include=["object", "category"]),
+            ),
+        ],
+        remainder="passthrough",
+    )
+
+    # Step 5: Add preprocessing and model
+    steps.append(("preprocessing", preprocessor))
     steps.append(("model", model))
 
     return Pipeline(steps=steps)
