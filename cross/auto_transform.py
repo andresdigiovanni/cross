@@ -2,9 +2,6 @@ from datetime import datetime
 from typing import Callable, List, Optional, Union
 
 import numpy as np
-import pandas as pd
-from scipy.stats import chi2_contingency, ks_2samp
-from sklearn.utils import check_random_state
 
 import cross.auto_parameters as pc
 from cross.auto_parameters.shared import evaluate_model
@@ -21,7 +18,6 @@ def auto_transform(
     direction: str = "maximize",
     cv: Union[int, Callable] = None,
     groups: Optional[np.ndarray] = None,
-    subsample_threshold: Optional[float] = 0.05,
     verbose: bool = True,
 ) -> List[dict]:
     """Automatically applies a series of data transformations to improve model performance.
@@ -34,8 +30,6 @@ def auto_transform(
         direction (str, optional): "maximize" or "minimize". Defaults to "maximize".
         cv (Union[int, Callable], optional): Cross-validation strategy. Defaults to None.
         groups (Optional[np.ndarray], optional): Group labels for cross-validation splitting. Defaults to None.
-        subsample_threshold (Optional[float], optional): Significance level to accept that distributions are similar.
-            If set to None or a value less than or equal to 0, all data will be used. Defaults to 0.05.
         verbose (bool, optional): Whether to print progress messages. Defaults to True.
 
     Returns:
@@ -57,8 +51,6 @@ def auto_transform(
     exclude_from_selection = set()
     exclude_from_dimred = set()
 
-    X, y = find_minimal_representative_sample(X, y, threshold=subsample_threshold)
-
     if verbose:
         print(f"[{date_time()}] Resampled data: {X.shape}")
 
@@ -69,7 +61,6 @@ def auto_transform(
         transformations,
         tracked_columns,
         subset=None,
-        extra_columns=None,
     ):
         X_transformed, new_transformations, new_tracked_columns = (
             execute_transformation(
@@ -83,7 +74,6 @@ def auto_transform(
                 groups,
                 verbose,
                 subset,
-                extra_columns,
             )
         )
 
@@ -205,7 +195,6 @@ def auto_transform(
         transformations,
         tracked_columns,
         subset=columns_for_selection,
-        extra_columns=exclude_from_selection,
     )
 
     candidate_columns = dtypes.numerical_columns(X)
@@ -221,7 +210,6 @@ def auto_transform(
         transformations,
         tracked_columns,
         subset=columns_for_dimred,
-        extra_columns=exclude_from_dimred,
     )
 
     # Remove unnecessary tranformations
@@ -247,7 +235,6 @@ def execute_transformation(
     groups,
     verbose,
     subset=None,
-    extra_columns=None,
 ):
     """Executes a given transformation and returns the transformed data along with metadata."""
     if verbose:
@@ -263,97 +250,12 @@ def execute_transformation(
     if not transformation:
         return X, [], []
 
-    if extra_columns:
-        features = transformation["params"]["features"]
-        features.extend(extra_columns)
-        transformation["params"]["features"] = features
-
     transformer = get_transformer(
         transformation["name"], {**transformation["params"], "track_columns": True}
     )
     X_transformed = transformer.fit_transform(X, y)
 
     return X_transformed, [transformation], [transformer.tracked_columns]
-
-
-def find_minimal_representative_sample(
-    X, y, threshold=0.05, step_fraction=0.05, random_state=42
-):
-    """
-    Finds the minimal sample size necessary to maintain the original dataset's distribution.
-
-    Args:
-        X (pd.DataFrame or np.ndarray): Feature matrix.
-        y (pd.Series or np.ndarray): Target vector.
-        threshold (float, optional): Significance level to accept that distributions are similar. Defaults to 0.05.
-        step_fraction (float, optional): Percentage of data to add in each iteration (e.g., 0.05 for 5%). Defaults to 0.05.
-        random_state (int, optional): Random seed for reproducibility. Defaults to 42.
-
-    Returns:
-        tuple: (X_reduced, y_reduced) where:
-            - X_reduced (pd.DataFrame or np.ndarray): Reduced feature matrix.
-            - y_reduced (pd.Series or np.ndarray): Reduced target vector.
-    """
-    if threshold is None or threshold <= 0:
-        return X, y
-
-    rs = check_random_state(random_state)
-
-    # Ensure X and y are pandas DataFrame/Series
-    X = pd.DataFrame(X) if not isinstance(X, pd.DataFrame) else X
-    y = pd.Series(y) if not isinstance(y, pd.Series) else y
-
-    # Initial sample size (step_fraction of the total dataset)
-    step_size = max(1, int(len(X) * step_fraction))  # Ensure at least 1 sample
-    sample_size = max(100, step_size)
-
-    while sample_size <= len(X):  # Stop when the sample size reaches the full dataset
-        # Take a new sample with the current sample size
-        sample_idx = rs.choice(X.index, size=sample_size, replace=False)
-        sample_data = X.loc[sample_idx]
-        sample_labels = y.loc[sample_idx]
-
-        all_features_match = True
-
-        for col in X.columns:
-            if (
-                X[col].dtype == "object" or X[col].dtype == "category"
-            ):  # Categorical variables
-                original_counts = X[col].value_counts()
-                sample_counts = sample_data[col].value_counts()
-
-                contingency_table = (
-                    pd.concat([original_counts, sample_counts], axis=1).fillna(0).values
-                )
-
-                _, p_value, _, _ = chi2_contingency(contingency_table)
-            else:  # Numerical variables
-                p_value = ks_2samp(X[col].dropna(), sample_data[col].dropna()).pvalue
-
-            if (
-                p_value < threshold
-            ):  # If distributions are significantly different, increase sample size
-                all_features_match = False
-                break
-
-        # Check the distribution of the target variable
-        original_counts_y = y.value_counts()
-        sample_counts_y = sample_labels.value_counts()
-
-        contingency_table_y = (
-            pd.concat([original_counts_y, sample_counts_y], axis=1).fillna(0).values
-        )
-        _, p_value_y, _, _ = chi2_contingency(contingency_table_y)
-
-        if p_value_y < threshold:
-            all_features_match = False
-
-        if all_features_match:
-            return sample_data, sample_labels  # Return the optimal subset
-
-        sample_size += step_size  # Increase the sample size
-
-    return X, y  # If no optimal subset is found, return the original dataset
 
 
 def filter_transformations(

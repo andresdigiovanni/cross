@@ -31,9 +31,10 @@ class DimensionalityReduction(BaseEstimator, TransformerMixin):
         return self
 
     def fit(self, X, y=None):
-        self._reducer = None
         X = X.copy()
         X = X[self.features]
+
+        self._reducer = None
 
         if self.method == "factor_analysis":
             self._reducer = FactorAnalysis(n_components=self.n_components).fit(X)
@@ -73,8 +74,9 @@ class DimensionalityReduction(BaseEstimator, TransformerMixin):
         return self
 
     def transform(self, X, y=None):
-        X = X[self.features]
-        reduced_array = self._reducer.transform(X)
+        X_subset = X[self.features]
+
+        reduced_array = self._reducer.transform(X_subset)
         columns = [f"{self.method}_{i + 1}" for i in range(reduced_array.shape[1])]
 
         reduced_df = pd.DataFrame(
@@ -85,9 +87,10 @@ class DimensionalityReduction(BaseEstimator, TransformerMixin):
 
         if self.track_columns:
             for column in columns:
-                self.tracked_columns[column] = list(X.columns)
+                self.tracked_columns[column] = list(self.features)
 
-        return reduced_df
+        X = pd.concat([X.drop(columns=self.features), reduced_df], axis=1)
+        return X
 
     def fit_transform(self, X, y=None):
         return self.fit(X, y).transform(X, y)

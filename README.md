@@ -172,7 +172,6 @@ from cross import auto_transform
 - `direction` (`str`, optional): Optimization direction: `"maximize"` or `"minimize"`. Default is `"maximize"`.
 - `cv` (`int` or callable, optional): Cross-validation strategy (e.g., number of folds or a custom splitter). Default is `None`.
 - `groups` (`np.ndarray`, optional): Group labels for cross-validation splitting.
-- `subsample_threshold` (`float`, optional): Significance threshold for distribution similarity. Default is `0.05`. Set to `None` or `<= 0` to disable subsampling.
 - `verbose` (`bool`, optional): Whether to display progress logs. Default is `True`.
 
 #### **Returns:**
