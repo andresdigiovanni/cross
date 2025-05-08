@@ -48,31 +48,19 @@ class CategoricalEncodingParamCalculator:
 
         for col, count in category_counts.items():
             encodings = [
-                "basen",
                 "binary",
                 "catboost",
                 "count",
-                "glmm",
-                "gray",
                 "hashing",
-                "james_stein",
                 "label",
                 "loo",
-                "m_estimate",
-                "quantile",
                 "target",
                 "woe",
             ]
             if count <= 15:
                 encodings.extend(
                     [
-                        "backward_diff",
                         "dummy",
-                        "helmert",
-                        "onehot",
-                        "polynomial",
-                        "rankhot",
-                        "sum",
                     ]
                 )
 

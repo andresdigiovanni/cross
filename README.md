@@ -243,16 +243,16 @@ MissingValuesIndicator(
 Handles missing values.
 
 - Parameters:
-    - `transformation_options`: Dictionary that specifies the handling strategy for each column. Options: `fill_0`, `most_frequent`, `fill_mean`, `fill_median`, `fill_mode`, `fill_knn`.
-    - `n_neighbors`: Number of neighbors for K-Nearest Neighbors imputation (used with `fill_knn`).
+    - `transformation_options`: Dictionary that specifies the handling strategy for each column. Options: `fill_0`, `mean`, `median`, `most_frequent`, `knn`.
+    - `n_neighbors`: Number of neighbors for K-Nearest Neighbors imputation (used with `knn`).
 
 ```python
 from cross.transformations import MissingValuesHandler
 
 MissingValuesHandler(
     transformation_options={
-        'sepal width (cm)': 'fill_knn',
-        'petal length (cm)': 'fill_mode',
+        'sepal width (cm)': 'knn',
+        'petal length (cm)': 'mean',
         'petal width (cm)': 'most_frequent',
         
     },

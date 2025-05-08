@@ -10,8 +10,8 @@ from cross.transformations.utils import dtypes
 
 class SplineTransformationParamCalculator:
     N_KNOTS_OPTIONS = [5, 10]
-    DEGREE_OPTIONS = [3, 4, 5]
-    EXTRAPOLATION_OPTIONS = ["constant", "linear", "continue", "periodic"]
+    DEGREE_OPTIONS = [3, 4]
+    EXTRAPOLATION_OPTIONS = ["constant", "linear"]
 
     def calculate_best_params(
         self, x, y, model, scoring, direction, cv, groups, verbose

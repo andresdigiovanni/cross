@@ -50,9 +50,8 @@ class OutliersParamCalculator:
     def _get_outlier_methods(self):
         return {
             "iqr": {"thresholds": [1.5, 3.0]},
-            "zscore": {"thresholds": [2.5, 3.0, 4.0]},
-            "lof": {"n_neighbors": [10, 20, 50]},
-            "iforest": {"contamination": [0.05, 0.1, 0.2]},
+            "zscore": {"thresholds": [2.5, 3.0]},
+            "iforest": {"contamination": [0.05, 0.1]},
         }
 
     def _find_best_params_for_column(
@@ -91,17 +90,18 @@ class OutliersParamCalculator:
     def _generate_combinations(self, actions, methods):
         combinations = [("none", "none", None)]
 
-        for action in actions:
-            for method, params in methods.items():
-                if action == "cap" and method not in ["iqr", "zscore"]:
-                    continue
+        for method, params in methods.items():
+            param_values = (
+                params.get("n_neighbors")
+                or params.get("contamination")
+                or params.get("thresholds")
+            )
 
-                param_values = (
-                    params.get("n_neighbors")
-                    or params.get("contamination")
-                    or params.get("thresholds")
-                )
-                combinations.extend(product([action], [method], param_values))
+            if method in ["iforest"]:
+                combinations.extend(product(["median"], [method], param_values))
+
+            else:
+                combinations.extend(product(actions, [method], param_values))
 
         return combinations
 

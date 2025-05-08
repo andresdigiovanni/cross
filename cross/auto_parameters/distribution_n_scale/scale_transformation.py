@@ -8,7 +8,7 @@ from cross.transformations.utils import dtypes
 
 class ScaleTransformationParamCalculator:
     SCALER_OPTIONS = ["min_max", "standard", "robust"]
-    QUANTILE_RANGE_OPTIONS = [1.0, 5.0, 10.0, 25.0]
+    QUANTILE_RANGE_OPTIONS = [5.0, 25.0]
 
     def calculate_best_params(
         self, x, y, model, scoring, direction, cv, groups, verbose

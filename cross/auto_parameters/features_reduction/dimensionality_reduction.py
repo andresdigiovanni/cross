@@ -10,12 +10,8 @@ class DimensionalityReductionParamCalculator:
         self, X, y, model, scoring, direction, cv, groups, verbose
     ):
         methods = [
-            "factor_analysis",
-            "ica",
-            "isomap",
             "kernel_pca",
             "lda",
-            "lle",
             "pca",
             "truncated_svd",
         ]
@@ -27,12 +23,8 @@ class DimensionalityReductionParamCalculator:
             return None
 
         n_components_ranges = {
-            "factor_analysis": (2, min(50, n_features)),
-            "ica": (2, min(50, n_features)),
-            "isomap": (2, min(50, n_features)),
             "kernel_pca": (2, min(50, n_features)),
             "lda": (2, min(50, n_features, n_classes - 1)),
-            "lle": (2, min(50, n_features)),
             "pca": (2, min(50, n_features)),
             "truncated_svd": (2, min(50, n_features)),
         }

@@ -7,7 +7,7 @@ from cross.transformations.utils import dtypes
 
 class MathematicalOperationsParamCalculator:
     SYMMETRIC_OPS = ["add", "subtract", "multiply"]
-    NON_SYMMETRIC_OPS = ["divide", "modulus"]
+    NON_SYMMETRIC_OPS = ["divide"]
 
     def calculate_best_params(
         self, x, y, model, scoring, direction, cv, groups, verbose

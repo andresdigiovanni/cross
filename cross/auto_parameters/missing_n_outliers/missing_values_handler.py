@@ -13,16 +13,14 @@ class MissingValuesParamCalculator:
         self.imputation_strategies = {
             "all": {
                 "fill_0": {},
-                "fill_mode": {},
-            },
-            "num": {
-                "fill_mean": {},
-                "fill_median": {},
-                "fill_knn": {"n_neighbors": [3, 5, 10]},
-            },
-            "cat": {
                 "most_frequent": {},
             },
+            "num": {
+                "mean": {},
+                "median": {},
+                "knn": {"n_neighbors": [5]},
+            },
+            "cat": {},
         }
 
     def calculate_best_params(
@@ -54,7 +52,7 @@ class MissingValuesParamCalculator:
             )
             best_transformation_options[column] = best_strategy
 
-            if best_strategy == "fill_knn":
+            if best_strategy == "knn":
                 best_n_neighbors.update(best_params)
 
         return self._build_result(best_transformation_options, best_n_neighbors)
@@ -79,7 +77,7 @@ class MissingValuesParamCalculator:
             )
 
         for strategy, params in imputation_strategies.items():
-            if strategy == "fill_knn":
+            if strategy == "knn":
                 score, params = self._evaluate_knn_strategy(
                     x,
                     y,
@@ -113,7 +111,7 @@ class MissingValuesParamCalculator:
 
         for n_neighbors in params["n_neighbors"]:
             score = self._evaluate_strategy(
-                x, y, model, scoring, cv, groups, column, "fill_knn", n_neighbors
+                x, y, model, scoring, cv, groups, column, "knn", n_neighbors
             )
 
             if is_score_improved(score, best_score, direction):

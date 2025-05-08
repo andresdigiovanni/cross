@@ -9,8 +9,8 @@ from cross.transformations.utils import dtypes
 
 
 class NumericalBinningParamCalculator:
-    STRATEGIES = ["uniform", "quantile", "kmeans"]
-    ALL_N_BINS = [3, 5, 8, 12, 20]
+    STRATEGIES = ["uniform", "quantile"]
+    ALL_N_BINS = [3, 8, 20]
 
     def calculate_best_params(
         self, X, y, model, scoring, direction, cv, groups, verbose
@@ -23,11 +23,16 @@ class NumericalBinningParamCalculator:
 
         with tqdm(total=len(columns) * len(combinations), disable=not verbose) as pbar:
             for column in columns:
+                n_unique = X[column].nunique()
+
                 best_score = base_score
                 best_transformation = None
 
                 for strategy, n_bins in combinations:
                     pbar.update(1)
+
+                    if n_unique <= n_bins:
+                        continue
 
                     transformation_options = {column: (strategy, n_bins)}
                     transformer = NumericalBinning(transformation_options)
