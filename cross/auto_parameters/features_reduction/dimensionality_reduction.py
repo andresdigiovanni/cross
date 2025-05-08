@@ -1,13 +1,12 @@
-from tqdm import tqdm
-
 from cross.auto_parameters.shared import evaluate_model
 from cross.auto_parameters.shared.utils import is_score_improved
 from cross.transformations import DimensionalityReduction
+from cross.utils.verbose import VerboseLogger
 
 
 class DimensionalityReductionParamCalculator:
     def calculate_best_params(
-        self, X, y, model, scoring, direction, cv, groups, verbose
+        self, X, y, model, scoring, direction, cv, groups, logger: VerboseLogger
     ):
         methods = [
             "kernel_pca",
@@ -16,10 +15,13 @@ class DimensionalityReductionParamCalculator:
             "truncated_svd",
         ]
 
+        logger.task_start("Starting dimensionality reduction")
+
         n_features = X.shape[1]
         n_classes = y.nunique()
 
         if n_features < 2:
+            logger.warn("No dimensionality reduction was applied: less than 2 columns")
             return None
 
         n_components_ranges = {
@@ -32,26 +34,28 @@ class DimensionalityReductionParamCalculator:
         best_method = None
         best_n_components = None
         best_score = evaluate_model(X, y, model, scoring, cv, groups)
+        logger.baseline(f"Base score: {best_score:.4f}")
 
-        with tqdm(total=len(methods), disable=not verbose) as pbar:
-            for method in methods:
-                n_components, score = self._binary_search_optimal_components(
-                    X,
-                    y,
-                    method,
-                    n_components_ranges[method],
-                    model,
-                    scoring,
-                    direction,
-                    cv,
-                    groups,
-                )
-                pbar.update(1)
+        for i, method in enumerate(methods, start=1):
+            n_components, score = self._binary_search_optimal_components(
+                X,
+                y,
+                method,
+                n_components_ranges[method],
+                model,
+                scoring,
+                direction,
+                cv,
+                groups,
+            )
 
-                if is_score_improved(score, best_score, direction):
-                    best_score = score
-                    best_method = method
-                    best_n_components = n_components
+            # Log progress
+            logger.progress(f"   ↪ Tried '{method}' → Score: {score:.4f}")
+
+            if is_score_improved(score, best_score, direction):
+                best_score = score
+                best_method = method
+                best_n_components = n_components
 
         if best_method and best_n_components:
             dimensionality_reduction = DimensionalityReduction(
@@ -59,11 +63,16 @@ class DimensionalityReductionParamCalculator:
                 method=best_method,
                 n_components=best_n_components,
             )
+            # Log success message
+            logger.task_result(
+                f"Best method: {best_method} with {best_n_components} components"
+            )
             return {
                 "name": dimensionality_reduction.__class__.__name__,
                 "params": dimensionality_reduction.get_params(),
             }
 
+        logger.warn("No dimensarionality reduction was applied")
         return None
 
     def _binary_search_optimal_components(

@@ -1,4 +1,5 @@
 import numpy as np
+from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.compose import ColumnTransformer, make_column_selector
 from sklearn.impute import SimpleImputer
 from sklearn.model_selection import cross_val_score
@@ -6,8 +7,23 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OrdinalEncoder
 
 
+# Custom selector to exclude datetime columns
+class ExcludeDatetimeColumns(BaseEstimator, TransformerMixin):
+    def fit(self, X, y=None):
+        self.columns_ = X.select_dtypes(
+            exclude=["datetime64[ns]", "datetime64"]
+        ).columns
+        return self
+
+    def transform(self, X):
+        return X[self.columns_]
+
+
 def build_pipeline(model, transformer=None):
     steps = []
+
+    # Step 0: Drop datetime columns
+    steps.append(("drop_datetime", ExcludeDatetimeColumns()))
 
     # Step 1: Optional custom transformer
     if transformer:
@@ -38,7 +54,7 @@ def build_pipeline(model, transformer=None):
                 make_column_selector(dtype_include=["object", "category"]),
             ),
         ],
-        remainder="passthrough",
+        remainder="drop",  # drop unhandled types like datetime
     )
 
     # Step 5: Add preprocessing and model

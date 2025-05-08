@@ -15,7 +15,7 @@ dependencies = [
     "pandas>=2.2.2",
     "matplotlib>=3.9.0",
     "category-encoders>=2.6.3",
-    "tqdm>=4.66.5",
+    "rich>=14.0.0",
 ]
 
 [dependency-groups]

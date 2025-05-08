@@ -1,8 +1,7 @@
-from tqdm import tqdm
-
 from cross.auto_parameters.shared import ProbeFeatureSelector, RecursiveFeatureAddition
 from cross.transformations import MathematicalOperations
 from cross.transformations.utils import dtypes
+from cross.utils.verbose import VerboseLogger
 
 
 class MathematicalOperationsParamCalculator:
@@ -10,17 +9,21 @@ class MathematicalOperationsParamCalculator:
     NON_SYMMETRIC_OPS = ["divide"]
 
     def calculate_best_params(
-        self, x, y, model, scoring, direction, cv, groups, verbose
+        self, x, y, model, scoring, direction, cv, groups, logger: VerboseLogger
     ):
         columns = dtypes.numerical_columns(x)
         all_transformations_info = []
         all_selected_features = []
 
         idxs_columns = range(len(columns))
+        total_columns = len(columns)
+
+        logger.task_start("Starting mathematical transformations search")
 
         # Select operations per columns using probe method
-        for idx_column_1 in tqdm(idxs_columns, disable=not verbose):
+        for i, idx_column_1 in enumerate(idxs_columns, start=1):
             column_1 = columns[idx_column_1]
+            logger.task_update(f"[{i}/{total_columns}] Evaluating column: '{column_1}'")
 
             transformations_info, operations_options = self._generate_operations(
                 x, column_1, idx_column_1, columns, idxs_columns
@@ -32,6 +35,9 @@ class MathematicalOperationsParamCalculator:
 
             selected_features = ProbeFeatureSelector.fit(x_transformed, y, model)
             all_selected_features.extend(selected_features)
+            logger.progress(
+                f"   ↪ Tried {len(transformations_info)} operations → Selected: {len(selected_features)}"
+            )
 
         selected_transformations = self._select_transformations(
             all_transformations_info, all_selected_features
@@ -39,6 +45,7 @@ class MathematicalOperationsParamCalculator:
 
         # Select final mathematical operations using RFA
         if selected_transformations:
+            logger.task_update("Refining selected operations using RFA")
             transformer = MathematicalOperations(selected_transformations)
             x_transformed = transformer.fit_transform(x, y)
 
@@ -50,11 +57,16 @@ class MathematicalOperationsParamCalculator:
             )
 
         if selected_transformations:
+            logger.task_result(
+                f"Selected {len(selected_transformations)} mathematical transformation(s)"
+            )
             mathematical_operations = MathematicalOperations(selected_transformations)
             return {
                 "name": mathematical_operations.__class__.__name__,
                 "params": mathematical_operations.get_params(),
             }
+
+        logger.warn("No mathematical transformations was applied to any column")
         return None
 
     def _generate_operations(self, x, column_1, idx_column_1, columns, idxs_columns):

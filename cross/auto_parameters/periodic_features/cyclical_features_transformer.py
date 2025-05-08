@@ -1,7 +1,6 @@
-from tqdm import tqdm
-
 from cross.transformations import CyclicalFeaturesTransformer
 from cross.transformations.utils import dtypes
+from cross.utils.verbose import VerboseLogger
 
 
 class CyclicalFeaturesTransformerParamCalculator:
@@ -17,21 +16,25 @@ class CyclicalFeaturesTransformerParamCalculator:
     PCT_UNIQUE_VALUES_THRESHOLD = 0.10
 
     def calculate_best_params(
-        self, x, y, model, scoring, direction, cv, groups, verbose
+        self, x, y, model, scoring, direction, cv, groups, logger: VerboseLogger
     ):
         columns = dtypes.numerical_columns(x)
         transformation_options = {}
 
-        for column in tqdm(columns, disable=not verbose):
-            period = self._get_period(x, column)
-            if period is None:
-                continue
+        logger.task_start("Detecting cyclical features")
 
-            transformation_options[column] = period
+        for column in columns:
+            period = self._get_period(x, column)
+            if period is not None:
+                transformation_options[column] = period
 
         if transformation_options:
+            logger.task_result(
+                f"Cyclical features applied to {len(transformation_options)} column(s)"
+            )
             return self._build_transformation_result(transformation_options)
 
+        logger.warn("No cyclical features was applied to any column")
         return None
 
     def _get_period(self, df, column):

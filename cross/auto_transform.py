@@ -8,6 +8,7 @@ from cross.auto_parameters.shared import evaluate_model
 from cross.transformations import ColumnSelection
 from cross.transformations.utils import dtypes
 from cross.utils import get_transformer
+from cross.utils.verbose import VerboseLogger
 
 
 def auto_transform(
@@ -36,11 +37,12 @@ def auto_transform(
         List[dict]: A list of applied transformations.
     """
 
-    if verbose:
-        print(f"\n[{date_time()}] Starting transformation search")
-        print(f"[{date_time()}] Data shape: {X.shape}")
-        print(f"[{date_time()}] Model: {model.__class__.__name__}")
-        print(f"[{date_time()}] Scoring: {scoring}\n")
+    logger = VerboseLogger(verbose)
+
+    logger.header("Starting automated transformation search")
+    logger.config(f"Input shape: {X.shape}")
+    logger.config(f"Model: {model.__class__.__name__}")
+    logger.config(f"Scoring metric: '{scoring}' with direction '{direction}'")
 
     X = X.copy()
     y = y.copy()
@@ -50,9 +52,6 @@ def auto_transform(
 
     exclude_from_selection = set()
     exclude_from_dimred = set()
-
-    if verbose:
-        print(f"[{date_time()}] Resampled data: {X.shape}")
 
     def wrapper(
         transformer,
@@ -72,7 +71,7 @@ def auto_transform(
                 direction,
                 cv,
                 groups,
-                verbose,
+                logger,
                 subset,
             )
         )
@@ -169,7 +168,12 @@ def auto_transform(
     if datetime_columns:
         transformer = pc.CyclicalFeaturesTransformerParamCalculator()
         X, transformations, tracked_columns, new_columns = wrapper(
-            transformer, X, y, transformations, tracked_columns, subset=datetime_columns
+            transformer,
+            X,
+            y,
+            transformations,
+            tracked_columns,
+            subset=list(datetime_columns),
         )
         exclude_from_dimred.update(new_columns)
 
@@ -233,19 +237,14 @@ def execute_transformation(
     direction,
     cv,
     groups,
-    verbose,
+    logger,
     subset=None,
 ):
     """Executes a given transformation and returns the transformed data along with metadata."""
-    if verbose:
-        print(
-            f"\n[{date_time()}] Applying transformation: {calculator.__class__.__name__}"
-        )
-
     X_subset = X.loc[:, subset] if subset else X
 
     transformation = calculator.calculate_best_params(
-        X_subset, y, model, scoring, direction, cv, groups, verbose
+        X_subset, y, model, scoring, direction, cv, groups, logger
     )
     if not transformation:
         return X, [], []

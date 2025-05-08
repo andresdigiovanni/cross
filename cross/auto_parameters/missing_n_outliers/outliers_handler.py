@@ -3,22 +3,22 @@ from itertools import product
 import numpy as np
 from sklearn.ensemble import IsolationForest
 from sklearn.neighbors import LocalOutlierFactor
-from tqdm import tqdm
 
 from cross.auto_parameters.shared import evaluate_model
 from cross.auto_parameters.shared.utils import is_score_improved
 from cross.transformations import OutliersHandler
 from cross.transformations.utils import dtypes
+from cross.utils.verbose import VerboseLogger
 
 
 class OutliersParamCalculator:
     def calculate_best_params(
-        self, x, y, model, scoring, direction, cv, groups, verbose
+        self, x, y, model, scoring, direction, cv, groups, logger: VerboseLogger
     ):
         columns = dtypes.numerical_columns(x)
+        total_columns = len(columns)
         outlier_methods = self._get_outlier_methods()
         outlier_actions = ["cap", "median"]
-        base_score = evaluate_model(x, y, model, scoring, cv, groups)
 
         best_params = {
             "transformation_options": {},
@@ -27,7 +27,13 @@ class OutliersParamCalculator:
             "iforest_params": {},
         }
 
-        for column in tqdm(columns, disable=not verbose):
+        logger.task_start("Starting outlier handling search")
+        base_score = evaluate_model(x, y, model, scoring, cv, groups)
+        logger.baseline(f"Base score: {base_score:.4f}")
+
+        for i, column in enumerate(columns, start=1):
+            logger.task_update(f"[{i}/{total_columns}] Evaluating column: '{column}'")
+
             best_column_params = self._find_best_params_for_column(
                 x,
                 y,
@@ -40,11 +46,24 @@ class OutliersParamCalculator:
                 base_score,
                 outlier_actions,
                 outlier_methods,
+                logger,
             )
 
             if best_column_params:
+                kwargs_str = self._kwargs_to_string(best_column_params, column)
+                logger.task_result(
+                    f"Selected outlier handler for '{column}': {kwargs_str}"
+                )
                 self._update_best_params(column, best_column_params, best_params)
 
+        transformation_options = best_params["transformation_options"]
+        if transformation_options:
+            logger.task_result(
+                f"Outlier handler applied to {len(transformation_options)} column(s)"
+            )
+            return self._build_outliers_handler(best_params)
+
+        logger.warn("No outlier handler was applied to any column")
         return self._build_outliers_handler(best_params)
 
     def _get_outlier_methods(self):
@@ -67,6 +86,7 @@ class OutliersParamCalculator:
         base_score,
         actions,
         methods,
+        logger,
     ):
         best_score = base_score
         best_params = {}
@@ -80,6 +100,8 @@ class OutliersParamCalculator:
             score = evaluate_model(
                 x, y, model, scoring, cv, groups, OutliersHandler(**kwargs)
             )
+            kwargs_str = self._kwargs_to_string(kwargs, column)
+            logger.progress(f"   ↪ Tried '{kwargs_str}' → Score: {score:.4f}")
 
             if is_score_improved(score, best_score, direction):
                 best_score = score
@@ -97,9 +119,8 @@ class OutliersParamCalculator:
                 or params.get("thresholds")
             )
 
-            if method in ["iforest"]:
+            if method == "iforest":
                 combinations.extend(product(["median"], [method], param_values))
-
             else:
                 combinations.extend(product(actions, [method], param_values))
 
@@ -116,10 +137,9 @@ class OutliersParamCalculator:
 
     def _get_outliers_count(self, column_data, method, param):
         if method == "iqr":
-            q1, q3 = np.percentile(column_data, [25, 75])
+            q1, q3 = np.percentile(column_data.dropna(), [25, 75])
             iqr = q3 - q1
             lower, upper = q1 - param * iqr, q3 + param * iqr
-
         else:  # zscore
             mean, std = column_data.mean(), column_data.std()
             lower, upper = mean - param * std, mean + param * std
@@ -127,12 +147,13 @@ class OutliersParamCalculator:
         return column_data[(column_data < lower) | (column_data > upper)].shape[0]
 
     def _get_outliers_count_ml(self, column_data, method, param):
+        clean_data = column_data.dropna().values.reshape(-1, 1)
         model = (
             LocalOutlierFactor(n_neighbors=param)
             if method == "lof"
-            else IsolationForest(contamination=param)
+            else IsolationForest(contamination=param, random_state=42)
         )
-        is_outlier = model.fit_predict(column_data.dropna().values.reshape(-1, 1)) == -1
+        is_outlier = model.fit_predict(clean_data) == -1
         return is_outlier.sum()
 
     def _build_kwargs(self, column, action, method, param):
@@ -140,14 +161,29 @@ class OutliersParamCalculator:
 
         if method == "lof":
             kwargs["lof_params"] = {column: {"n_neighbors": param}}
-
         elif method == "iforest":
             kwargs["iforest_params"] = {column: {"contamination": param}}
-
         else:
             kwargs["thresholds"] = {column: param}
 
         return kwargs
+
+    def _kwargs_to_string(self, kwargs, column):
+        action = kwargs["transformation_options"][column][0]
+        method = kwargs["transformation_options"][column][1]
+
+        if method == "lof":
+            params = f"n_neighbors: {kwargs['lof_params'][column]['n_neighbors']}"
+
+        elif method == "iforest":
+            params = (
+                f"contamination: {kwargs['iforest_params'][column]['contamination']}"
+            )
+
+        else:
+            params = f"thresholds: {kwargs['thresholds'][column]}"
+
+        return f"action: {action}, method: {method}, {params}"
 
     def _update_best_params(self, column, best_column_params, best_params):
         action = best_column_params["transformation_options"][column][0]
