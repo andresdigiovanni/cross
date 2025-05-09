@@ -1,3 +1,5 @@
+from typing import Any, Dict, Optional
+
 from cross.auto_parameters.shared import evaluate_model
 from cross.auto_parameters.shared.utils import is_score_improved
 from cross.transformations import QuantileTransformation
@@ -5,83 +7,81 @@ from cross.transformations.utils import dtypes
 from cross.utils.verbose import VerboseLogger
 
 
-class QuantileTransformationParamCalculator:
-    QUANTILE_TRANSFORMATION_OPTIONS = ["uniform", "normal"]
+class QuantileTransformationParameterSelector:
+    TRANSFORMATION_OPTIONS = ["uniform", "normal"]
 
-    def calculate_best_params(
-        self,
-        x,
-        y,
-        model,
-        scoring,
-        direction,
-        cv,
-        groups,
-        logger: VerboseLogger,
-    ):
-        columns = dtypes.numerical_columns(x)
-        transformation_options = {}
-        total_columns = len(columns)
+    def select_best_parameters(
+        self, X, y, model, scoring, direction: str, cv, groups, logger: VerboseLogger
+    ) -> Optional[Dict[str, Any]]:
+        logger.task_start("Beginning search for optimal quantile transformations.")
 
-        logger.task_start("Starting quantile transformation parameter search")
-        base_score = evaluate_model(x, y, model, scoring, cv, groups)
-        logger.baseline(f"Base score: {base_score:.4f}")
+        numeric_columns = dtypes.numerical_columns(X)
+        total_columns = len(numeric_columns)
+        selected_transformations = {}
 
-        for i, column in enumerate(columns, start=1):
-            logger.task_update(f"[{i}/{total_columns}] Evaluating column: '{column}'")
+        base_score = evaluate_model(X, y, model, scoring, cv, groups)
+        logger.baseline(
+            f"Baseline score (no quantile transformation): {base_score:.4f}"
+        )
 
-            best_params = self._find_best_quantile_transformation_for_column(
-                x, y, model, scoring, base_score, column, direction, cv, groups, logger
+        for index, column in enumerate(numeric_columns, start=1):
+            logger.task_update(
+                f"[{index}/{total_columns}] Evaluating column: '{column}'"
             )
 
-            if best_params:
-                transformation_options.update(best_params)
+            best_option = self._evaluate_column_transformations(
+                X, y, model, scoring, base_score, column, direction, cv, groups, logger
+            )
+
+            if best_option:
+                selected_transformations.update(best_option)
                 logger.task_result(
-                    f"Selected transformation for '{column}': {list(best_params.values())[0]}"
+                    f"Selected transformation for '{column}': {list(best_option.values())[0]}"
                 )
 
-        if transformation_options:
+        if selected_transformations:
             logger.task_result(
-                f"Quantile transformation applied to {len(transformation_options)} column(s)"
+                f"Quantile transformation selected for {len(selected_transformations)} column(s)."
             )
-            return self._build_transformation_result(transformation_options)
+            return self._build_transformation_result(selected_transformations)
 
-        logger.warn("No quantile transformation was applied to any column")
+        logger.warn("No quantile transformation improved performance.")
         return None
 
-    def _find_best_quantile_transformation_for_column(
+    def _evaluate_column_transformations(
         self,
-        x,
+        X,
         y,
         model,
         scoring,
-        base_score,
-        column,
-        direction,
+        base_score: float,
+        column: str,
+        direction: str,
         cv,
         groups,
         logger: VerboseLogger,
-    ):
+    ) -> Dict[str, str]:
         best_score = base_score
-        best_params = {}
+        best_transformation = {}
 
-        for transformation in self.QUANTILE_TRANSFORMATION_OPTIONS:
-            params = {column: transformation}
-            transformer = QuantileTransformation(params)
-            score = evaluate_model(x, y, model, scoring, cv, groups, transformer)
-            logger.progress(f"   ↪ Tried '{transformation}' → Score: {score:.4f}")
+        for option in self.TRANSFORMATION_OPTIONS:
+            transformation = QuantileTransformation({column: option})
+            score = evaluate_model(X, y, model, scoring, cv, groups, transformation)
+            logger.progress(f"   ↪ Tried '{option}' → Score: {score:.4f}")
 
             if is_score_improved(score, best_score, direction):
                 best_score = score
-                best_params = params
+                best_transformation = {column: option}
 
-        return best_params
+        return best_transformation
 
-    def _build_transformation_result(self, transformation_options):
-        quantile_transformation = QuantileTransformation(
+    def _build_transformation_result(
+        self, transformation_options: Dict[str, str]
+    ) -> Dict[str, Any]:
+        transformer = QuantileTransformation(
             transformation_options=transformation_options
         )
         return {
-            "name": quantile_transformation.__class__.__name__,
-            "params": quantile_transformation.get_params(),
+            "name": transformer.__class__.__name__,
+            "params": transformer.get_params(),
         }

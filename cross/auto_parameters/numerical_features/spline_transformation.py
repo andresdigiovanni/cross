@@ -7,51 +7,48 @@ from cross.transformations.utils import dtypes
 from cross.utils.verbose import VerboseLogger
 
 
-class SplineTransformationParamCalculator:
+class SplineTransformationParameterSelector:
     N_KNOTS_OPTIONS = [5, 10]
     DEGREE_OPTIONS = [3, 4]
     EXTRAPOLATION_OPTIONS = ["constant", "linear"]
 
-    def calculate_best_params(
+    def select_best_parameters(
         self, x, y, model, scoring, direction, cv, groups, logger: VerboseLogger
     ):
         columns = dtypes.numerical_columns(x)
         total_columns = len(columns)
-        transformation_options = {}
+        best_transformations = {}
 
-        logger.task_start("Starting spline transformations search")
+        logger.task_start("Starting spline transformation search")
         base_score = evaluate_model(x, y, model, scoring, cv, groups)
         logger.baseline(f"Base score: {base_score:.4f}")
 
         for i, column in enumerate(columns, start=1):
             logger.task_update(f"[{i}/{total_columns}] Evaluating column: '{column}'")
 
-            best_params = self._find_best_spline_transformation_for_column(
-                x, y, model, scoring, base_score, column, direction, cv, groups, logger
+            best_params = self._find_best_spline_params_for_column(
+                x, y, model, scoring, direction, cv, groups, base_score, column, logger
             )
 
             if best_params:
-                kwargs_str = (
-                    f"extrapolation: {best_params[column]['extrapolation']}"
-                    + f", degree: {best_params[column]['degree']}"
-                    + f", n_knots: {best_params[column]['n_knots']}"
-                )
+                config = best_params[column]
                 logger.task_result(
-                    f"Selected spline transformation for '{column}': {kwargs_str}"
+                    f"Selected spline transformation for '{column}': "
+                    f"extrapolation='{config['extrapolation']}', degree={config['degree']}, n_knots={config['n_knots']}"
                 )
-                transformation_options.update(best_params)
+                best_transformations.update(best_params)
 
-        if transformation_options:
+        if best_transformations:
             logger.task_result(
-                f"Spline transformations applied to {len(transformation_options)} column(s)"
+                f"Spline transformations applied to {len(best_transformations)} column(s)"
             )
-            return self._build_transformation_result(transformation_options)
+            return self._build_transformation_result(best_transformations)
 
-        logger.warn("No spline transformations was applied to any column")
+        logger.warn("No spline transformations were applied to any column")
         return None
 
-    def _find_best_spline_transformation_for_column(
-        self, x, y, model, scoring, base_score, column, direction, cv, groups, logger
+    def _find_best_spline_params_for_column(
+        self, x, y, model, scoring, direction, cv, groups, base_score, column, logger
     ):
         best_score = base_score
         best_params = {}
@@ -59,9 +56,6 @@ class SplineTransformationParamCalculator:
         for n_knots, degree, extrapolation in product(
             self.N_KNOTS_OPTIONS, self.DEGREE_OPTIONS, self.EXTRAPOLATION_OPTIONS
         ):
-            if extrapolation == "periodic" and degree >= n_knots:
-                continue
-
             params = {
                 column: {
                     "degree": degree,
@@ -69,10 +63,11 @@ class SplineTransformationParamCalculator:
                     "extrapolation": extrapolation,
                 }
             }
-            spline_transformer = SplineTransformation(params)
-            score = evaluate_model(x, y, model, scoring, cv, groups, spline_transformer)
+
+            transformer = SplineTransformation(params)
+            score = evaluate_model(x, y, model, scoring, cv, groups, transformer)
             logger.progress(
-                f"   ↪ Tried {extrapolation=}, {degree=}, {n_knots=} → Score: {score:.4f}"
+                f"   ↪ Tried extrapolation='{extrapolation}', degree={degree}, n_knots={n_knots} → Score: {score:.4f}"
             )
 
             if is_score_improved(score, best_score, direction):
@@ -82,10 +77,10 @@ class SplineTransformationParamCalculator:
         return best_params
 
     def _build_transformation_result(self, transformation_options):
-        spline_transformation = SplineTransformation(
+        transformer = SplineTransformation(
             transformation_options=transformation_options
         )
         return {
-            "name": spline_transformation.__class__.__name__,
-            "params": spline_transformation.get_params(),
+            "name": transformer.__class__.__name__,
+            "params": transformer.get_params(),
         }

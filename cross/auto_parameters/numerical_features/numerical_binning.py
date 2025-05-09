@@ -7,50 +7,52 @@ from cross.transformations.utils import dtypes
 from cross.utils.verbose import VerboseLogger
 
 
-class NumericalBinningParamCalculator:
+class NumericalBinningParameterSelector:
     STRATEGIES = ["uniform", "quantile"]
-    ALL_N_BINS = [3, 8, 20]
+    BIN_COUNTS = [3, 8, 20]
 
-    def calculate_best_params(
-        self, X, y, model, scoring, direction, cv, groups, logger: VerboseLogger
+    def select_best_parameters(
+        self, x, y, model, scoring, direction, cv, groups, logger: VerboseLogger
     ):
-        columns = dtypes.numerical_columns(X)
+        columns = dtypes.numerical_columns(x)
         total_columns = len(columns)
         best_transformations = {}
-        combinations = list(product(self.STRATEGIES, self.ALL_N_BINS))
+        all_combinations = list(product(self.STRATEGIES, self.BIN_COUNTS))
 
         logger.task_start("Starting numerical binning search")
-        base_score = evaluate_model(X, y, model, scoring, cv, groups)
+
+        base_score = evaluate_model(x, y, model, scoring, cv, groups)
         logger.baseline(f"Base score: {base_score:.4f}")
 
         for i, column in enumerate(columns, start=1):
-            n_unique = X[column].nunique()
+            n_unique = x[column].nunique()
             logger.task_update(f"[{i}/{total_columns}] Evaluating column: '{column}'")
 
             best_score = base_score
-            best_transformation = None
+            best_column_params = None
 
-            for strategy, n_bins in combinations:
+            for strategy, n_bins in all_combinations:
                 if n_unique <= n_bins:
                     continue
 
-                transformation_options = {column: (strategy, n_bins)}
-                transformer = NumericalBinning(transformation_options)
+                transformation_option = {column: (strategy, n_bins)}
+                transformer = NumericalBinning(transformation_option)
 
-                score = evaluate_model(X, y, model, scoring, cv, groups, transformer)
+                score = evaluate_model(x, y, model, scoring, cv, groups, transformer)
                 logger.progress(
-                    f"   ↪ Tried '{strategy}' with {n_bins} bins → Score: {score:.4f}"
+                    f"   ↪ Tried strategy='{strategy}', bins={n_bins} → Score: {score:.4f}"
                 )
 
                 if is_score_improved(score, best_score, direction):
                     best_score = score
-                    best_transformation = (strategy, n_bins)
+                    best_column_params = (strategy, n_bins)
 
-            if best_transformation:
+            if best_column_params:
+                strategy, n_bins = best_column_params
                 logger.task_result(
-                    f"Selected numerical binning for '{column}': {best_transformation[0]} with {best_transformation[1]} bins"
+                    f"Selected binning for '{column}': strategy='{strategy}', bins={n_bins}"
                 )
-                best_transformations[column] = best_transformation
+                best_transformations[column] = best_column_params
 
         if best_transformations:
             logger.task_result(

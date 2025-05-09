@@ -1,3 +1,5 @@
+from typing import Any, Dict, Optional
+
 from scipy.stats import skew
 
 from cross.transformations import NonLinearTransformation
@@ -5,44 +7,46 @@ from cross.transformations.utils import dtypes
 from cross.utils.verbose import VerboseLogger
 
 
-class NonLinearTransformationParamCalculator:
+class NonLinearTransformationParameterSelector:
     SKEWNESS_THRESHOLD = 0.5
 
-    def calculate_best_params(
-        self, x, y, model, scoring, direction, cv, groups, logger: VerboseLogger
-    ):
-        best_transformation_options = {}
-        columns = dtypes.numerical_columns(x)
-        total_columns = len(columns)
+    def select_best_parameters(
+        self, X, y, model, scoring, direction: str, cv, groups, logger: VerboseLogger
+    ) -> Optional[Dict[str, Any]]:
+        logger.task_start("Beginning search for optimal non-linear transformations.")
 
-        logger.task_start("Starting non-linear transformation search")
+        numeric_columns = dtypes.numerical_columns(X)
+        total_columns = len(numeric_columns)
+        selected_transformations = {}
 
-        for i, column in enumerate(columns, start=1):
-            logger.task_update(f"[{i}/{total_columns}] Checking column: '{column}'")
-
-            column_skewness = skew(x[column].dropna())
-            logger.progress(f"   ↪ Skewness: {column_skewness:.4f}")
-
-            if abs(column_skewness) < self.SKEWNESS_THRESHOLD:
-                continue
-
-            best_transformation_options[column] = "yeo_johnson"
-            logger.task_result(f"Selected 'yeo_johnson' for '{column}'")
-
-        if best_transformation_options:
-            logger.task_result(
-                f"Non-linear transformation applied to {len(best_transformation_options)} column(s)"
+        for index, column in enumerate(numeric_columns, start=1):
+            logger.task_update(
+                f"[{index}/{total_columns}] Evaluating column: '{column}'"
             )
-            return self._build_transformation_result(best_transformation_options)
 
-        logger.warn("No columns required non-linear transformation")
+            column_skew = skew(X[column].dropna())
+            logger.progress(f"   ↪ Skewness: {column_skew:.4f}")
+
+            if abs(column_skew) >= self.SKEWNESS_THRESHOLD:
+                selected_transformations[column] = "yeo_johnson"
+                logger.task_result(f"Selected 'yeo_johnson' for '{column}'")
+
+        if selected_transformations:
+            logger.task_result(
+                f"Non-linear transformation selected for {len(selected_transformations)} column(s)."
+            )
+            return self._build_transformation_result(selected_transformations)
+
+        logger.warn("No columns met the threshold for non-linear transformation.")
         return None
 
-    def _build_transformation_result(self, best_transformation_options):
-        non_linear_transformation = NonLinearTransformation(
-            transformation_options=best_transformation_options
+    def _build_transformation_result(
+        self, transformation_options: Dict[str, str]
+    ) -> Dict[str, Any]:
+        transformer = NonLinearTransformation(
+            transformation_options=transformation_options
         )
         return {
-            "name": non_linear_transformation.__class__.__name__,
-            "params": non_linear_transformation.get_params(),
+            "name": transformer.__class__.__name__,
+            "params": transformer.get_params(),
         }

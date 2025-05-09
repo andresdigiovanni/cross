@@ -1,3 +1,3 @@
-from .mathematical_operations import MathematicalOperationsParamCalculator
-from .numerical_binning import NumericalBinningParamCalculator
-from .spline_transformation import SplineTransformationParamCalculator
+from .mathematical_operations import MathematicalOperationsParameterSelector
+from .numerical_binning import NumericalBinningParameterSelector
+from .spline_transformation import SplineTransformationParameterSelector

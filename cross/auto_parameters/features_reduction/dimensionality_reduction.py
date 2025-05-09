@@ -1,20 +1,17 @@
+from typing import Any, Dict, Optional, Tuple
+
 from cross.auto_parameters.shared import evaluate_model
 from cross.auto_parameters.shared.utils import is_score_improved
 from cross.transformations import DimensionalityReduction
 from cross.utils.verbose import VerboseLogger
 
 
-class DimensionalityReductionParamCalculator:
-    def calculate_best_params(
-        self, X, y, model, scoring, direction, cv, groups, logger: VerboseLogger
-    ):
-        methods = [
-            "kernel_pca",
-            "lda",
-            "pca",
-            "truncated_svd",
-        ]
+class DimensionalityReductionParameterSelector:
+    METHODS = ["kernel_pca", "lda", "pca", "truncated_svd"]
 
+    def select_best_parameters(
+        self, X, y, model, scoring, direction: str, cv, groups, logger: VerboseLogger
+    ) -> Optional[Dict[str, Any]]:
         logger.task_start("Starting dimensionality reduction")
 
         n_features = X.shape[1]
@@ -24,32 +21,19 @@ class DimensionalityReductionParamCalculator:
             logger.warn("No dimensionality reduction was applied: less than 2 columns")
             return None
 
-        n_components_ranges = {
-            "kernel_pca": (2, min(50, n_features)),
-            "lda": (2, min(50, n_features, n_classes - 1)),
-            "pca": (2, min(50, n_features)),
-            "truncated_svd": (2, min(50, n_features)),
-        }
-
         best_method = None
         best_n_components = None
         best_score = evaluate_model(X, y, model, scoring, cv, groups)
         logger.baseline(f"Base score: {best_score:.4f}")
 
-        for i, method in enumerate(methods, start=1):
-            n_components, score = self._binary_search_optimal_components(
-                X,
-                y,
-                method,
-                n_components_ranges[method],
-                model,
-                scoring,
-                direction,
-                cv,
-                groups,
-            )
+        for method in self.METHODS:
+            max_components = min(50, n_features)
+            if method == "lda":
+                max_components = min(max_components, n_classes - 1)
 
-            # Log progress
+            n_components, score = self._search_optimal_components(
+                X, y, method, (2, max_components), model, scoring, direction, cv, groups
+            )
             logger.progress(f"   ↪ Tried '{method}' → Score: {score:.4f}")
 
             if is_score_improved(score, best_score, direction):
@@ -57,67 +41,68 @@ class DimensionalityReductionParamCalculator:
                 best_method = method
                 best_n_components = n_components
 
-        if best_method and best_n_components:
-            dimensionality_reduction = DimensionalityReduction(
+        if best_method:
+            transformer = DimensionalityReduction(
                 features=list(X.columns),
                 method=best_method,
                 n_components=best_n_components,
             )
-            # Log success message
             logger.task_result(
                 f"Best method: {best_method} with {best_n_components} components"
             )
             return {
-                "name": dimensionality_reduction.__class__.__name__,
-                "params": dimensionality_reduction.get_params(),
+                "name": transformer.__class__.__name__,
+                "params": transformer.get_params(),
             }
 
-        logger.warn("No dimensarionality reduction was applied")
+        logger.warn("No dimensionality reduction was applied")
         return None
 
-    def _binary_search_optimal_components(
-        self, X, y, method, n_range, model, scoring, direction, cv, groups
-    ):
+    def _search_optimal_components(
+        self,
+        X,
+        y,
+        method: str,
+        n_range: Tuple[int, int],
+        model,
+        scoring,
+        direction: str,
+        cv,
+        groups,
+    ) -> Tuple[int, float]:
         low, high = n_range
-        best_n_components = low
+        best_n = low
         best_score = float("-inf") if direction == "maximize" else float("inf")
         scores = {}
 
-        while low < high:
+        while low <= high:
             mid1 = low + (high - low) // 3
             mid2 = high - (high - low) // 3
 
-            # Evaluate performance for the two midpoints
-            if mid1 not in scores:
-                handler_1 = DimensionalityReduction(
-                    features=list(X.columns), method=method, n_components=mid1
-                )
-                score_1 = evaluate_model(X, y, model, scoring, cv, groups, handler_1)
-                scores[mid1] = score_1
+            for mid in [mid1, mid2]:
+                if mid not in scores:
+                    transformer = DimensionalityReduction(
+                        features=list(X.columns),
+                        method=method,
+                        n_components=mid,
+                    )
+                    scores[mid] = evaluate_model(
+                        X, y, model, scoring, cv, groups, transformer
+                    )
 
-            score_1 = scores[mid1]
+            score1, score2 = scores[mid1], scores[mid2]
 
-            if mid2 not in scores:
-                handler_2 = DimensionalityReduction(
-                    features=list(X.columns), method=method, n_components=mid2
-                )
-                score_2 = evaluate_model(X, y, model, scoring, cv, groups, handler_2)
-                scores[mid2] = score_2
+            if is_score_improved(score1, best_score, direction):
+                best_score = score1
+                best_n = mid1
 
-            score_2 = scores[mid2]
+            if is_score_improved(score2, best_score, direction):
+                best_score = score2
+                best_n = mid2
 
-            if is_score_improved(score_1, best_score, direction):
-                best_score = score_1
-                best_n_components = mid1
-
-            if is_score_improved(score_2, best_score, direction):
-                best_score = score_2
-                best_n_components = mid2
-
-            # Narrow the search space based on comparisons
-            if is_score_improved(score_2, score_1, direction):
-                low = mid1 + 1  # Search in the upper half
+            if is_score_improved(score2, score1, direction):
+                low = mid1 + 1
             else:
-                high = mid2 - 1  # Search in the lower half
+                high = mid2 - 1
 
-        return best_n_components, best_score
+        return best_n, best_score

@@ -1,2 +1,2 @@
-from .cyclical_features_transformer import CyclicalFeaturesTransformerParamCalculator
-from .datetime_transformer import DateTimeTransformerParamCalculator
+from .cyclical_features_transformer import CyclicalFeaturesTransformerParameterSelector
+from .datetime_transformer import DateTimeTransformerParameterSelector

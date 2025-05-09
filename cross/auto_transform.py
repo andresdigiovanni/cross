@@ -44,71 +44,51 @@ def auto_transform(
     logger.config(f"Model: {model.__class__.__name__}")
     logger.config(f"Scoring metric: '{scoring}' with direction '{direction}'")
 
-    X = X.copy()
-    y = y.copy()
+    X, y = X.copy(), y.copy()
     initial_columns = set(X.columns)
     initial_num_columns = dtypes.numerical_columns(X)
+
     transformations, tracked_columns = [], []
+    exclude_from_selection, exclude_from_dimred = set(), set()
 
-    exclude_from_selection = set()
-    exclude_from_dimred = set()
-
-    def wrapper(
-        transformer,
-        X,
-        y,
-        transformations,
-        tracked_columns,
-        subset=None,
+    def apply_wrapper(
+        transform_calc, X, y, transformations, tracked_columns, subset=None
     ):
-        X_transformed, new_transformations, new_tracked_columns = (
-            execute_transformation(
-                transformer,
-                X,
-                y,
-                model,
-                scoring,
-                direction,
-                cv,
-                groups,
-                logger,
-                subset,
-            )
+        X_t, new_transforms, new_tracks = execute_transformation(
+            transform_calc, X, y, model, scoring, direction, cv, groups, logger, subset
         )
-
-        transformations.extend(new_transformations)
-        tracked_columns.extend(new_tracked_columns)
-        new_columns = set(X_transformed.columns) - set(X.columns)
-
-        return X_transformed, transformations, tracked_columns, new_columns
+        transformations.extend(new_transforms)
+        tracked_columns.extend(new_tracks)
+        new_columns = set(X_t.columns) - set(X.columns)
+        return X_t, transformations, tracked_columns, new_columns
 
     # Apply Missing and Outlier handling
-    transformer = pc.MissingValuesIndicatorParamCalculator()
-    X, transformations, tracked_columns, new_columns = wrapper(
+    transformer = pc.MissingValuesIndicatorParameterSelector()
+    X, transformations, tracked_columns, new_columns = apply_wrapper(
         transformer, X, y, transformations, tracked_columns
     )
     exclude_from_dimred.update(new_columns)
 
-    transformer = pc.MissingValuesParamCalculator()
-    X, transformations, tracked_columns, _ = wrapper(
+    transformer = pc.MissingValuesHandlerParameterSelector()
+    X, transformations, tracked_columns, _ = apply_wrapper(
         transformer, X, y, transformations, tracked_columns
     )
 
-    transformer = pc.OutliersParamCalculator()
-    X, transformations, tracked_columns, _ = wrapper(
+    transformer = pc.OutliersParameterSelector()
+    X, transformations, tracked_columns, _ = apply_wrapper(
         transformer, X, y, transformations, tracked_columns
     )
 
     # Feature Engineering
-    transformer = pc.SplineTransformationParamCalculator()
-    X, transformations, tracked_columns, new_columns = wrapper(
+    transformer = pc.SplineTransformationParameterSelector()
+    X, transformations, tracked_columns, new_columns = apply_wrapper(
         transformer, X, y, transformations, tracked_columns, subset=initial_num_columns
     )
     exclude_from_selection.update(new_columns)
     exclude_from_dimred.update(new_columns)
 
-    transformer = pc.NumericalBinningParamCalculator()
-    X, transformations, tracked_columns, new_columns = wrapper(
+    transformer = pc.NumericalBinningParameterSelector()
+    X, transformations, tracked_columns, new_columns = apply_wrapper(
         transformer, X, y, transformations, tracked_columns, subset=initial_num_columns
     )
     exclude_from_dimred.update(new_columns)
@@ -118,19 +98,19 @@ def auto_transform(
     tracked_columns_1, tracked_columns_2 = [], []
 
     ## Option 1: NonLinear + Normalization
-    transformer = pc.NonLinearTransformationParamCalculator()
-    X_1, transformations_1, tracked_columns_1, _ = wrapper(
+    transformer = pc.NonLinearTransformationParameterSelector()
+    X_1, transformations_1, tracked_columns_1, _ = apply_wrapper(
         transformer, X, y, transformations_1, tracked_columns_1
     )
 
-    transformer = pc.NormalizationParamCalculator()
-    X_1, transformations_1, tracked_columns_1, _ = wrapper(
+    transformer = pc.NormalizationParameterSelector()
+    X_1, transformations_1, tracked_columns_1, _ = apply_wrapper(
         transformer, X_1, y, transformations_1, tracked_columns_1
     )
 
     ## Option 2: Quantile Transformation
-    transformer = pc.QuantileTransformationParamCalculator()
-    X_2, transformations_2, tracked_columns_2, _ = wrapper(
+    transformer = pc.QuantileTransformationParameterSelector()
+    X_2, transformations_2, tracked_columns_2, _ = apply_wrapper(
         transformer, X, y, transformations_2, tracked_columns_2
     )
 
@@ -148,26 +128,26 @@ def auto_transform(
         tracked_columns.extend(tracked_columns_2)
 
     # Apply Mathematical Operations
-    transformer = pc.MathematicalOperationsParamCalculator()
-    X, transformations, tracked_columns, _ = wrapper(
+    transformer = pc.MathematicalOperationsParameterSelector()
+    X, transformations, tracked_columns, _ = apply_wrapper(
         transformer, X, y, transformations, tracked_columns, subset=initial_num_columns
     )
 
     # Final scaling after all transformations
-    transformer = pc.ScaleTransformationParamCalculator()
-    X, transformations, tracked_columns, _ = wrapper(
+    transformer = pc.ScaleTransformationParameterSelector()
+    X, transformations, tracked_columns, _ = apply_wrapper(
         transformer, X, y, transformations, tracked_columns
     )
 
     # Periodic Features
-    transformer = pc.DateTimeTransformerParamCalculator()
-    X, transformations, tracked_columns, datetime_columns = wrapper(
+    transformer = pc.DateTimeTransformerParameterSelector()
+    X, transformations, tracked_columns, datetime_columns = apply_wrapper(
         transformer, X, y, transformations, tracked_columns
     )
 
     if datetime_columns:
-        transformer = pc.CyclicalFeaturesTransformerParamCalculator()
-        X, transformations, tracked_columns, new_columns = wrapper(
+        transformer = pc.CyclicalFeaturesTransformerParameterSelector()
+        X, transformations, tracked_columns, new_columns = apply_wrapper(
             transformer,
             X,
             y,
@@ -178,8 +158,8 @@ def auto_transform(
         exclude_from_dimred.update(new_columns)
 
     # Categorical Encoding
-    transformer = pc.CategoricalEncodingParamCalculator()
-    X, transformations, tracked_columns, new_columns = wrapper(
+    transformer = pc.CategoricalEncodingParameterSelector()
+    X, transformations, tracked_columns, new_columns = apply_wrapper(
         transformer, X, y, transformations, tracked_columns
     )
     exclude_from_selection.update(new_columns)
@@ -191,8 +171,8 @@ def auto_transform(
         col for col in candidate_columns if col not in exclude_from_selection
     ]
 
-    transformer = pc.ColumnSelectionParamCalculator()
-    X, transformations, tracked_columns, _ = wrapper(
+    transformer = pc.ColumnSelectionParameterSelector()
+    X, transformations, tracked_columns, _ = apply_wrapper(
         transformer,
         X,
         y,
@@ -206,8 +186,8 @@ def auto_transform(
         col for col in candidate_columns if col not in exclude_from_dimred
     ]
 
-    transformer = pc.DimensionalityReductionParamCalculator()
-    X, transformations, tracked_columns, _ = wrapper(
+    transformer = pc.DimensionalityReductionParameterSelector()
+    X, transformations, tracked_columns, _ = apply_wrapper(
         transformer,
         X,
         y,
@@ -240,10 +220,9 @@ def execute_transformation(
     logger,
     subset=None,
 ):
-    """Executes a given transformation and returns the transformed data along with metadata."""
     X_subset = X.loc[:, subset] if subset else X
 
-    transformation = calculator.calculate_best_params(
+    transformation = calculator.select_best_parameters(
         X_subset, y, model, scoring, direction, cv, groups, logger
     )
     if not transformation:
@@ -253,73 +232,71 @@ def execute_transformation(
         transformation["name"], {**transformation["params"], "track_columns": True}
     )
     X_transformed = transformer.fit_transform(X, y)
-
     return X_transformed, [transformation], [transformer.tracked_columns]
 
 
 def filter_transformations(
     transformations, column_dependencies, initial_columns, target_columns
 ):
-    filtered_transformations = []
+    # Inicialmente, solo necesitamos las columnas que aparecen en el dataset final
     required_columns = set(target_columns)
+    filtered_transformations = []
 
-    for index in range(len(transformations) - 1, -1, -1):
-        transformation = transformations[index]
-        transformation_name = transformation["name"]
-        transformation_params = transformation["params"].copy()
+    # Recorremos las transformaciones en orden inverso para verificar dependencias hacia atrás
+    for i in reversed(range(len(transformations))):
+        transformation = transformations[i]
+        name = transformation["name"]
+        params = transformation["params"].copy()
+        dependencies = column_dependencies[i]
 
-        dependency_mapping = column_dependencies[index]
-        additional_required_columns = {
-            source_col
-            for output_col, source_cols in dependency_mapping.items()
-            if output_col in required_columns
-            for source_col in source_cols
-        }
-        required_columns.update(additional_required_columns)
+        # Determinar si alguna columna generada por esta transformación está en las necesarias
+        relevant_outputs = [out for out in dependencies if out in required_columns]
+        if not relevant_outputs:
+            continue  # Si no aporta columnas necesarias, se descarta por completo
 
-        modified_param_key = None
+        # Añadir columnas fuente que son necesarias para generar las columnas requeridas
+        for out_col in relevant_outputs:
+            required_columns.update(dependencies[out_col])
 
-        if "features" in transformation_params:
-            transformation_params["features"] = [
-                col
-                for col in transformation_params["features"]
-                if col in required_columns
+        # Filtrar los parámetros innecesarios
+        if "features" in params:
+            params["features"] = [
+                col for col in params["features"] if col in required_columns
             ]
-            modified_param_key = "features"
+            if not params["features"]:
+                continue
 
-        elif "transformation_options" in transformation_params:
-            transformation_params["transformation_options"] = {
-                key: value
-                for key, value in transformation_params[
-                    "transformation_options"
-                ].items()
-                if key in required_columns
+        elif "transformation_options" in params:
+            params["transformation_options"] = {
+                k: v
+                for k, v in params["transformation_options"].items()
+                if k in required_columns
             }
-            modified_param_key = "transformation_options"
+            if not params["transformation_options"]:
+                continue
 
-        elif "operations_options" in transformation_params:
-            transformation_params["operations_options"] = [
-                (col1, col2, op)
-                for col1, col2, op in transformation_params["operations_options"]
-                if col1 in required_columns and col2 in required_columns
+        elif "operations_options" in params:
+            params["operations_options"] = [
+                (a, b, op)
+                for a, b, op in params["operations_options"]
+                if a in required_columns and b in required_columns
             ]
-            modified_param_key = "operations_options"
+            if not params["operations_options"]:
+                continue
 
-        if modified_param_key and transformation_params[modified_param_key]:
-            filtered_transformations.append(
-                {
-                    "name": transformation_name,
-                    "params": transformation_params,
-                }
-            )
+        filtered_transformations.append({"name": name, "params": params})
 
-    # Add column selector to minimize initial columns
-    selected_columns = [col for col in initial_columns if col in required_columns]
-    column_selector = ColumnSelection(selected_columns)
-    selector_transformation = {
-        "name": column_selector.__class__.__name__,
-        "params": column_selector.get_params(),
-    }
-    filtered_transformations.append(selector_transformation)
+    # Finalmente, añadimos un ColumnSelection con las columnas iniciales que son necesarias
+    selected_initial_columns = [
+        col for col in initial_columns if col in required_columns
+    ]
+    if selected_initial_columns:
+        selector = ColumnSelection(selected_initial_columns)
+        filtered_transformations.append(
+            {
+                "name": selector.__class__.__name__,
+                "params": selector.get_params(),
+            }
+        )
 
     return filtered_transformations[::-1]

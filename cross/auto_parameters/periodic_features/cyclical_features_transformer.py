@@ -3,8 +3,8 @@ from cross.transformations.utils import dtypes
 from cross.utils.verbose import VerboseLogger
 
 
-class CyclicalFeaturesTransformerParamCalculator:
-    VALID_PERIODS = {
+class CyclicalFeaturesTransformerParameterSelector:
+    VALID_SUFFIX_PERIODS = {
         "_month": 12,
         "_day": 31,
         "_weekday": 7,
@@ -13,19 +13,19 @@ class CyclicalFeaturesTransformerParamCalculator:
         "_second": 60,
     }
 
-    PCT_UNIQUE_VALUES_THRESHOLD = 0.10
+    UNIQUE_VALUE_RATIO_THRESHOLD = 0.10
 
-    def calculate_best_params(
+    def select_best_parameters(
         self, x, y, model, scoring, direction, cv, groups, logger: VerboseLogger
     ):
-        columns = dtypes.numerical_columns(x)
+        numerical_columns = dtypes.numerical_columns(x)
         transformation_options = {}
 
         logger.task_start("Detecting cyclical features")
 
-        for column in columns:
-            period = self._get_period(x, column)
-            if period is not None:
+        for column in numerical_columns:
+            period = self._infer_cyclical_period(x, column)
+            if period:
                 transformation_options[column] = period
 
         if transformation_options:
@@ -34,23 +34,23 @@ class CyclicalFeaturesTransformerParamCalculator:
             )
             return self._build_transformation_result(transformation_options)
 
-        logger.warn("No cyclical features was applied to any column")
+        logger.warn("No cyclical features were applied to any column")
         return None
 
-    def _get_period(self, df, column):
-        column_lower = column.lower()
+    def _infer_cyclical_period(self, dataframe, column_name):
+        """Infer the cyclical period of a column based on its name or unique value count."""
+        column_name_lower = column_name.lower()
 
-        for suffix, period in self.VALID_PERIODS.items():
-            if column_lower.endswith(suffix):
+        # Check suffix match for common time units
+        for suffix, period in self.VALID_SUFFIX_PERIODS.items():
+            if column_name_lower.endswith(suffix):
                 return period
 
-        unique_values = df[column].dropna().unique()
-        pct_unique_values = len(unique_values) / df.shape[0]
+        # Fallback: check if column has low unique value ratio
+        unique_values = dataframe[column_name].dropna().unique()
+        unique_ratio = len(unique_values) / len(dataframe)
 
-        if (
-            len(unique_values) > 2
-            and pct_unique_values < self.PCT_UNIQUE_VALUES_THRESHOLD
-        ):
+        if len(unique_values) > 2 and unique_ratio < self.UNIQUE_VALUE_RATIO_THRESHOLD:
             return len(unique_values)
 
         return None

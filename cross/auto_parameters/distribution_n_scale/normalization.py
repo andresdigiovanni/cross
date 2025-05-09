@@ -1,3 +1,5 @@
+from typing import Any, Dict, Optional
+
 from cross.auto_parameters.shared import evaluate_model
 from cross.auto_parameters.shared.utils import is_score_improved
 from cross.transformations import Normalization
@@ -5,79 +7,75 @@ from cross.transformations.utils import dtypes
 from cross.utils.verbose import VerboseLogger
 
 
-class NormalizationParamCalculator:
+class NormalizationParameterSelector:
     NORMALIZATION_OPTIONS = ["l1", "l2"]
 
-    def calculate_best_params(
-        self,
-        x,
-        y,
-        model,
-        scoring,
-        direction,
-        cv,
-        groups,
-        logger: VerboseLogger,
-    ):
-        columns = dtypes.numerical_columns(x)
-        transformation_options = {}
-        total_columns = len(columns)
+    def select_best_parameters(
+        self, X, y, model, scoring, direction: str, cv, groups, logger: VerboseLogger
+    ) -> Optional[Dict[str, Any]]:
+        logger.task_start("Beginning search for optimal normalization parameters.")
 
-        logger.task_start("Starting normalization parameter search")
-        base_score = evaluate_model(x, y, model, scoring, cv, groups)
-        logger.baseline(f"Base score: {base_score:.4f}")
+        numeric_columns = dtypes.numerical_columns(X)
+        total_columns = len(numeric_columns)
+        selected_normalizations = {}
 
-        for i, column in enumerate(columns, start=1):
-            logger.task_update(f"[{i}/{total_columns}] Evaluating column: '{column}'")
+        base_score = evaluate_model(X, y, model, scoring, cv, groups)
+        logger.baseline(f"Baseline score (no normalization): {base_score:.4f}")
 
-            best_params = self._find_best_normalization_for_column(
-                x, y, model, scoring, base_score, column, direction, cv, groups, logger
+        for index, column in enumerate(numeric_columns, start=1):
+            logger.task_update(
+                f"[{index}/{total_columns}] Evaluating normalization for column: '{column}'"
             )
 
-            if best_params:
-                transformation_options.update(best_params)
+            best_option = self._evaluate_column_normalizations(
+                X, y, model, scoring, base_score, column, direction, cv, groups, logger
+            )
+
+            if best_option:
+                selected_normalizations.update(best_option)
                 logger.task_result(
-                    f"Selected normalization for '{column}': {list(best_params.values())[0]}"
+                    f"Selected normalization for '{column}': {list(best_option.values())[0]}"
                 )
 
-        if transformation_options:
+        if selected_normalizations:
             logger.task_result(
-                f"Normalization applied to {len(transformation_options)} column(s)"
+                f"Normalization strategy selected for {len(selected_normalizations)} column(s)."
             )
-            return self._build_transformation_result(transformation_options)
+            return self._build_transformation_result(selected_normalizations)
 
-        logger.warn("No normalization was applied to any column")
+        logger.warn("No normalization method improved performance.")
         return None
 
-    def _find_best_normalization_for_column(
+    def _evaluate_column_normalizations(
         self,
-        x,
+        X,
         y,
         model,
         scoring,
-        base_score,
-        column,
-        direction,
+        base_score: float,
+        column: str,
+        direction: str,
         cv,
         groups,
         logger: VerboseLogger,
-    ):
+    ) -> Dict[str, str]:
         best_score = base_score
-        best_params = {}
+        best_normalization = {}
 
-        for norm in self.NORMALIZATION_OPTIONS:
-            params = {column: norm}
-            transformer = Normalization(params)
-            score = evaluate_model(x, y, model, scoring, cv, groups, transformer)
-            logger.progress(f"   ↪ Tried '{norm}' → Score: {score:.4f}")
+        for method in self.NORMALIZATION_OPTIONS:
+            transformation = Normalization({column: method})
+            score = evaluate_model(X, y, model, scoring, cv, groups, transformation)
+            logger.progress(f"   ↪ Tried '{method}' → Score: {score:.4f}")
 
             if is_score_improved(score, best_score, direction):
                 best_score = score
-                best_params = params
+                best_normalization = {column: method}
 
-        return best_params
+        return best_normalization
 
-    def _build_transformation_result(self, transformation_options):
+    def _build_transformation_result(
+        self, transformation_options: Dict[str, str]
+    ) -> Dict[str, Any]:
         normalization = Normalization(transformation_options=transformation_options)
         return {
             "name": normalization.__class__.__name__,

@@ -1,1 +1,1 @@
-from .categorical_enconding import CategoricalEncodingParamCalculator
+from .categorical_enconding import CategoricalEncodingParameterSelector

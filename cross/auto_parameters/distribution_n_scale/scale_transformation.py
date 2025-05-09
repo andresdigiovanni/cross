@@ -1,3 +1,5 @@
+from typing import Any, Dict, Optional
+
 from cross.auto_parameters.shared import evaluate_model
 from cross.auto_parameters.shared.utils import is_score_improved
 from cross.transformations import ScaleTransformation
@@ -5,103 +7,97 @@ from cross.transformations.utils import dtypes
 from cross.utils.verbose import VerboseLogger
 
 
-class ScaleTransformationParamCalculator:
+class ScaleTransformationParameterSelector:
     SCALER_OPTIONS = ["min_max", "standard", "robust"]
     QUANTILE_RANGE_OPTIONS = [5.0, 25.0]
 
-    def calculate_best_params(
-        self, x, y, model, scoring, direction, cv, groups, logger: VerboseLogger
-    ):
-        columns = dtypes.numerical_columns(x)
-        total_columns = len(columns)
-        best_params = {
-            "transformation_options": {},
-            "quantile_range": {},
-        }
+    def select_best_parameters(
+        self, X, y, model, scoring, direction: str, cv, groups, logger: VerboseLogger
+    ) -> Optional[Dict[str, Any]]:
+        logger.task_start("Beginning search for optimal scaling transformations.")
 
-        logger.task_start("Starting scale transformation parameter search")
-        base_score = evaluate_model(x, y, model, scoring, cv, groups)
-        logger.baseline(f"Base score: {base_score:.4f}")
+        numeric_columns = dtypes.numerical_columns(X)
+        total_columns = len(numeric_columns)
 
-        for i, column in enumerate(columns, start=1):
-            logger.task_update(f"[{i}/{total_columns}] Evaluating column: '{column}'")
+        selected_scalers = {"transformation_options": {}, "quantile_range": {}}
 
-            best_column_params = self._find_best_scaler_for_column(
-                x, y, model, scoring, base_score, column, direction, cv, groups, logger
+        base_score = evaluate_model(X, y, model, scoring, cv, groups)
+        logger.baseline(f"Baseline score (no scaling): {base_score:.4f}")
+
+        for index, column in enumerate(numeric_columns, start=1):
+            logger.task_update(
+                f"[{index}/{total_columns}] Evaluating column: '{column}'"
             )
 
-            if best_column_params:
-                best_params["transformation_options"].update(
-                    best_column_params.get("transformation_options", {})
+            best_for_column = self._evaluate_scalers_for_column(
+                X, y, model, scoring, base_score, column, direction, cv, groups, logger
+            )
+
+            if best_for_column:
+                selected_scalers["transformation_options"].update(
+                    best_for_column.get("transformation_options", {})
                 )
-                best_params["quantile_range"].update(
-                    best_column_params.get("quantile_range", {})
+                selected_scalers["quantile_range"].update(
+                    best_for_column.get("quantile_range", {})
                 )
 
-                scaler = best_column_params["transformation_options"][column]
-                quantile_range = best_column_params.get("quantile_range", {})
-
-                if quantile_range:
-                    quantile_range = quantile_range[column]
+                scaler = selected_scalers["transformation_options"][column]
+                if column in selected_scalers["quantile_range"]:
+                    q_range = selected_scalers["quantile_range"][column]
                     logger.task_result(
-                        f"Selected scale transformation for '{column}': {scaler} with quantile range {quantile_range}"
+                        f"Selected scaler for '{column}': {scaler} (quantile range {q_range})"
                     )
                 else:
-                    logger.task_result(
-                        f"Selected scale transformation for '{column}': {scaler}"
-                    )
+                    logger.task_result(f"Selected scaler for '{column}': {scaler}")
 
-        if len(best_params["transformation_options"]):
+        if selected_scalers["transformation_options"]:
             logger.task_result(
-                f"Scale transformation applied to {len(best_params['transformation_options'])} column(s)"
+                f"Scaling applied to {len(selected_scalers['transformation_options'])} column(s)."
             )
-            return self._build_transformation_result(best_params)
+            return self._build_transformation_result(selected_scalers)
 
-        logger.warn("No scale transformation was applied to any column")
+        logger.warn("No scaling transformation improved performance.")
         return None
 
-    def _find_best_scaler_for_column(
+    def _evaluate_scalers_for_column(
         self,
-        x,
+        X,
         y,
         model,
         scoring,
-        base_score,
-        column,
-        direction,
+        base_score: float,
+        column: str,
+        direction: str,
         cv,
         groups,
         logger: VerboseLogger,
-    ):
+    ) -> Dict[str, Dict[str, Any]]:
         best_score = base_score
         best_params = {}
 
         for scaler in self.SCALER_OPTIONS:
             if scaler == "robust":
-                for quantile_range in self.QUANTILE_RANGE_OPTIONS:
-                    quantile_range = (quantile_range, 100 - quantile_range)
+                for q_low in self.QUANTILE_RANGE_OPTIONS:
+                    q_range = (q_low, 100.0 - q_low)
                     params = {
                         "transformation_options": {column: scaler},
-                        "quantile_range": {column: quantile_range},
+                        "quantile_range": {column: q_range},
                     }
-                    scale_transformer = ScaleTransformation(**params)
+                    transformer = ScaleTransformation(**params)
                     score = evaluate_model(
-                        x, y, model, scoring, cv, groups, scale_transformer
+                        X, y, model, scoring, cv, groups, transformer
                     )
                     logger.progress(
-                        f"   ↪ Tried '{scaler}' with quantile range {quantile_range} → Score: {score:.4f}"
+                        f"   ↪ Tried '{scaler}' (quantile range {q_range}) → Score: {score:.4f}"
                     )
 
                     if is_score_improved(score, best_score, direction):
                         best_score = score
                         best_params = params
-
             else:
                 params = {"transformation_options": {column: scaler}}
-                scale_transformer = ScaleTransformation(**params)
-                score = evaluate_model(
-                    x, y, model, scoring, cv, groups, scale_transformer
-                )
+                transformer = ScaleTransformation(**params)
+                score = evaluate_model(X, y, model, scoring, cv, groups, transformer)
                 logger.progress(f"   ↪ Tried '{scaler}' → Score: {score:.4f}")
 
                 if is_score_improved(score, best_score, direction):
@@ -110,9 +106,11 @@ class ScaleTransformationParamCalculator:
 
         return best_params
 
-    def _build_transformation_result(self, best_params):
-        scale_transformation = ScaleTransformation(**best_params)
+    def _build_transformation_result(
+        self, selected_scalers: Dict[str, Dict[str, Any]]
+    ) -> Dict[str, Any]:
+        transformer = ScaleTransformation(**selected_scalers)
         return {
-            "name": scale_transformation.__class__.__name__,
-            "params": scale_transformation.get_params(),
+            "name": transformer.__class__.__name__,
+            "params": transformer.get_params(),
         }

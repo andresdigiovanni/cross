@@ -4,126 +4,126 @@ from cross.transformations.utils import dtypes
 from cross.utils.verbose import VerboseLogger
 
 
-class MathematicalOperationsParamCalculator:
-    SYMMETRIC_OPS = ["add", "subtract", "multiply"]
-    NON_SYMMETRIC_OPS = ["divide"]
+class MathematicalOperationsParameterSelector:
+    SYMMETRIC_OPERATIONS = ["add", "subtract", "multiply"]
+    NON_SYMMETRIC_OPERATIONS = ["divide"]
 
-    def calculate_best_params(
+    def select_best_parameters(
         self, x, y, model, scoring, direction, cv, groups, logger: VerboseLogger
     ):
-        columns = dtypes.numerical_columns(x)
-        all_transformations_info = []
+        numerical_columns = dtypes.numerical_columns(x)
+        column_indices = range(len(numerical_columns))
+        total_columns = len(numerical_columns)
+
+        all_transformations = []
         all_selected_features = []
 
-        idxs_columns = range(len(columns))
-        total_columns = len(columns)
+        logger.task_start("Starting mathematical operations search")
 
-        logger.task_start("Starting mathematical transformations search")
+        for i, idx1 in enumerate(column_indices, start=1):
+            col1 = numerical_columns[idx1]
+            logger.task_update(f"[{i}/{total_columns}] Evaluating column: '{col1}'")
 
-        # Select operations per columns using probe method
-        for i, idx_column_1 in enumerate(idxs_columns, start=1):
-            column_1 = columns[idx_column_1]
-            logger.task_update(f"[{i}/{total_columns}] Evaluating column: '{column_1}'")
-
-            transformations_info, operations_options = self._generate_operations(
-                x, column_1, idx_column_1, columns, idxs_columns
+            transformations, operation_options = self._generate_operations(
+                x, col1, idx1, numerical_columns, column_indices
             )
-            all_transformations_info.extend(transformations_info)
+            all_transformations.extend(transformations)
 
-            transformer = MathematicalOperations(operations_options)
+            transformer = MathematicalOperations(operation_options)
             x_transformed = transformer.fit_transform(x, y)
 
-            selected_features = ProbeFeatureSelector.fit(x_transformed, y, model)
-            all_selected_features.extend(selected_features)
+            selected = ProbeFeatureSelector.fit(x_transformed, y, model)
+            all_selected_features.extend(selected)
+            n_selected = len(set(selected) - set(x.columns))
+
             logger.progress(
-                f"   ↪ Tried {len(transformations_info)} operations → Selected: {len(selected_features)}"
+                f"   ↪ Evaluated {len(transformations)} operations → Selected: {n_selected}"
             )
 
-        selected_transformations = self._select_transformations(
-            all_transformations_info, all_selected_features
+        selected_operations = self._filter_selected_transformations(
+            all_transformations, all_selected_features
         )
 
-        # Select final mathematical operations using RFA
-        if selected_transformations:
-            logger.task_update("Refining selected operations using RFA")
-            transformer = MathematicalOperations(selected_transformations)
-            x_transformed = transformer.fit_transform(x, y)
+        if selected_operations:
+            logger.task_update(
+                "Refining selected operations using Recursive Feature Addition"
+            )
+            x_transformed = MathematicalOperations(selected_operations).fit_transform(
+                x, y
+            )
 
             rfa = RecursiveFeatureAddition(model, scoring, direction, cv, groups)
-            selected_features = rfa.fit(x_transformed, y)
+            refined_features = rfa.fit(x_transformed, y)
 
-            selected_transformations = self._select_transformations(
-                all_transformations_info, selected_features
+            selected_operations = self._filter_selected_transformations(
+                all_transformations, refined_features
             )
 
-        if selected_transformations:
+        if selected_operations:
             logger.task_result(
-                f"Selected {len(selected_transformations)} mathematical transformation(s)"
+                f"Selected {len(selected_operations)} mathematical operation(s)"
             )
-            mathematical_operations = MathematicalOperations(selected_transformations)
+            transformer = MathematicalOperations(selected_operations)
             return {
-                "name": mathematical_operations.__class__.__name__,
-                "params": mathematical_operations.get_params(),
+                "name": transformer.__class__.__name__,
+                "params": transformer.get_params(),
             }
 
-        logger.warn("No mathematical transformations was applied to any column")
+        logger.warn("No mathematical operations were applied")
         return None
 
-    def _generate_operations(self, x, column_1, idx_column_1, columns, idxs_columns):
-        all_transformations_info = []
-        all_operations_options = []
+    def _generate_operations(self, x, col1, idx1, columns, indices):
+        transformations = []
+        options = []
 
-        for op in self.SYMMETRIC_OPS:
-            transformations_info, operations_options = self._perform_operations(
-                x, column_1, idx_column_1, columns, idxs_columns, op, symmetric=True
+        for op in self.SYMMETRIC_OPERATIONS:
+            t, o = self._create_operations(
+                x, col1, idx1, columns, indices, op, symmetric=True
             )
-            all_transformations_info.extend(transformations_info)
-            all_operations_options.extend(operations_options)
+            transformations.extend(t)
+            options.extend(o)
 
-        for op in self.NON_SYMMETRIC_OPS:
-            transformations_info, operations_options = self._perform_operations(
-                x, column_1, idx_column_1, columns, idxs_columns, op, symmetric=False
+        for op in self.NON_SYMMETRIC_OPERATIONS:
+            t, o = self._create_operations(
+                x, col1, idx1, columns, indices, op, symmetric=False
             )
-            all_transformations_info.extend(transformations_info)
-            all_operations_options.extend(operations_options)
+            transformations.extend(t)
+            options.extend(o)
 
-        return all_transformations_info, all_operations_options
+        return transformations, options
 
-    def _perform_operations(
-        self, x, column_1, idx_column_1, columns, idxs_columns, op, symmetric
-    ):
-        transformations_info = []
-        operations_options = []
+    def _create_operations(self, x, col1, idx1, columns, indices, operation, symmetric):
+        transformations = []
+        options = []
 
-        for idx_column_2 in idxs_columns:
-            if symmetric and idx_column_1 >= idx_column_2:
+        for idx2 in indices:
+            if (symmetric and idx1 >= idx2) or (not symmetric and idx1 == idx2):
                 continue
 
-            if not symmetric and idx_column_1 == idx_column_2:
-                continue
+            col2 = columns[idx2]
+            operation_option = (col1, col2, operation)
+            options.append(operation_option)
 
-            column_2 = columns[idx_column_2]
-            operation_option = (column_1, column_2, op)
-            operations_options.append(operation_option)
+            transformer = MathematicalOperations([operation_option])
+            x_transformed = transformer.fit_transform(x)
 
-            mathematical_operations = MathematicalOperations([operation_option])
-            x_math = mathematical_operations.fit_transform(x)
-            math_column_name = list(set(x_math.columns) - set(x.columns))[0]
+            # Assume new column is the one not in original set
+            new_column_name = next(
+                col for col in x_transformed.columns if col not in x.columns
+            )
 
-            transformations_info.append(
+            transformations.append(
                 {
                     "operation_option": operation_option,
-                    "transformed_column": math_column_name,
+                    "transformed_column": new_column_name,
                 }
             )
 
-        return transformations_info, operations_options
+        return transformations, options
 
-    def _select_transformations(self, transformations_info, selected_features):
-        selected_transformations = []
-
-        for transformation in transformations_info:
-            if transformation["transformed_column"] in selected_features:
-                selected_transformations.append(transformation["operation_option"])
-
-        return selected_transformations
+    def _filter_selected_transformations(self, transformations_info, selected_features):
+        return [
+            info["operation_option"]
+            for info in transformations_info
+            if info["transformed_column"] in selected_features
+        ]

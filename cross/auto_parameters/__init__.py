@@ -1,25 +1,25 @@
-from .categorical_features import CategoricalEncodingParamCalculator
+from .categorical_features import CategoricalEncodingParameterSelector
 from .distribution_n_scale import (
-    NonLinearTransformationParamCalculator,
-    NormalizationParamCalculator,
-    QuantileTransformationParamCalculator,
-    ScaleTransformationParamCalculator,
+    NonLinearTransformationParameterSelector,
+    NormalizationParameterSelector,
+    QuantileTransformationParameterSelector,
+    ScaleTransformationParameterSelector,
 )
 from .features_reduction import (
-    ColumnSelectionParamCalculator,
-    DimensionalityReductionParamCalculator,
+    ColumnSelectionParameterSelector,
+    DimensionalityReductionParameterSelector,
 )
 from .missing_n_outliers import (
-    MissingValuesIndicatorParamCalculator,
-    MissingValuesParamCalculator,
-    OutliersParamCalculator,
+    MissingValuesHandlerParameterSelector,
+    MissingValuesIndicatorParameterSelector,
+    OutliersParameterSelector,
 )
 from .numerical_features import (
-    MathematicalOperationsParamCalculator,
-    NumericalBinningParamCalculator,
-    SplineTransformationParamCalculator,
+    MathematicalOperationsParameterSelector,
+    NumericalBinningParameterSelector,
+    SplineTransformationParameterSelector,
 )
 from .periodic_features import (
-    CyclicalFeaturesTransformerParamCalculator,
-    DateTimeTransformerParamCalculator,
+    CyclicalFeaturesTransformerParameterSelector,
+    DateTimeTransformerParameterSelector,
 )
